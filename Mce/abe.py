@@ -4238,91 +4238,6 @@ def redirect(page):
             '<body><h1>Moved</h1><p>This page has moved to '
             '<a href="' + uri + '">' + uri + '</a></body></html>')
 
-def serve(store):
-    args = store.args
-    abe = Abe(store, args)
-
-    # Hack preventing wsgiref.simple_server from resolving client addresses
-    bhs = __import__('BaseHTTPServer')
-    bhs.BaseHTTPRequestHandler.address_string = lambda x: x.client_address[0]
-    del(bhs)
-
-    if args.query is not None:
-        def start_response(status, headers):
-            pass
-        import urlparse
-        parsed = urlparse.urlparse(args.query)
-# MULTICHAIN START
-        print(abe({
-# MULTICHAIN END
-                'SCRIPT_NAME':  '',
-                'PATH_INFO':    parsed.path,
-                'QUERY_STRING': parsed.query
-# MULTICHAIN START
-                }, start_response))
-# MULTICHAIN END
-    elif args.host or args.port:
-        # HTTP server.
-        if args.host is None:
-            args.host = "localhost"
-        from wsgiref.simple_server import make_server
-# MULTICHAIN START
-        from wsgiref import simple_server
-        class ExplorerWSGIServer(simple_server.WSGIServer):
-            # To increase the backlog
-            request_queue_size = 500
-        port = int(args.port or 80)
-        httpd = make_server(args.host, port, abe, ExplorerWSGIServer)
-        abe.log.warning("Listening on http://%s:%d", args.host, port)
-        # Launch background loading of transactions
-        interval = float( abe.store.catch_up_tx_interval_secs )
-        def background_catch_up():
-            """
-            Background thread to make dummy requests and trigger abe.store.catch_up().
-            Thread is set as daemon so CTRL-C interrupt will terminate application and not block on thread/timer.
-            """
-            while True:
-                time.sleep(interval)
-                s = 'http://{0}:{1}'.format(args.host, port)
-                req = urllib2.Request(s)
-                try:
-                    response = urllib2.urlopen(req)
-                    response.read()
-                except Exception as e:
-                    pass
-        thread = threading.Thread(target=background_catch_up, args=())
-        thread.daemon = True
-        thread.start()
-        abe.log.warning("Launched background thread to catch up tx every {0} seconds".format(interval))
-# MULTICHAIN END
-        # httpd.shutdown() sometimes hangs, so don't call it.  XXX
-        httpd.serve_forever()
-    else:
-        # FastCGI server.
-        from flup.server.fcgi import WSGIServer
-
-        # In the case where the web server starts Abe but can't signal
-        # it on server shutdown (because Abe runs as a different user)
-        # we arrange the following.  FastCGI script passes its pid as
-        # --watch-pid=PID and enters an infinite loop.  We check every
-        # minute whether it has terminated and exit when it has.
-        wpid = args.watch_pid
-        if wpid is not None:
-            wpid = int(wpid)
-            interval = 60.0  # XXX should be configurable.
-            from threading import Timer
-            import signal
-            def watch():
-                if not process_is_alive(wpid):
-                    abe.log.warning("process %d terminated, exiting", wpid)
-                    #os._exit(0)  # sys.exit merely raises an exception.
-                    os.kill(os.getpid(), signal.SIGTERM)
-                    return
-                abe.log.log(0, "process %d found alive", wpid)
-                Timer(interval, watch).start()
-            Timer(interval, watch).start()
-        WSGIServer(abe).run()
-
 def process_is_alive(pid):
     # XXX probably fails spectacularly on Windows.
     import errno
@@ -4496,8 +4411,7 @@ See abe.conf for commented examples.""")
         return 1
 
     store = make_store(args)
-    if (not args.no_serve):
-        serve(store)
+    
     return 0
 
 if __name__ == '__main__':
