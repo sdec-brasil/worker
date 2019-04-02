@@ -464,6 +464,9 @@ class SqlAbstraction(object):
 
     def _execute(sql, stmt, params):
         try:
+            print(stmt)
+            print("\n########\n")
+            print(params)
             sql.cursor().execute(stmt, params)
         except (sql.module.OperationalError, sql.module.InternalError, sql.module.ProgrammingError) as e:
             if sql.in_transaction or not sql.auto_reconnect:
