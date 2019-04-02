@@ -30,7 +30,7 @@ You must have Python 2.x installed on your system to run MultiChain Explorer.
 
 On Ubuntu, you will need to install the following dependencies:
 
-    sudo apt-get install sqlite3 libsqlite3-dev
+    sudo apt-get install python-mysqldb
     sudo apt-get install python-dev
     sudo apt-get install python-pip
     sudo pip install --upgrade pip

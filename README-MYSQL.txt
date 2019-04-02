@@ -19,6 +19,7 @@ configuration (my.cnf or my.ini) then remove it and restart the server.
 
 5. Log into MySQL as root (e.g.: mysql -u root) and issue the following,
 replacing "PASSWORD" with a password you choose:
+5.0.1: https://stackoverflow.com/questions/39281594/error-1698-28000-access-denied-for-user-rootlocalhost
 
     create database abe;
     CREATE USER 'abe'@'localhost' IDENTIFIED BY 'PASSWORD';
