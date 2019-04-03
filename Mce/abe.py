@@ -55,7 +55,7 @@ COPYRIGHT = "Coin Sciences Ltd and Abe developers"
 COPYRIGHT_URL = 'https://github.com/multichain/multichain-explorer'
 # MULTICHAIN END
 
-TIME1970 = time.strptime('1970-01-01','%Y-%m-%d')
+TIME1970 = time.strptime('1970-01-01', '%Y-%m-%d')
 EPOCH1970 = calendar.timegm(TIME1970)
 
 # Abe-generated content should all be valid HTML and XHTML fragments.
@@ -176,6 +176,8 @@ NETHASH_SVG_TEMPLATE = """\
 MAX_UNSPENT_ADDRESSES = 200
 
 # MULTICHAIN START
+
+
 def html_keyvalue_tablerow(key, *values):
     """
     Return string for a two column table row.
@@ -183,14 +185,16 @@ def html_keyvalue_tablerow(key, *values):
     """
     return '<tr><td>', key, '</td><td>', list(values), '</td></tr>'
 
+
 def html_keyvalue_tablerow_wrap(minwidth, maxwidth, key, *values):
     """
     Return string for a two column table row, with word wrapping of <td> element.
     Where the first element is the key and everything else is treated as the value
     """
-    return '<tr><td style="word-wrap: break-word;min-width: ', minwidth, 'px;max-width: ',maxwidth,'px;white-space:normal;">', key, '</td><td style="word-wrap: break-word;min-width: ',minwidth,'px;max-width: ',maxwidth,'px;white-space:normal;">', list(values), '</td></tr>'
+    return '<tr><td style="word-wrap: break-word;min-width: ', minwidth, 'px;max-width: ', maxwidth, 'px;white-space:normal;">', key, '</td><td style="word-wrap: break-word;min-width: ', minwidth, 'px;max-width: ', maxwidth, 'px;white-space:normal;">', list(values), '</td></tr>'
 
 # MULTICHAIN END
+
 
 def make_store(args):
     store = DataStore.new(args)
@@ -198,18 +202,23 @@ def make_store(args):
         store.catch_up()
     return store
 
+
 class NoSuchChainError(Exception):
     """Thrown when a chain lookup fails"""
+
 
 class PageNotFound(Exception):
     """Thrown when code wants to return 404 Not Found"""
 
+
 class Redirect(Exception):
     """Thrown when code wants to redirect the request"""
+
 
 class Streamed(Exception):
     """Thrown when code has written the document to the callable
     returned by start_response."""
+
 
 class Abe:
     def __init__(abe, store, args):
@@ -266,10 +275,10 @@ class Abe:
             "content_type": str(abe.template_vars['CONTENT_TYPE']),
             "template": abe.template,
             "chain": None,
-# MULTICHAIN START
+            # MULTICHAIN START
             "myheader": []
-# MULTICHAIN END
-            }
+            # MULTICHAIN END
+        }
         if 'QUERY_STRING' in env:
             page['params'] = urlparse.parse_qs(env['QUERY_STRING'])
 
@@ -302,7 +311,7 @@ class Abe:
         else:
             # Second component of path is the command
             cmd = wsgiref.util.shift_path_info(env)
-            if cmd=='' or cmd is None:
+            if cmd == '' or cmd is None:
                 cmd = 'chain'
             handler = abe.get_handler(cmd)
 # MULTICHAIN END
@@ -332,9 +341,10 @@ class Abe:
                 '<p class="error">'
                 'Sorry, I don\'t know about that chain!</p>\n']
         except Redirect:
-            content=redirect(page)
+            content = redirect(page)
             if isinstance(content, unicode):
-                content = content.encode('latin-1') # Convert Unicode escaped bytes$
+                # Convert Unicode escaped bytes$
+                content = content.encode('latin-1')
             return content
         except Streamed:
             return ''
@@ -359,7 +369,8 @@ class Abe:
 
         content = page['template'] % tvars
         if isinstance(content, unicode):
-            content = content.encode('latin-1') # Convert Unicode escaped bytes into binary.  Used to be UTF-8.
+            # Convert Unicode escaped bytes into binary.  Used to be UTF-8.
+            content = content.encode('latin-1')
         return [content]
 
 # MULTICHAIN START
@@ -372,10 +383,11 @@ class Abe:
         params = {}
         try:
             params = util.jsonrpc(multichain_name, url, "getblockchainparams")
-            assert(len(params['chain-protocol']) > 0)   # if we get invalid result, an exception is thrown
+            # if we get invalid result, an exception is thrown
+            assert(len(params['chain-protocol']) > 0)
             abe.blockchainparams = params
         except Exception as e:
-            pass # nop
+            pass  # nop
         return params
 
 # MULTICHAIN END
@@ -384,19 +396,19 @@ class Abe:
         return getattr(abe, 'handle_' + cmd, None)
 
     def handle_chains(abe, page):
-# MULTICHAIN START
+        # MULTICHAIN START
         page['title'] = ABE_APPNAME
 # MULTICHAIN END
         body = page['body']
         body += [
             abe.search_form(page),
-# MULTICHAIN START
+            # MULTICHAIN START
             '<table class="table table-striped">\n',
             '<tr><th>Status</th>',
             '<th>Chain</th>',
             '<th>Blocks</th>',
             '<th>Transactions</th>',
-            #'<th>Time</th>',
+            # '<th>Time</th>',
             '<th>Assets</th>',
             '<th>Addresses</th>',
             '<th>Streams</th>',
@@ -405,8 +417,8 @@ class Abe:
             #'<th>Coins Created</th>',
             #'<th>Avg Coin Age</th><th>',
             #'% <a href="https://en.bitcoin.it/wiki/Bitcoin_Days_Destroyed">',
-            #'CoinDD</a></th>',
-# MULTICHAIN END
+            # 'CoinDD</a></th>',
+            # MULTICHAIN END
             '</tr>\n']
         now = time.time() - EPOCH1970
 
@@ -450,7 +462,7 @@ class Abe:
 
             body += [
                 '<td><a href="', escape(name), '/chain">',
-                escape(name), '</a></td>']  #<td>', escape(chain.code3), '</td>']
+                escape(name), '</a></td>']  # <td>', escape(chain.code3), '</td>']
 # MULTICHAIN END
 
             if row[1] is not None:
@@ -458,18 +470,20 @@ class Abe:
                     int(row[1]), int(row[2]), abe.store.hashout_hex(row[3]))
 
                 body += [
-# MULTICHAIN START
-                    '<td><a href="', escape(name), '/blocks">', height, '</a></td>',
+                    # MULTICHAIN START
+                    '<td><a href="', escape(
+                        name), '/blocks">', height, '</a></td>',
                     '<td>', num_txs, '</td>']
-                    #'<td><a href="block/', hash, '">', height, '</a></td>',                    ]
-                    #'<td>', format_time(nTime), '</td>']
+                # '<td><a href="block/', hash, '">', height, '</a></td>',                    ]
+                # '<td>', format_time(nTime), '</td>']
 
                 body += '<td>'
                 if chain.__class__.__name__ is "MultiChain":
                     if num_assets == -1:
                         body += '?'
-                    elif num_assets>=0:
-                        body += ['<a href="{0}/assets">'.format(escape(chain.name)), num_assets, '</a>']
+                    elif num_assets >= 0:
+                        body += ['<a href="{0}/assets">'.format(
+                            escape(chain.name)), num_assets, '</a>']
                 else:
                     body += ['<td></td>']
                 body += ['<td>', num_addresses, '</td>']
@@ -483,9 +497,10 @@ class Abe:
                     elif num_streams == 0:
                         body += '0'
                     else:
-                        body += ['<a href="{0}/streams">'.format(escape(chain.name)), num_streams, '</a>']
+                        body += ['<a href="{0}/streams">'.format(
+                            escape(chain.name)), num_streams, '</a>']
                 else:
-                    pass #body += ['<td></td>']
+                    pass  # body += ['<td></td>']
                 #body += ['<td>', num_streams, '</td>']
                 body += '</td>'
 
@@ -521,9 +536,9 @@ class Abe:
                         '</td>',
                         '<td>', format_time(started)[:10], '</td>',
                         '<td>', "{0:.1f}".format(chain_age / 86400.0), '</td>']
-                        # '<td>', format_satoshis(satoshis, chain), '</td>',
-                        # '<td>', avg_age, '</td>',
-                        # '<td>', percent_destroyed, '</td>']
+                    # '<td>', format_satoshis(satoshis, chain), '</td>',
+                    # '<td>', avg_age, '</td>',
+                    # '<td>', percent_destroyed, '</td>']
 # MULTICHAIN END
 
             body += ['</tr>\n']
@@ -535,22 +550,23 @@ class Abe:
         myheader = page['myheader']
         mempool_refresh_interval_ms = abe.store.recent_tx_interval_ms
         myheader += ['<script>'
-                    '$(document).ready(function(){'
-                    'setInterval(function(){'
-                    '$("#recenttx").load(\'' + page['dotdot'] + urllib.quote(name, safe='') + '/recent?random=\' + Math.random().toString() )'
-                    '}, ', mempool_refresh_interval_ms, ');'
-                    '});'
-                    '</script>']
+                     '$(document).ready(function(){'
+                     'setInterval(function(){'
+                     '$("#recenttx").load(\'' + page['dotdot'] + urllib.quote(
+                         name, safe='') + '/recent?random=\' + Math.random().toString() )'
+                     '}, ', mempool_refresh_interval_ms, ');'
+                     '});'
+                     '</script>']
         page_refresh_interval_secs = abe.store.home_refresh_interval_secs
         myheader += ['<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />',
                      '<meta http-equiv="Pragma" content="no-cache" />',
                      '<meta http-equiv="Expires" content="0" />']
-        myheader += ['<meta http-equiv="refresh" content="', page_refresh_interval_secs, '" >']
+        myheader += ['<meta http-equiv="refresh" content="',
+                     page_refresh_interval_secs, '" >']
 
         body += ['<div id="recenttx">']
         body += abe.create_recent_table(page, chain)
         body += ['</div>']
-
 
     def handle_recent(abe, page):
         chain = page['chain']
@@ -558,7 +574,6 @@ class Abe:
         page['title'] = chain.name
         body = page['body']
         body += abe.create_recent_table(page, chain)
-
 
     def create_recent_table(abe, page, chain):
         """
@@ -568,21 +583,23 @@ class Abe:
         """
         body = []
         body += ['<h3>Latest Transactions</h3>'
-            '<table class="table table-striped">\n',
-            '<tr><th>Txid</th>', '<th>Type</th><th>Confirmation</th>'
-            '<th>Time</th>',
-            '</tr>\n']
+                 '<table class="table table-striped">\n',
+                 '<tr><th>Txid</th>', '<th>Type</th><th>Confirmation</th>'
+                 '<th>Time</th>',
+                 '</tr>\n']
 
         now = time.time() - EPOCH1970
         try:
             mempool = abe.store.get_rawmempool(chain)
             recenttx = abe.store.get_recent_transactions_as_json(chain, 10)
         except Exception as e:
-            return ['<div class="alert alert-danger" role="warning">', e ,'</div>']
+            return ['<div class="alert alert-danger" role="warning">', e, '</div>']
 
-        sorted_mempool = sorted(mempool.items()[:10], key=lambda tup: tup[1]['time'], reverse=True)
+        sorted_mempool = sorted(
+            mempool.items()[:10], key=lambda tup: tup[1]['time'], reverse=True)
         if len(sorted_mempool) < 10:
-            sorted_recenttx = sorted(recenttx, key=lambda tx: tx['time'], reverse=True)
+            sorted_recenttx = sorted(
+                recenttx, key=lambda tx: tx['time'], reverse=True)
             existing_txids = [txid for (txid, value) in sorted_mempool]
             for tx in sorted_recenttx:
                 if len(sorted_mempool) == 10:
@@ -603,13 +620,14 @@ class Abe:
             else:
                 elapsed = str(int((diff / 3600) / 24)) + " days"
 
-
             body += ['<tr><td>']
             if abe.store.does_transaction_exist(txid):
-                body += ['<a href="' + page['dotdot'] + escape(chain.name) + '/tx/' + txid + '">', txid, '</a>']
+                body += ['<a href="' + page['dotdot'] +
+                         escape(chain.name) + '/tx/' + txid + '">', txid, '</a>']
                 labels = abe.store.get_labels_for_tx(txid, chain)
             else:
-                body += ['<a href="' + page['dotdot'] + escape(chain.name) + '/mempooltx/' + txid + '">', txid, '</a>']
+                body += ['<a href="' + page['dotdot'] +
+                         escape(chain.name) + '/mempooltx/' + txid + '">', txid, '</a>']
                 json = None
                 try:
                     json = abe.store.get_rawtransaction_decoded(chain, txid)
@@ -617,12 +635,14 @@ class Abe:
                     pass
 
                 if json is not None:
-                    scriptpubkeys = [vout['scriptPubKey']['hex'] for vout in json['vout']]
+                    scriptpubkeys = [vout['scriptPubKey']['hex']
+                                     for vout in json['vout']]
                     labels = None
                     d = set()
                     for hex in scriptpubkeys:
                         binscript = binascii.unhexlify(hex)
-                        tmp = abe.store.get_labels_for_scriptpubkey(chain, binscript)
+                        tmp = abe.store.get_labels_for_scriptpubkey(
+                            chain, binscript)
                         d |= set(tmp)
                     labels = list(d)
 
@@ -630,23 +650,23 @@ class Abe:
                 labels = []
             body += ['</td><td>']
             for label in labels:
-                body += ['&nbsp;<span class="label label-primary">',label,'</span>']
+                body += ['&nbsp;<span class="label label-primary">',
+                         label, '</span>']
 
             body += ['</td><td>']
             conf = v.get('confirmations', None)
             if conf is None or conf == 0:
                 body += ['<span class="label label-default">Mempool</span>']
             else:
-                body += ['<span class="label label-info">', conf, ' confirmations</span>']
+                body += ['<span class="label label-info">',
+                         conf, ' confirmations</span>']
 
             body += ['</td><td>', elapsed, '</td></tr>']
-
 
         body += ['</table>']
         return body
 
 # MULTICHAIN END
-
 
     def chain_lookup_by_name(abe, symbol):
         if symbol is None:
@@ -661,18 +681,19 @@ class Abe:
         return abe.store.get_default_chain()
 
     def format_addresses(abe, data, dotdot, chain):
-# MULTICHAIN START
+        # MULTICHAIN START
         checksum = chain.address_checksum
 # MULTICHAIN END
         if data['binaddr'] is None:
             return 'Unknown'
         if 'subbinaddr' in data:
             # Multisig or known P2SH.
-# MULTICHAIN START
+            # MULTICHAIN START
             ret = [hash_to_address_link(chain.script_addr_vers, data['binaddr'], dotdot, text='Escrow', checksum=checksum),
                    ' ', data['required_signatures'], ' of']
             for binaddr in data['subbinaddr']:
-                ret += [' ', hash_to_address_link(data['address_version'], binaddr, dotdot, 10, checksum=checksum)]
+                ret += [' ', hash_to_address_link(
+                    data['address_version'], binaddr, dotdot, 10, checksum=checksum)]
             return ret
         return hash_to_address_link(data['address_version'], data['binaddr'], dotdot, checksum=checksum)
 # MULTICHAIN END
@@ -715,10 +736,11 @@ class Abe:
         params_resp = None
         try:
             info_resp = util.jsonrpc(multichain_name, url, "getinfo")
-            params_resp = util.jsonrpc(multichain_name, url, "getblockchainparams")
+            params_resp = util.jsonrpc(
+                multichain_name, url, "getblockchainparams")
         except util.JsonrpcException as e:
-            msg= "JSON-RPC error({0}): {1}".format(e.code, e.message)
-            body += ['<div class="alert alert-danger" role="warning">', msg ,'</div>']
+            msg = "JSON-RPC error({0}): {1}".format(e.code, e.message)
+            body += ['<div class="alert alert-danger" role="warning">', msg, '</div>']
             return
         except IOError as e:
             body += ['<div class="alert alert-danger" role="alert">', e, '</div>']
@@ -727,37 +749,40 @@ class Abe:
         body += ['<div class="container"><div class="row"><div class="col-md-6">']
         body += ['<h3>Summary</h3>']
         body += ['<table class="table table-bordered table-striped table-condensed">']
-        body += ['<td>Blocks</td>', '<td><a href="', page['dotdot'], escape(chain.name), '/blocks/">', info_resp['blocks'], '</a></td>']
+        body += ['<td>Blocks</td>', '<td><a href="', page['dotdot'],
+                 escape(chain.name), '/blocks/">', info_resp['blocks'], '</a></td>']
         #body += html_keyvalue_tablerow('Blocks', info_resp['blocks'])
         body += html_keyvalue_tablerow('Transactions', num_txs)
-        body += ['<td>Assets</td>', '<td><a href="', page['dotdot'], escape(chain.name), '/assets">', num_assets, '</a></td>']
+        body += ['<td>Assets</td>', '<td><a href="', page['dotdot'],
+                 escape(chain.name), '/assets">', num_assets, '</a></td>']
         #body += html_keyvalue_tablerow('Assets', num_assets)
         body += html_keyvalue_tablerow('Addresses', num_addresses)
-        body += ['<td>Streams</td>', '<td><a href="', page['dotdot'], escape(chain.name), '/streams">', num_streams, '</a></td>']
+        body += ['<td>Streams</td>', '<td><a href="', page['dotdot'],
+                 escape(chain.name), '/streams">', num_streams, '</a></td>']
         #body += html_keyvalue_tablerow('Streams', num_streams)
         body += ['</table>']
         body += ['<h3>General Information</h3>']
         body += ['<table class="table table-bordered table-striped table-condensed">']
         #body += ['<colgroup><col class="col-md-4"><col class="col-md-8"></colgroup>']
-        for k,v in sorted(info_resp.items()):
+        for k, v in sorted(info_resp.items()):
             if k in ('nodeaddress', 'port'):
                 continue
             if k in ('relayfee'):
-                #v = '%.8g' % v # doesn't work?
-                v = ('%.20f' % v).rstrip('0')  # so instead we force the number of decimal places and strip zeros
+                # v = '%.8g' % v # doesn't work?
+                # so instead we force the number of decimal places and strip zeros
+                v = ('%.20f' % v).rstrip('0')
             body += html_keyvalue_tablerow(k, v)
         body += ['</table>']
         body += ['</div><div class="col-md-6">']
         body += ['<h3>Blockchain Parameters</h3>']
         body += ['<table class="table table-bordered table-striped table-condensed">']
         #body += ['<colgroup><col class="col-md-4"><col class="col-md-8"></colgroup>']
-        for k,v in sorted(params_resp.items()):
+        for k, v in sorted(params_resp.items()):
             if k in ('default-network-port', 'default-rpc-port'):
                 continue
             body += html_keyvalue_tablerow_wrap(50, 300, k, v)
         body += ['</table>']
-        body += ['</div></div></div>'] # col, row, container
-
+        body += ['</div></div></div>']  # col, row, container
 
     def handle_blocks(abe, page):
         chain = page['chain']
@@ -820,15 +845,15 @@ class Abe:
         nav = ['<a href="',
                basename, '?count=', str(count), '">&lt;&lt;</a>']
         nav += [' <a href="', basename, '?hi=', str(hi + count),
-                 '&amp;count=', str(count), '">&lt;</a>']
+                '&amp;count=', str(count), '">&lt;</a>']
         nav += [' ', '&gt;']
         if hi >= count:
             nav[-1] = ['<a href="', basename, '?hi=', str(hi - count),
-                        '&amp;count=', str(count), '">', nav[-1], '</a>']
+                       '&amp;count=', str(count), '">', nav[-1], '</a>']
         nav += [' ', '&gt;&gt;']
         if hi != count - 1:
             nav[-1] = ['<a href="', basename, '?hi=', str(count - 1),
-                        '&amp;count=', str(count), '">', nav[-1], '</a>']
+                       '&amp;count=', str(count), '">', nav[-1], '</a>']
         for c in (20, 50, 100, 500):
             nav += [' ']
             if c != count:
@@ -845,17 +870,17 @@ class Abe:
         extra = False
         #extra = True
         body += ['<p>', nav, '</p>\n',
-# MULTICHAIN START
+                 # MULTICHAIN START
                  '<table class="table table-striped"><tr><th>Block</th><th>Miner</th><th>Approx. Time</th>',
                  '<th>Transactions</th>',
                  #'<th>Value Out</th>',
-                 #'<th>Difficulty</th><th>Outstanding</th>',
+                 # '<th>Difficulty</th><th>Outstanding</th>',
                  #'<th>Average Age</th>'
                  '<th>Chain Age</th>',
                  #'<th>% ',
                  #'<a href="https://en.bitcoin.it/wiki/Bitcoin_Days_Destroyed">',
-                 #'CoinDD</a></th>',
-# MULTICHAIN END
+                 # 'CoinDD</a></th>',
+                 # MULTICHAIN END
                  ['<th>Satoshi-seconds</th>',
                   '<th>Total ss</th>']
                  if extra else '',
@@ -884,25 +909,32 @@ class Abe:
             miner_address = ''
             miner_block = None
             try:
-                miner_block = abe.store.export_block(chain, block_number=height)
+                miner_block = abe.store.export_block(
+                    chain, block_number=height)
             except DataStore.MalformedHash:
                 pass
 
             if miner_block is not None:
                 miner_txout = miner_block['transactions'][0]['out'][0]
                 if miner_txout['binaddr'] is not None:
-                    miner_address = abe.format_addresses(miner_txout, page['dotdot'], chain)
+                    miner_address = abe.format_addresses(
+                        miner_txout, page['dotdot'], chain)
                     #miner_address = miner_address[0:6]
                 else:
                     try:
-                        blockjson = abe.store.get_block_by_hash(chain, miner_block['hash'])
+                        blockjson = abe.store.get_block_by_hash(
+                            chain, miner_block['hash'])
                         miner = blockjson['miner']
-                        miner_address = '<a href="' + page['dotdot'] + '/' + escape(chain.name) + '/address/' + miner + '">' + miner + '</a>'
+                        miner_address = '<a href="' + \
+                            page['dotdot'] + '/' + \
+                            escape(chain.name) + '/address/' + \
+                            miner + '">' + miner + '</a>'
                     except Exception:
                         miner_address = "Unknown"
 
             body += [
-                '<tr><td><a href="', page['dotdot'], escape(chain.name), '/block/',
+                '<tr><td><a href="', page['dotdot'], escape(
+                    chain.name), '/block/',
                 abe.store.hashout_hex(hash),
                 '">', height, '</a>'
                 '</td><td>', miner_address,
@@ -942,7 +974,7 @@ class Abe:
                 in_longest = cc['in_longest']
 
         if in_longest:
-# MULTICHAIN START
+            # MULTICHAIN START
             page['title'] = [escape(chain.name), ' - Block ', b['height']]
             page['h1'] = ['<a href="', page['dotdot'], escape(chain.name), '/chain',
                           '?hi=', b['height'], '">',
@@ -960,69 +992,83 @@ class Abe:
         try:
             blockjson = abe.store.get_block_by_hash(chain, b['hash'])
         except Exception as e:
-            body += ['<div class="alert alert-danger" role="warning">', e ,'</div>']
+            body += ['<div class="alert alert-danger" role="warning">', e, '</div>']
             return
 
         if b['hashPrev'] is not None or b['next_block_hashes'] is not None:
             body += ['<nav><ul class="pager">']
             if b['hashPrev'] is not None:
                 body += ['<li class="previous"><a href="', dotdotblock,
-                     b['hashPrev'], '"><span aria-hidden="true">&larr;</span> Older</a></li>']
+                         b['hashPrev'], '"><span aria-hidden="true">&larr;</span> Older</a></li>']
             if b['next_block_hashes']:
-                body += ['<li class="next"><a href="', dotdotblock, b['next_block_hashes'][0], '">Newer<span aria-hidden="true">&rarr;</span></a></li>']
+                body += ['<li class="next"><a href="', dotdotblock, b['next_block_hashes']
+                         [0], '">Newer<span aria-hidden="true">&rarr;</span></a></li>']
             body += ['</ul></nav>']
-
 
         body += ['<h3>Block Summary</h3>\n']
         body += ['<table class="table table-bordered table-condensed">']
 
         if is_stake_chain:
-            body += html_keyvalue_tablerow('Proof of Stake' if is_stake_block else 'Proof of Work', format_satoshis(b['generated'], chain), ' coins generated')
+            body += html_keyvalue_tablerow('Proof of Stake' if is_stake_block else 'Proof of Work',
+                                           format_satoshis(b['generated'], chain), ' coins generated')
 
         body += html_keyvalue_tablerow('Hash', b['hash'])
 
         if b['hashPrev'] is not None:
             body += html_keyvalue_tablerow('Previous Block', '<a href="', dotdotblock,
-                     b['hashPrev'], '">', b['hashPrev'], '</a>')
+                                           b['hashPrev'], '">', b['hashPrev'], '</a>')
 
         if b['next_block_hashes']:
             body += ['<tr><td>Next Block</td>']
         for hash in b['next_block_hashes']:
-            body += ['<td><a href="', dotdotblock, hash, '">', hash, '</a></td>']
+            body += ['<td><a href="', dotdotblock,
+                     hash, '">', hash, '</a></td>']
         if b['next_block_hashes']:
             body += ['</tr>']
 
-        body += html_keyvalue_tablerow('Height', b['height'] if b['height'] is not None else '')
+        body += html_keyvalue_tablerow('Height',
+                                       b['height'] if b['height'] is not None else '')
 
         miner_txout = b['transactions'][0]['out'][0]
 # MULTICHAIN START
         if miner_txout['binaddr'] is not None:
-            miner_address = abe.format_addresses(miner_txout, page['dotdot'], chain)
+            miner_address = abe.format_addresses(
+                miner_txout, page['dotdot'], chain)
         else:
             miner = blockjson['miner']
-            miner_address = '<a href="' + page['dotdot'] + '/' + escape(chain.name) + '/address/' + miner + '">' + miner + '</a>'
+            miner_address = '<a href="' + \
+                page['dotdot'] + '/' + \
+                escape(chain.name) + '/address/' + \
+                miner + '">' + miner + '</a>'
 # MULTICHAIN END
         body += html_keyvalue_tablerow('Miner', miner_address)
 
         body += html_keyvalue_tablerow('Version', b['version'])
-        body += html_keyvalue_tablerow('Transaction Merkle Root', b['hashMerkleRoot'])
-        body += html_keyvalue_tablerow('Time', b['nTime'] , ' (' , format_time(b['nTime']) , ')')
+        body += html_keyvalue_tablerow('Transaction Merkle Root',
+                                       b['hashMerkleRoot'])
+        body += html_keyvalue_tablerow('Time',
+                                       b['nTime'], ' (', format_time(b['nTime']), ')')
         if False:
-            body += html_keyvalue_tablerow('Difficulty', format_difficulty(util.calculate_difficulty(b['nBits'])) , ' (Bits: %x)' % (b['nBits']))
-            body += html_keyvalue_tablerow('Cumulative Difficulty', format_difficulty(util.work_to_difficulty(b['chain_work'])) if b['chain_work'] is not None else '')
-
+            body += html_keyvalue_tablerow('Difficulty', format_difficulty(
+                util.calculate_difficulty(b['nBits'])), ' (Bits: %x)' % (b['nBits']))
+            body += html_keyvalue_tablerow('Cumulative Difficulty', format_difficulty(
+                util.work_to_difficulty(b['chain_work'])) if b['chain_work'] is not None else '')
 
         body += html_keyvalue_tablerow('Nonce', b['nNonce'])
-        body += html_keyvalue_tablerow('Transactions',len(b['transactions']))
+        body += html_keyvalue_tablerow('Transactions', len(b['transactions']))
         if False:
-            body += html_keyvalue_tablerow('Value out', format_satoshis(b['value_out'], chain))
-            body += html_keyvalue_tablerow('Transaction Fees', format_satoshis(b['fees'], chain))
+            body += html_keyvalue_tablerow('Value out',
+                                           format_satoshis(b['value_out'], chain))
+            body += html_keyvalue_tablerow('Transaction Fees',
+                                           format_satoshis(b['fees'], chain))
 
         if False:
-            body += html_keyvalue_tablerow('Average Coin Age', '%6g' % (b['satoshi_seconds'] / 86400.0 / b['chain_satoshis']) + ' days' if b['chain_satoshis'] and (b['satoshi_seconds'] is not None) else '')
-            body += html_keyvalue_tablerow('Coin-days Destroyed', '' if b['satoshis_destroyed'] is None else format_satoshis(b['satoshis_destroyed'] / 86400.0, chain))
+            body += html_keyvalue_tablerow('Average Coin Age', '%6g' % (
+                b['satoshi_seconds'] / 86400.0 / b['chain_satoshis']) + ' days' if b['chain_satoshis'] and (b['satoshi_seconds'] is not None) else '')
+            body += html_keyvalue_tablerow('Coin-days Destroyed', '' if b['satoshis_destroyed'] is None else format_satoshis(
+                b['satoshis_destroyed'] / 86400.0, chain))
             body += html_keyvalue_tablerow('Cumulative Coin-days Destroyed', '%6g%%' %
-             (100 * (1 - float(b['satoshi_seconds']) / b['chain_satoshi_seconds'])) if b['chain_satoshi_seconds'] else '')
+                                           (100 * (1 - float(b['satoshi_seconds']) / b['chain_satoshi_seconds'])) if b['chain_satoshi_seconds'] else '')
 
         # ['sat=',b['chain_satoshis'],';sec=',seconds,';ss=',b['satoshi_seconds'],
         # ';total_ss=',b['chain_satoshi_seconds'],';destroyed=',b['satoshis_destroyed']]
@@ -1030,23 +1076,23 @@ class Abe:
 
         body += ['</table>']
 
-
         body += ['<h3>Transactions</h3>\n']
 
         body += ['<table class="table table-striped"><tr><th>Transaction</th>'
-                 #<th>Fee</th>'
+                 # <th>Fee</th>'
                  '<th>Size (kB)</th>'
-                 #<th>From (amount)</th><th>To (amount)</th>'
+                 # <th>From (amount)</th><th>To (amount)</th>'
                  '</tr>\n']
 # MULTICHAIN END
 
         for tx in b['transactions']:
-# MULTICHAIN START
+            # MULTICHAIN START
             # Describe MultiChain specific transaction
             labels = []
             labeltype = 'success'
             try:
-                mytx = abe.store.export_tx(tx_hash = tx['hash'], format = 'browser')
+                mytx = abe.store.export_tx(
+                    tx_hash=tx['hash'], format='browser')
             except DataStore.MalformedHash:
                 mytx = None
 
@@ -1060,19 +1106,25 @@ class Abe:
                     #     # we have found the main purpose of this tx
                     #     break
 
-                    script_type, data = chain.parse_txout_script(txout['binscript'])
+                    script_type, data = chain.parse_txout_script(
+                        txout['binscript'])
                     if script_type in [Chain.SCRIPT_TYPE_MULTICHAIN, Chain.SCRIPT_TYPE_MULTICHAIN_P2SH]:
-                        data = util.get_multichain_op_drop_data(txout['binscript'])
+                        data = util.get_multichain_op_drop_data(
+                            txout['binscript'])
                         if data is not None:
-                            opdrop_type, val = util.parse_op_drop_data(data, chain)
-                            label = util.get_op_drop_type_description(opdrop_type)
+                            opdrop_type, val = util.parse_op_drop_data(
+                                data, chain)
+                            label = util.get_op_drop_type_description(
+                                opdrop_type)
                         else:
                             label = 'Unknown MultiChain command'
                             labeltype = 'danger'
 
                     elif script_type is Chain.SCRIPT_TYPE_MULTICHAIN_OP_RETURN:
-                        opreturn_type, val = util.parse_op_return_data(data, chain)
-                        label = util.get_op_return_type_description(opreturn_type)
+                        opreturn_type, val = util.parse_op_return_data(
+                            data, chain)
+                        label = util.get_op_return_type_description(
+                            opreturn_type)
 
                     elif script_type is Chain.SCRIPT_TYPE_MULTICHAIN_STREAM:
                         label = 'Create Stream'
@@ -1087,10 +1139,13 @@ class Abe:
                         label = 'Approval or Entity Permission'
 
                     elif script_type in [Chain.SCRIPT_TYPE_MULTICHAIN_SPKN, Chain.SCRIPT_TYPE_MULTICHAIN_SPKU]:
-                        data = util.get_multichain_op_drop_data(txout['binscript'])
+                        data = util.get_multichain_op_drop_data(
+                            txout['binscript'])
                         if data is not None:
-                            opdrop_type, val = util.parse_op_drop_data(data, chain)
-                            label = util.get_op_drop_type_description(opdrop_type)
+                            opdrop_type, val = util.parse_op_drop_data(
+                                data, chain)
+                            label = util.get_op_drop_type_description(
+                                opdrop_type)
                         else:
                             label = 'Unknown MultiChain command'
                             labeltype = 'danger'
@@ -1110,22 +1165,23 @@ class Abe:
             if len(labels) == 0:
                 labelclass = ''
             else:
-                labelclass='class="' + labeltype + '"'
+                labelclass = 'class="' + labeltype + '"'
             body += ['<tr ' + labelclass + '><td><a href="../tx/' + tx['hash'] + '">',
                      tx['hash'], '</a>']
-                     # tx['hash'][:16], '...</a>']
+            # tx['hash'][:16], '...</a>']
 
-            if len(labels)>0:
+            if len(labels) > 0:
                 body += ['<div>']
                 for label in labels:
-                    body += ['<span class="label label-' + labeltype + '">', label, '</span>&nbsp;']
+                    body += ['<span class="label label-' +
+                             labeltype + '">', label, '</span>&nbsp;']
                 body += ['</div>']
 
             body += [
-                     #'</td><td>', format_satoshis(tx['fees'], chain),
-# MULTICHAIN END
-                     '</td><td>', tx['size'] / 1000.0,
-                     '</td><td>']
+                #'</td><td>', format_satoshis(tx['fees'], chain),
+                # MULTICHAIN END
+                '</td><td>', tx['size'] / 1000.0,
+                '</td><td>']
 
 #             if tx is b['transactions'][0]:
 #                 body += [
@@ -1208,7 +1264,7 @@ class Abe:
 
         try:
             # XXX Should pass chain to export_tx to help parse scripts.
-            tx = abe.store.export_tx(tx_hash = tx_hash, format = 'browser')
+            tx = abe.store.export_tx(tx_hash=tx_hash, format='browser')
         except DataStore.MalformedHash:
             body += ['<p class="error">Not in correct format.</p>']
             return
@@ -1224,7 +1280,7 @@ class Abe:
         try:
             resp = abe.store.get_assets(chain)
             for o in resp:
-                txid = o.get('issuetxid',None)
+                txid = o.get('issuetxid', None)
                 if txid is not None:
                     fragment = txid[0:32]   # first 16 hex chars
                     result[fragment] = o
@@ -1236,7 +1292,8 @@ class Abe:
 # MULTICHAIN START
 
     def show_tx_row_to_html_impl(abe, chain, body, asset_txid_dict, binscript, script_type, data, v_json, data_ref):
-        body += ['<td style="max-width: 400px;">', escape(decode_script(binscript)) ]
+        body += ['<td style="max-width: 400px;">',
+                 escape(decode_script(binscript))]
         msg = None
         msgtype = 'success'
         msgpanelstyle = ''
@@ -1245,7 +1302,8 @@ class Abe:
                            Chain.SCRIPT_TYPE_MULTICHAIN_FILTER,
                            Chain.SCRIPT_TYPE_MULTICHAIN_STREAM,
                            Chain.SCRIPT_TYPE_MULTICHAIN_STREAM_ITEM,
-                           Chain.SCRIPT_TYPE_MULTICHAIN_SPKN,  # also matches template used for input cache opdrop
+                           # also matches template used for input cache opdrop
+                           Chain.SCRIPT_TYPE_MULTICHAIN_SPKN,
                            Chain.SCRIPT_TYPE_MULTICHAIN_SPKF,
                            Chain.SCRIPT_TYPE_MULTICHAIN_SPKU,
                            Chain.SCRIPT_TYPE_MULTICHAIN_APPROVE]:
@@ -1253,17 +1311,21 @@ class Abe:
             data = util.get_multichain_op_drop_data(binscript)
             if data is not None:
                 opdrop_type, val = util.parse_op_drop_data(data, chain)
-                if opdrop_type==util.OP_DROP_TYPE_ISSUE_ASSET:
+                if opdrop_type == util.OP_DROP_TYPE_ISSUE_ASSET:
                     # Not the most efficient way, but will suffice for now until assets are stored in a database table.
                     try:
                         asset = abe.store.get_asset_by_name(chain, tx['hash'])
-                        display_amount = util.format_display_quantity(asset, val)
+                        display_amount = util.format_display_quantity(
+                            asset, val)
                         assetref = asset['assetref'] or asset['name']
-                        link = '<a href="../../' + escape(chain.name) + '/assetref/' + assetref + '">' + assetref + '</a>'
-                        msg = "Issue {0} units of new asset {1}".format(display_amount, link)
+                        link = '<a href="../../' + \
+                            escape(chain.name) + '/assetref/' + \
+                            assetref + '">' + assetref + '</a>'
+                        msg = "Issue {0} units of new asset {1}".format(
+                            display_amount, link)
                     except Exception as e:
                         msg = "Issue {0:d} raw units of new asset".format(val)
-                elif opdrop_type==util.OP_DROP_TYPE_ISSUE_MORE_ASSET:
+                elif opdrop_type == util.OP_DROP_TYPE_ISSUE_MORE_ASSET:
                     dict = val[0]
                     quantity = dict['quantity']
                     if chain.protocol_version < 10007:
@@ -1271,16 +1333,23 @@ class Abe:
                     else:
                         asset_dict = asset_txid_dict[dict['assetref']]
                         assetref = asset_dict['assetref'] or asset_dict['name']
-                    link = '<a href="../../' + escape(chain.name) + '/assetref/' + assetref + '">' + assetref + '</a>'
+                    link = '<a href="../../' + \
+                        escape(chain.name) + '/assetref/' + \
+                        assetref + '">' + assetref + '</a>'
                     try:
                         asset = abe.store.get_asset_by_name(chain, assetref)
-                        assetname = asset.get('name',assetref)
-                        link = '<a href="../../' + escape(chain.name) + '/assetref/' + assetref + '">' + assetname.encode('unicode-escape') + '</a>'
-                        display_amount = util.format_display_quantity(asset, quantity)
-                        msg = "Issue {0} more units of {1}".format(display_amount, link)
+                        assetname = asset.get('name', assetref)
+                        link = '<a href="../../' + \
+                            escape(chain.name) + '/assetref/' + assetref + \
+                            '">' + assetname.encode('unicode-escape') + '</a>'
+                        display_amount = util.format_display_quantity(
+                            asset, quantity)
+                        msg = "Issue {0} more units of {1}".format(
+                            display_amount, link)
                     except Exception as e:
-                        msg = "Issue {0:d} more raw units of asset {1}".format(val, link)
-                elif opdrop_type==util.OP_DROP_TYPE_SEND_ASSET:
+                        msg = "Issue {0:d} more raw units of asset {1}".format(
+                            val, link)
+                elif opdrop_type == util.OP_DROP_TYPE_SEND_ASSET:
                     msg = ""
                     msgparts = []
                     for dict in val:
@@ -1292,27 +1361,37 @@ class Abe:
                             assetref = asset_dict['assetref'] or asset_dict['name']
 
                         # link shows asset ref
-                        link = '<a href="../../' + escape(chain.name) + '/assetref/' + assetref + '">' + assetref + '</a>'
+                        link = '<a href="../../' + \
+                            escape(chain.name) + '/assetref/' + \
+                            assetref + '">' + assetref + '</a>'
 
                         # Not the most efficient way, but will suffice for now until assets are stored in a database table.
                         try:
-                            asset = abe.store.get_asset_by_name(chain, assetref)
-                            display_amount = util.format_display_quantity(asset, quantity)
+                            asset = abe.store.get_asset_by_name(
+                                chain, assetref)
+                            display_amount = util.format_display_quantity(
+                                asset, quantity)
                             # update link to display name, if not anonymous, instead of assetref
-                            assetname = asset.get('name',assetref)
-                            if len(assetname)>0:
-                                link = '<a href="../../' + escape(chain.name) + '/assetref/' + assetref + '">' + assetname.encode('unicode-escape') + '</a>'
-                            msgparts.append("{0} units of asset {1}".format(display_amount, link))
+                            assetname = asset.get('name', assetref)
+                            if len(assetname) > 0:
+                                link = '<a href="../../' + \
+                                    escape(chain.name) + '/assetref/' + assetref + \
+                                    '">' + \
+                                    assetname.encode('unicode-escape') + '</a>'
+                            msgparts.append(
+                                "{0} units of asset {1}".format(display_amount, link))
                         except Exception as e:
-                            msgparts.append("{0} raw units of asset {1}".format(quantity, link))
+                            msgparts.append(
+                                "{0} raw units of asset {1}".format(quantity, link))
 
                     msg += '<br>'.join(msgparts)
                 elif opdrop_type == util.OP_DROP_TYPE_RAW_DATA:
                     msg = "Data: " + util.render_long_data_with_popover(val)
 
-                elif opdrop_type==util.OP_DROP_TYPE_PERMISSION:
+                elif opdrop_type == util.OP_DROP_TYPE_PERMISSION:
                     if val['filter']:
-                        msg = "{} Filter".format("Approve" if val['type'] == 'grant' else "Reject")
+                        msg = "{} Filter".format(
+                            "Approve" if val['type'] == 'grant' else "Reject")
                     else:
                         permissions = [permission_type for permission_type in (
                             'connect', 'send', 'receive', 'write', 'issue', 'create', 'mine', 'high1', 'high2', 'high3',
@@ -1320,20 +1399,23 @@ class Abe:
 
                         msg = val['type'].capitalize() + " "
                         msg += ' permission for '
-                        msg += ', '.join("{0}".format(item) for item in permissions)
+                        msg += ', '.join("{0}".format(item)
+                                         for item in permissions)
 
-                    if val['type'] is 'grant' and not (val['startblock']==0 and val['endblock']==4294967295):
-                        msg += ' (blocks {0} - {1} only)'.format(val['startblock'], val['endblock'])
+                    if val['type'] is 'grant' and not (val['startblock'] == 0 and val['endblock'] == 4294967295):
+                        msg += ' (blocks {0} - {1} only)'.format(
+                            val['startblock'], val['endblock'])
                 elif opdrop_type in [util.OP_DROP_TYPE_CREATE_STREAM, util.OP_DROP_TYPE_SPKN_CREATE_STREAM]:
                     msg = 'Create stream:'
                     if chain.protocol_version < 10007:
                         data = util.get_multichain_op_return_data(binscript)
-                        opreturn_type, val = util.parse_op_return_data(data, chain)
+                        opreturn_type, val = util.parse_op_return_data(
+                            data, chain)
                         fields = val['fields']
                     else:
-                        fields = val # for 10007, val already contains the fields
+                        fields = val  # for 10007, val already contains the fields
                     msg += '<table class="table table-bordered table-condensed">'
-                    for k,v in sorted(fields.items()):
+                    for k, v in sorted(fields.items()):
                         try:
                             v.decode('ascii')
                         except UnicodeDecodeError:
@@ -1341,13 +1423,13 @@ class Abe:
                         # msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(k.capitalize(),v)
                         msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(k, v)
                     msg += '</table>'
-                    msgpanelstyle="margin-bottom: -20px;"
+                    msgpanelstyle = "margin-bottom: -20px;"
 
                 elif opdrop_type == util.OP_DROP_TYPE_SPKN_CREATE_FILTER:
                     msg = "Create filter"
                     fields = val
                     msg += '<table class="table table-bordered table-condensed">'
-                    for k,v in sorted(fields.items()):
+                    for k, v in sorted(fields.items()):
                         try:
                             v.decode('ascii')
                         except UnicodeDecodeError:
@@ -1355,7 +1437,7 @@ class Abe:
                         # msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(k.capitalize(),v)
                         msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(k, v)
                     msg += '</table>'
-                    msgpanelstyle="margin-bottom: -20px;"
+                    msgpanelstyle = "margin-bottom: -20px;"
 
                 # 20001
                 elif opdrop_type == util.OP_DROP_TYPE_SPKN_CREATE_UPGRADE:
@@ -1365,21 +1447,23 @@ class Abe:
                         for upgrade in resp:
                             if upgrade["name"] == val["Name"]:
                                 msg += '<table class="table table-bordered table-condensed">'
-                                msg += '<tr><td>Name</td><td>{0}</td>'.format(upgrade["name"])
+                                msg += '<tr><td>Name</td><td>{0}</td>'.format(
+                                    upgrade["name"])
                                 for k, v in upgrade["params"].items():
-                                    msg += '<tr><td>{0}</td><td>{1}</td>'.format(k, v)
+                                    msg += '<tr><td>{0}</td><td>{1}</td>'.format(
+                                        k, v)
                                 msg += '</table>'
                                 break
                     except Exception as e:
                         pass
-                    msgpanelstyle="margin-bottom: -20px;"
+                    msgpanelstyle = "margin-bottom: -20px;"
 
                 # 10007
-                elif opdrop_type==util.OP_DROP_TYPE_SPKN_NEW_ISSUE:
+                elif opdrop_type == util.OP_DROP_TYPE_SPKN_NEW_ISSUE:
                     msg = 'New Issuance Metadata:'
                     msg += '<table class="table table-bordered table-condensed">'
                     fields = val
-                    for k,v in sorted(fields.items()):
+                    for k, v in sorted(fields.items()):
                         # try:
                         #     v.decode('ascii')
                         # except UnicodeDecodeError:
@@ -1387,55 +1471,60 @@ class Abe:
                         # msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(k.capitalize(),v)
                         msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(k, v)
                     msg += '</table>'
-                    msgpanelstyle="margin-bottom: -20px;"
+                    msgpanelstyle = "margin-bottom: -20px;"
                     msgtype = 'danger'
 
                 # 10007
-                elif opdrop_type==util.OP_DROP_TYPE_SPKI:
+                elif opdrop_type == util.OP_DROP_TYPE_SPKI:
                     msg = 'Input Cache:'
                     msg += '<table class="table table-bordered table-condensed">'
                     fields = val
-                    for k,v in sorted(fields.items()):
+                    for k, v in sorted(fields.items()):
                         decodedscript = escape(decode_script(v))
                         # try:
                         #     v.decode('ascii')
                         # except UnicodeDecodeError:
                         #     v = util.long_hex(v)
                         # msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(k.capitalize(), decodedscript)
-                        msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(k, decodedscript)
+                        msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(
+                            k, decodedscript)
                     msg += '</table>'
-                    msgpanelstyle="margin-bottom: -20px;"
+                    msgpanelstyle = "margin-bottom: -20px;"
                     msgtype = 'danger'
 
                 # 10007
-                #elif opdrop_type==util.OP_DROP_TYPE_FOLLOW_ON_ISSUANCE_METADATA:
-                elif opdrop_type==util.OP_DROP_TYPE_SPKE and script_type==Chain.SCRIPT_TYPE_MULTICHAIN_SPKU:
+                # elif opdrop_type==util.OP_DROP_TYPE_FOLLOW_ON_ISSUANCE_METADATA:
+                elif opdrop_type == util.OP_DROP_TYPE_SPKE and script_type == Chain.SCRIPT_TYPE_MULTICHAIN_SPKU:
                     script_type, dict = chain.parse_txout_script(binscript)
                     # dict keys contain opdrop data: assetidentifier, assetdetails
 
                     opdrop_spke = dict['assetidentifier']
-                    opdrop_type, assettxid = util.parse_op_drop_data(opdrop_spke, chain)
+                    opdrop_type, assettxid = util.parse_op_drop_data(
+                        opdrop_spke, chain)
 
                     opdrop_spku = dict['assetdetails']
-                    opdrop_type, fields = util.parse_op_drop_data(opdrop_spku, chain)
+                    opdrop_type, fields = util.parse_op_drop_data(
+                        opdrop_spku, chain)
 
                     asset_dict = asset_txid_dict[assettxid]
                     assetref = asset_dict['assetref'] or asset_dict['name']
                     assetname = asset_dict['name']
-                    link = '<a href="../../' + escape(chain.name) + '/assetref/' + assetref + '">' + assetname.encode('unicode-escape') + '</a>'
+                    link = '<a href="../../' + \
+                        escape(chain.name) + '/assetref/' + assetref + \
+                        '">' + assetname.encode('unicode-escape') + '</a>'
 
                     msg = "Follow-on issuance metadata for {0}".format(link)
                     msg += '<table class="table table-bordered table-condensed">'
-                    for k,v in sorted(fields.items()):
+                    for k, v in sorted(fields.items()):
                         # msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(k.capitalize(),v)
                         msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(k, v)
                     msg += '</table>'
-                    msgpanelstyle="margin-bottom: -20px;"
+                    msgpanelstyle = "margin-bottom: -20px;"
 
-                elif (opdrop_type==util.OP_DROP_TYPE_SPKE and script_type==Chain.SCRIPT_TYPE_MULTICHAIN_STREAM_ITEM) or opdrop_type == util.OP_DROP_TYPE_STREAM_ITEM:
+                elif (opdrop_type == util.OP_DROP_TYPE_SPKE and script_type == Chain.SCRIPT_TYPE_MULTICHAIN_STREAM_ITEM) or opdrop_type == util.OP_DROP_TYPE_STREAM_ITEM:
 
-                # legacy 10006
-                #elif opdrop_type == util.OP_DROP_TYPE_STREAM_ITEM:
+                    # legacy 10006
+                    # elif opdrop_type == util.OP_DROP_TYPE_STREAM_ITEM:
                     msg = ''
                     script_type, dict = chain.parse_txout_script(binscript)
                     txidfragment = val
@@ -1444,35 +1533,45 @@ class Abe:
                     try:
                         resp = abe.store.list_streams(chain)
                         for stream in resp:
-                            if stream.get('createtxid','').startswith(txidfragment):
-                                streamname = stream.get('name','')
-                                streamlink = '<a href="../../' + escape(chain.name) + '/stream/' + streamname + '">' + streamname + '</a>'
+                            if stream.get('createtxid', '').startswith(txidfragment):
+                                streamname = stream.get('name', '')
+                                streamlink = '<a href="../../' + \
+                                    escape(chain.name) + '/stream/' + \
+                                    streamname + '">' + streamname + '</a>'
                                 break
 
                     except Exception as e:
-                        body += ['<div class="alert alert-danger" role="warning">', e ,'</div>']
+                        body += ['<div class="alert alert-danger" role="warning">', e, '</div>']
                         return
 
                     # itemkey = dict['itemkey'][4:] # we don't need prefix 'spkk' or 0x73 0x70 0x6b 0x6b
                     itemkeys = [itemkey[4:] for itemkey in dict['itemkeys']]
                     msg += '<table class="table table-bordered table-condensed">'
-                    msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format('Stream', streamlink)
-                    msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format('Key', ', '.join(itemkeys))
+                    msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(
+                        'Stream', streamlink)
+                    msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(
+                        'Key', ', '.join(itemkeys))
 
                     for item in v_json.get("items", []):
                         itemdata = item["data"]
                         if isinstance(itemdata, types.DictType):
-                            text_data = itemdata.get("text", "") or json.dumps(itemdata.get("json", ""))
-                            data_html = util.render_long_data_with_popover(text_data)
+                            text_data = itemdata.get("text", "") or json.dumps(
+                                itemdata.get("json", ""))
+                            data_html = util.render_long_data_with_popover(
+                                text_data)
                         else:
                             try:
-                                text_data = itemdata.decode('hex').decode('ascii')
-                                data_html = util.render_long_data_with_popover(text_data)
+                                text_data = itemdata.decode(
+                                    'hex').decode('ascii')
+                                data_html = util.render_long_data_with_popover(
+                                    text_data)
                             except Exception:
-                                data_html = util.render_long_data_with_link(itemdata, data_ref)
-                        msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format('Data', data_html)
+                                data_html = util.render_long_data_with_link(
+                                    itemdata, data_ref)
+                        msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(
+                            'Data', data_html)
                     msg += '</table>'
-                    msgpanelstyle="margin-bottom: -20px;"
+                    msgpanelstyle = "margin-bottom: -20px;"
 
                 elif opdrop_type == util.OP_DROP_TYPE_SPKE and script_type == Chain.SCRIPT_TYPE_MULTICHAIN_APPROVE:
                     msg = "Approve upgrade"
@@ -1481,15 +1580,18 @@ class Abe:
                         resp = abe.store.list_upgrades(chain)
                         for upgrade in resp:
                             if upgrade.get("createtxid", "").startswith(val):
-                                msg += '<tr><td>Name</td><td>{0}</td>'.format(upgrade["name"])
+                                msg += '<tr><td>Name</td><td>{0}</td>'.format(
+                                    upgrade["name"])
                                 for k, v in upgrade["params"].items():
-                                    msg += '<tr><td>{0}</td><td>{1}</td>'.format(k, v)
+                                    msg += '<tr><td>{0}</td><td>{1}</td>'.format(
+                                        k, v)
                                 break
                     except Exception as e:
                         pass
                     parts = v_json["scriptPubKey"]["asm"].split()
                     approval = parts[2][8:10]
-                    msg += '<tr><td>Approval</td><td>{0}</td>'.format(approval == '01')
+                    msg += '<tr><td>Approval</td><td>{0}</td>'.format(
+                        approval == '01')
                     msg += '</table>'
                     msgpanelstyle = "margin-bottom: -20px;"
 
@@ -1498,32 +1600,37 @@ class Abe:
             script_type, dict = chain.parse_txout_script(binscript)
 
             opdrop_spke = dict['txid']
-            opdrop_type, txidfragment = util.parse_op_drop_data(opdrop_spke, chain)
+            opdrop_type, txidfragment = util.parse_op_drop_data(
+                opdrop_spke, chain)
 
             # Figure out if the txid is for an asset or a stream
             asset = asset_txid_dict.get(txidfragment, None)
             if asset is not None:
                 assetref = asset['assetref'] or asset['name']
                 entityname = asset.get('name', '')
-                entitylink = '<a href="../../' + escape(chain.name) + '/assetref/' + assetref + '">' + entityname.encode('unicode-escape') + '</a>'
+                entitylink = '<a href="../../' + \
+                    escape(chain.name) + '/assetref/' + assetref + \
+                    '">' + entityname.encode('unicode-escape') + '</a>'
             else:
                 try:
                     resp = abe.store.list_streams(chain)
                     for stream in resp:
-                        if stream.get('createtxid','').startswith(txidfragment):
-                            entityname = stream.get('name','')
-                            entitylink = '<a href="../../' + escape(chain.name) + '/streams/' + entityname + '">' + entityname + '</a>'
+                        if stream.get('createtxid', '').startswith(txidfragment):
+                            entityname = stream.get('name', '')
+                            entitylink = '<a href="../../' + \
+                                escape(chain.name) + '/streams/' + \
+                                entityname + '">' + entityname + '</a>'
                             break
                 except Exception as e:
-                    body += ['<div class="alert alert-danger" role="warning">', e ,'</div>']
+                    body += ['<div class="alert alert-danger" role="warning">', e, '</div>']
                     return
-
 
             opdrop_spkp = dict['permissions']
             opdrop_type, val = util.parse_op_drop_data(opdrop_spkp, chain)
 
             if val['filter']:
-                msg = "{} Filter".format("Approve" if val['type'] == 'grant' else "Reject")
+                msg = "{} Filter".format(
+                    "Approve" if val['type'] == 'grant' else "Reject")
             else:
                 if val['type'] is 'grant':
                     msg = 'Grant permission to '
@@ -1551,12 +1658,13 @@ class Abe:
                 msg += 'stream '
             msg += entitylink
 
-            if val['type'] is 'grant' and not (val['startblock']==0 and val['endblock']==4294967295):
-                msg += ' (blocks {0} - {1} only)'.format(val['startblock'], val['endblock'])
+            if val['type'] is 'grant' and not (val['startblock'] == 0 and val['endblock'] == 4294967295):
+                msg += ' (blocks {0} - {1} only)'.format(
+                    val['startblock'], val['endblock'])
 
         if script_type is Chain.SCRIPT_TYPE_MULTICHAIN_OP_RETURN:
             opreturn_type, val = util.parse_op_return_data(data, chain)
-            if opreturn_type==util.OP_RETURN_TYPE_ISSUE_ASSET:
+            if opreturn_type == util.OP_RETURN_TYPE_ISSUE_ASSET:
 
                 msg = 'Issued asset details:'
                 msg += '<table class="table table-bordered table-condensed">'
@@ -1567,14 +1675,17 @@ class Abe:
                 try:
                     asset = abe.store.get_asset_by_name(chain, assetName)
                     assetref = asset['assetref'] or asset['name']
-                    assetLink = '<a href="../assetref/{0}">{1}</a>'.format(asset['assetref'], assetName)
+                    assetLink = '<a href="../assetref/{0}">{1}</a>'.format(
+                        asset['assetref'], assetName)
                 except Exception:
                     pass
 
-                msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format('Name',assetLink)
-                msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format('Multiplier',val['multiplier'])
+                msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(
+                    'Name', assetLink)
+                msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(
+                    'Multiplier', val['multiplier'])
                 fields = val['fields']
-                for k,v in sorted(fields.items()):
+                for k, v in sorted(fields.items()):
                     try:
                         v.decode('ascii')
                     except UnicodeDecodeError:
@@ -1582,14 +1693,14 @@ class Abe:
                     # msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(k.capitalize(),v)
                     msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(k, v)
                 msg += '</table>'
-                msgpanelstyle="margin-bottom: -20px;"
+                msgpanelstyle = "margin-bottom: -20px;"
 
-            elif opreturn_type==util.OP_RETURN_TYPE_SPKC:
+            elif opreturn_type == util.OP_RETURN_TYPE_SPKC:
                 msg = 'Issue more asset details:'
                 msg += '<table class="table table-bordered table-condensed">'
 
                 fields = val['fields']
-                for k,v in sorted(fields.items()):
+                for k, v in sorted(fields.items()):
                     try:
                         v.decode('ascii')
                     except UnicodeDecodeError:
@@ -1597,14 +1708,14 @@ class Abe:
                     # msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(k.capitalize(),v)
                     msg += '<tr><td>{0}</td><td>{1}</td></tr>'.format(k, v)
                 msg += '</table>'
-                msgpanelstyle="margin-bottom: -20px;"
+                msgpanelstyle = "margin-bottom: -20px;"
 
-            elif opreturn_type==util.OP_RETURN_TYPE_MINER_BLOCK_SIGNATURE:
+            elif opreturn_type == util.OP_RETURN_TYPE_MINER_BLOCK_SIGNATURE:
                 msg = 'Miner block signature'
                 msgtype = 'info'
-                msgpanelstyle="margin-bottom: -20px; word-break:break-all;"
+                msgpanelstyle = "margin-bottom: -20px; word-break:break-all;"
             else:
-                msgpanelstyle="word-break:break-word;"
+                msgpanelstyle = "word-break:break-word;"
 
         # if v_json and not msg:
         if v_json:
@@ -1623,7 +1734,8 @@ class Abe:
                     else:
                         if bytearray.fromhex(item[:6]) in (b"spk", b"SPK"):
                             item = item[8:]
-                        item_html = util.render_long_data_with_link(item, data_ref)
+                        item_html = util.render_long_data_with_link(
+                            item, data_ref)
                     msg += "<tr><td>{}</td></tr>".format(item_html)
                 msg += "</table>"
                 msgpanelstyle = "margin-bottom: -20px;"
@@ -1635,21 +1747,27 @@ class Abe:
                         assetref = item.get('assetref') or item.get('name')
 
                         # link shows asset ref
-                        link = '<a href="../../' + escape(chain.name) + '/assetref/' + assetref + '">' + assetref + '</a>'
+                        link = '<a href="../../' + \
+                            escape(chain.name) + '/assetref/' + \
+                            assetref + '">' + assetref + '</a>'
 
                         # Not the most efficient way, but will suffice for now until assets are stored in a database table.
                         try:
-                            asset = abe.store.get_asset_by_name(chain, assetref)
-                            display_amount = util.format_display_quantity(asset, quantity)
+                            asset = abe.store.get_asset_by_name(
+                                chain, assetref)
+                            display_amount = util.format_display_quantity(
+                                asset, quantity)
                             # update link to display name, if not anonymous, instead of assetref
                             assetname = item.get('name', assetref)
                             if assetname:
                                 link = '<a href="../../' + escape(
                                     chain.name) + '/assetref/' + assetref + '">' + assetname.encode(
                                     'unicode-escape') + '</a>'
-                            msgparts.append("{0} units of asset {1}".format(display_amount, link))
+                            msgparts.append(
+                                "{0} units of asset {1}".format(display_amount, link))
                         except Exception as e:
-                            msgparts.append("{0} raw units of asset {1}".format(quantity, link))
+                            msgparts.append(
+                                "{0} raw units of asset {1}".format(quantity, link))
                     msg += '<br>'.join(msgparts)
                 if "items" in v_json:
                     for item in (x for x in v_json["items"] if x["type"] == "stream"):
@@ -1667,10 +1785,13 @@ class Abe:
                                     data = data["text"]
                                 else:
                                     data = json.dumps(data["json"])
-                                data_html = util.render_long_data_with_popover(data)
+                                data_html = util.render_long_data_with_popover(
+                                    data)
                             else:
-                                data_html = util.render_long_data_with_link(data, data_ref)
-                        stream_link = '<a href="../../{0}/stream/{1}">{1}</a>'.format(escape(chain.name), stream_name)
+                                data_html = util.render_long_data_with_link(
+                                    data, data_ref)
+                        stream_link = '<a href="../../{0}/stream/{1}">{1}</a>'.format(
+                            escape(chain.name), stream_name)
                         keys_html = ', '.join(keys)
                         msg += """
                             <table class="table table-bordered table-condensed">
@@ -1683,14 +1804,15 @@ class Abe:
 
         # Add MultiChain HTML
         if msg is not None:
-            body += ['<div style="height:5px;"></div><div class="panel panel-default panel-'+msgtype+'"><div class="panel-body" style="' + msgpanelstyle + '">'+msg+'</div></div>']
+            body += ['<div style="height:5px;"></div><div class="panel panel-default panel-' +
+                     msgtype+'"><div class="panel-body" style="' + msgpanelstyle + '">'+msg+'</div></div>']
 
-        body += [ '</td>\n']
-
+        body += ['</td>\n']
 
     def show_tx(abe, page, tx):
         body = page['body']
-        asset_txid_dict = {}    # map: txid fragment (first 16 bytes as hex string) --> asset obj
+        # map: txid fragment (first 16 bytes as hex string) --> asset obj
+        asset_txid_dict = {}
 
         def row_to_html(v, row, this_ch, other_ch, no_link_text):
             txid = row['o_hash']
@@ -1711,7 +1833,7 @@ class Abe:
             body += ['</td>']
 
             # Decode earlier as we need to use script type
-            novalidaddress=False
+            novalidaddress = False
             script_type = data = None
             if binscript is not None:
                 script_type, data = chain.parse_txout_script(binscript)
@@ -1728,9 +1850,13 @@ class Abe:
             if row['binaddr'] is None and txid is None:
                 if novalidaddress is False:
                     try:
-                        blockjson = abe.store.get_block_by_hash(chain, blk_hash)
+                        blockjson = abe.store.get_block_by_hash(
+                            chain, blk_hash)
                         miner = blockjson['miner']
-                        addressLabel = '<a href="' + page['dotdot'] + '/' + escape(chain.name) + '/address/' + miner + '">' + miner + '</a>'
+                        addressLabel = '<a href="' + \
+                            page['dotdot'] + '/' + \
+                            escape(chain.name) + '/address/' + \
+                            miner + '">' + miner + '</a>'
                     except Exception:
                         addressLabel = 'Unknown (not connected)'
                 else:
@@ -1746,16 +1872,19 @@ class Abe:
 
             if p2sh_flag is True:
                 body += ['<div><span class="label label-info">P2SH</span></div>']
-            body += [ '</td>\n']
+            body += ['</td>\n']
 
             if binscript is not None:
                 if this_ch == 'o':
-                    tx_json = util.jsonrpc(chain_name, chain_url, "getrawtransaction", tx["hash"], 1)
+                    tx_json = util.jsonrpc(
+                        chain_name, chain_url, "getrawtransaction", tx["hash"], 1)
                     v_json = tx_json['vout'][int(v)]
-                    dataref = '{}/{}/txoutdata/{}/{}'.format(page['dotdot'], escape(chain.name), tx["hash"], v)
+                    dataref = '{}/{}/txoutdata/{}/{}'.format(
+                        page['dotdot'], escape(chain.name), tx["hash"], v)
                 else:
                     v_json = dataref = None
-                abe.show_tx_row_to_html_impl(chain, body, asset_txid_dict, binscript, script_type, data, v_json, dataref)
+                abe.show_tx_row_to_html_impl(
+                    chain, body, asset_txid_dict, binscript, script_type, data, v_json, dataref)
 
             body += ['</tr>\n']
 
@@ -1772,40 +1901,47 @@ class Abe:
                 is_coinbase = (tx_cc['tx_pos'] == 0)
             elif tx_cc['chain'].id != chain.id:
                 abe.log.warning('Transaction ' + tx['hash'] + ' in multiple chains: '
-                             + tx_cc['chain'].id + ', ' + chain.id)
+                                + tx_cc['chain'].id + ', ' + chain.id)
 
             blk_hash = tx_cc['block_hash']
 # MULTICHAIN START
             body += html_keyvalue_tablerow('Appeared in',
-                '<a href="../block/', blk_hash, '">',
-                escape(tx_cc['chain'].name), ', Block ',
-                tx_cc['block_height'] if tx_cc['in_longest'] else [blk_hash[:10], '...', blk_hash[-4:]],
-                '</a> (', format_time(tx_cc['block_nTime']), ')'
-                )
+                                           '<a href="../block/', blk_hash, '">',
+                                           escape(
+                                               tx_cc['chain'].name), ', Block ',
+                                           tx_cc['block_height'] if tx_cc['in_longest'] else [
+                                               blk_hash[:10], '...', blk_hash[-4:]],
+                                           '</a> (', format_time(
+                                               tx_cc['block_nTime']), ')'
+                                           )
 # MULTICHAIN END
 
         if chain is None:
-            abe.log.warning('Assuming default chain for Transaction ' + tx['hash'])
+            abe.log.warning(
+                'Assuming default chain for Transaction ' + tx['hash'])
             chain = abe.get_default_chain()
         chain_name = abe.store.get_multichain_name_by_id(chain.id)
         chain_url = abe.store.get_url_by_chain(chain)
 # MULTICHAIN START
         body += html_keyvalue_tablerow('Number of inputs', len(tx['in']),
-            ' &ndash; <a href="#inputs">jump to inputs</a>')
+                                       ' &ndash; <a href="#inputs">jump to inputs</a>')
         #body += html_keyvalue_tablerow('Total in', format_satoshis(tx['value_in'], chain))
         body += html_keyvalue_tablerow('Number of outputs', len(tx['out']),
-            ' &ndash; <a href="#outputs">jump to outputs</a>')
+                                       ' &ndash; <a href="#outputs">jump to outputs</a>')
         #body += html_keyvalue_tablerow('Total out', format_satoshis(tx['value_out'], chain))
         body += html_keyvalue_tablerow('Size', tx['size'], ' bytes')
         if False:
             body += html_keyvalue_tablerow('Fee', format_satoshis(0 if is_coinbase else
-                                     (tx['value_in'] and tx['value_out'] and
-                                      tx['value_in'] - tx['value_out']), chain))
+                                                                  (tx['value_in'] and tx['value_out'] and
+                                                                   tx['value_in'] - tx['value_out']), chain))
         body += ['</table>']
         body += ['<p class="text-right">']
-        body += [' <a role="button" class="btn btn-default btn-xs" href="../rawtx/', tx['hash'], '">Bitcoin JSON</a>']
-        body += [' <a role="button" class="btn btn-default btn-xs" href="../rpctxjson/', tx['hash'], '">MultiChain JSON</a>']
-        body += [' <a role="button" class="btn btn-default btn-xs" href="../rpctxraw/', tx['hash'], '">MultiChain Hex</a>']
+        body += [' <a role="button" class="btn btn-default btn-xs" href="../rawtx/',
+                 tx['hash'], '">Bitcoin JSON</a>']
+        body += [' <a role="button" class="btn btn-default btn-xs" href="../rpctxjson/',
+                 tx['hash'], '">MultiChain JSON</a>']
+        body += [' <a role="button" class="btn btn-default btn-xs" href="../rpctxraw/',
+                 tx['hash'], '">MultiChain Hex</a>']
         body += ['</p>']
 # MULTICHAIN END
 
@@ -1815,7 +1951,7 @@ class Abe:
 
         body += ['<a name="inputs"><h3>Inputs</h3></a>\n<table class="table table-striped">\n',
                  '<tr><th>Index</th><th>Previous output</th><th>Native</th>',
-# MULTICHAIN END
+                 # MULTICHAIN END
                  '<th>From address</th>']
         if abe.store.keep_scriptsig:
             body += ['<th>ScriptSig</th>']
@@ -1824,10 +1960,10 @@ class Abe:
             row_to_html(vin, txin, 'i', 'o',
                         'Generation' if is_coinbase else 'Unknown')
         body += ['</table>\n',
-# MULTICHAIN START
+                 # MULTICHAIN START
                  '<a name="outputs"><h3>Outputs</h3></a>\n<table class="table table-striped">\n',
                  '<tr><th>Index</th><th>Redeemed at input</th><th>Native</th>',
-# MULTICHAIN END
+                 # MULTICHAIN END
                  '<th>To address</th><th>ScriptPubKey</th></tr>\n']
         for vout, txout in enumerate(tx['out']):
             row_to_html(vout, txout, 'o', 'i', 'Not yet redeemed')
@@ -1837,12 +1973,14 @@ class Abe:
 # MULTICHAIN START
     def show_mempool_tx_json(abe, page, tx):
 
-        asset_txid_dict = {}    # map: txid fragment (first 16 bytes as hex string) --> asset obj
+        # map: txid fragment (first 16 bytes as hex string) --> asset obj
+        asset_txid_dict = {}
 
         def row_to_html(v, row, this_ch, other_ch, no_link_text, tx):
             txid = row.get('txid') or tx["txid"]
             # if input tx is in the database, show the correct url
-            urlprefix = '../tx/' if abe.store.does_transaction_exist(txid) else ''
+            urlprefix = '../tx/' if abe.store.does_transaction_exist(
+                txid) else ''
             # binscript
             if this_ch is 'i':
                 binscript = binascii.unhexlify(row['scriptSig']['hex'])
@@ -1863,7 +2001,7 @@ class Abe:
             body += ['</td>']
 
             # Decode earlier as we need to use script type
-            novalidaddress=False
+            novalidaddress = False
             script_type = data = None
             if binscript is not None:
                 script_type, data = chain.parse_txout_script(binscript)
@@ -1882,7 +2020,8 @@ class Abe:
             # tx_json = util.jsonrpc(chain_name, chain_url, "getrawtransaction", txid, 1)
             # v_json = tx_json['vout'][int(vout)]
             if this_ch == 'o':
-                tx_json = util.jsonrpc(chain_name, chain_url, "getrawtransaction", txid, 1)
+                tx_json = util.jsonrpc(
+                    chain_name, chain_url, "getrawtransaction", txid, 1)
                 v_json = tx_json['vout'][int(v)]
             else:
                 v_json = None
@@ -1902,23 +2041,28 @@ class Abe:
                         pass
 
             if addressLabel is not 'None':
-                version, pubkeyhash = util.decode_address_multichain(addressLabel)
+                version, pubkeyhash = util.decode_address_multichain(
+                    addressLabel)
                 if version is chain.script_addr_vers:
                     p2sh_flag = True
-                addressLabel = '<a href="../address/' + addressLabel + '">' + addressLabel + '</a>'
+                addressLabel = '<a href="../address/' + \
+                    addressLabel + '">' + addressLabel + '</a>'
 
             body += [
                 '</td>\n',
-                '<td>', value, '</td>\n', # value is already in currency format, does not require calling format_satoshis
+                # value is already in currency format, does not require calling format_satoshis
+                '<td>', value, '</td>\n',
                 '<td>', addressLabel]
 
             if p2sh_flag is True:
                 body += ['<div><span class="label label-info">P2SH</span></div>']
-            body += [ '</td>\n']
+            body += ['</td>\n']
 
             if binscript is not None:
-                dataref = '{}/{}/txoutdata/{}/{}'.format(page['dotdot'], escape(chain.name), txid, v)
-                abe.show_tx_row_to_html_impl(chain, body, asset_txid_dict, binscript, script_type, data, v_json, dataref)
+                dataref = '{}/{}/txoutdata/{}/{}'.format(
+                    page['dotdot'], escape(chain.name), txid, v)
+                abe.show_tx_row_to_html_impl(
+                    chain, body, asset_txid_dict, binscript, script_type, data, v_json, dataref)
 
             body += ['</tr>\n']
 
@@ -1936,19 +2080,19 @@ class Abe:
 
         is_coinbase = tx.get('coinbase', None)
 
-        body += html_keyvalue_tablerow('Appeared in', escape(chain.name) + ' (Mempool)')
+        body += html_keyvalue_tablerow('Appeared in',
+                                       escape(chain.name) + ' (Mempool)')
         body += html_keyvalue_tablerow('Number of inputs', len(tx['vin']),
-            ' &ndash; <a href="#inputs">jump to inputs</a>')
+                                       ' &ndash; <a href="#inputs">jump to inputs</a>')
         body += html_keyvalue_tablerow('Number of outputs', len(tx['vout']),
-            ' &ndash; <a href="#outputs">jump to outputs</a>')
+                                       ' &ndash; <a href="#outputs">jump to outputs</a>')
         body += html_keyvalue_tablerow('Size', len(tx['hex']), ' bytes')
         body += ['</table>']
-
 
         body += ['<a name="inputs"><h3>Inputs</h3></a>\n<table class="table table-striped">\n',
                  '<tr><th>Index</th><th>Previous output</th><th>Native</th>',
                  '<th>From address</th>']
-        #if abe.store.keep_scriptsig:
+        # if abe.store.keep_scriptsig:
         body += ['<th>ScriptSig</th>']
         body += ['</tr>\n']
         for vin, txin in enumerate(tx['vin']):
@@ -1960,7 +2104,7 @@ class Abe:
                  '<a name="outputs"><h3>Outputs</h3></a>\n<table class="table table-striped">\n',
                  '<tr><th>Index</th><th>Redeemed at input</th><th>Native</th>',
                  '<th>To address</th><th>ScriptPubKey</th></tr>\n']
-        
+
         for vout, txout in enumerate(tx['vout']):
             txout['pos'] = vout
             row_to_html(vout, txout, 'o', 'i', 'Not yet redeemed', tx)
@@ -1995,27 +2139,30 @@ class Abe:
             #raise MalformedAddress("Invalid address")
 
         # If the HTML link for this handler gets only created for MultiChain networks, we don't need to check class.
-        #if chain.__class__.__name__ is "MultiChain":
+        # if chain.__class__.__name__ is "MultiChain":
         body += ['<h3>Permissions</h3>']
         try:
-            resp = util.jsonrpc(multichain_name, url, "listpermissions", "all", address)
-            if len(resp) > 0 :
+            resp = util.jsonrpc(multichain_name, url,
+                                "listpermissions", "all", address)
+            if len(resp) > 0:
                 body += ['<ul>']
                 for permission in resp:
                     name = permission['type'].capitalize()
                     start = permission['startblock']
                     end = permission['endblock']
                     range = ""
-                    if not (start==0 and end==4294967295):
+                    if not (start == 0 and end == 4294967295):
                         range = " (blocks {0} - {1} only)".format(start, end)
                     body += ['<li>', name, range, '</li>']
                 body += ['</ul>']
         except util.JsonrpcException as e:
-            msg= "Failed to get permissions for address: JSON-RPC error({0}): {1}".format(e.code, e.message)
-            body += ['<div class="alert alert-danger" role="warning">', msg ,'</div>']
+            msg = "Failed to get permissions for address: JSON-RPC error({0}): {1}".format(
+                e.code, e.message)
+            body += ['<div class="alert alert-danger" role="warning">', msg, '</div>']
             return
         except IOError as e:
-            msg= "Failed to get permissions for address: I/O error({0}): {1}".format(e.errno, e.strerror)
+            msg = "Failed to get permissions for address: I/O error({0}): {1}".format(
+                e.errno, e.strerror)
             body += ['<div class="alert alert-danger" role="alert">', msg, '</div>']
             return
 
@@ -2023,7 +2170,8 @@ class Abe:
         if abe.get_blockchainparams(chain).get('initial-block-reward', 0) > 0:
             body += ['<h3>Native Balance</h3>']
             try:
-                resp = util.jsonrpc(multichain_name, url, "getaddressbalances", address)
+                resp = util.jsonrpc(multichain_name, url,
+                                    "getaddressbalances", address)
                 if len(resp) is 0:
                     body += ['None']
                 else:
@@ -2033,18 +2181,21 @@ class Abe:
                             body += ['<li>', str(balance['qty']), '</li>']
                     body += ['</ul>']
             except util.JsonrpcException as e:
-                msg= "Failed to get balance for address: JSON-RPC error({0}): {1}".format(e.code, e.message)
+                msg = "Failed to get balance for address: JSON-RPC error({0}): {1}".format(
+                    e.code, e.message)
                 body += ['<div class="alert alert-danger" role="warning">', msg, '</div>']
                 return
             except IOError as e:
-                msg= "Failed to get balance for address: I/O error({0}): {1}".format(e.errno, e.strerror)
-                body += ['<div class="alert alert-danger" role="alert">', msg, '</div>']
+                msg = "Failed to get balance for address: I/O error({0}): {1}".format(
+                    e.errno, e.strerror)
+                body += ['<div class="alert alert-danger" role="alert">',
+                         msg, '</div>']
                 return
 
         body += ['<h3>Asset Balances</h3>']
         try:
             row = abe.store.selectrow("""select pubkey_id from pubkey where pubkey_hash = ?""",
-                                      (abe.store.binin(pubkeyhash),) )
+                                      (abe.store.binin(pubkeyhash),))
             assets_resp = abe.store.get_assets(chain)
             if len(assets_resp) is 0:
                 body += ['None']
@@ -2065,49 +2216,56 @@ class Abe:
                 assetdict = {}
                 for asset in assets_resp:
                     # use escaped form as dict key
-                    name = asset.get('name','').encode('unicode-escape')
+                    name = asset.get('name', '').encode('unicode-escape')
                     assetdict[name] = asset
 
                 for row in abe.store.selectall("""
                     select a.name, a.prefix, b.balance from asset_address_balance b join asset a on (a.asset_id=b.asset_id)
                     where b.balance>0 and b.pubkey_id=?""",
-                                       (pubkey_id, )):
+                                               (pubkey_id, )):
                     name, prefix, balance = row
                     if name is None:
-                        name=''
+                        name = ''
                     name = name.encode('unicode-escape')
-                    asset = assetdict[ name ]
+                    asset = assetdict[name]
                     assetref = asset['assetref']
 
-                    num_tx = abe.store.get_number_of_transactions_for_asset_address(chain, assetref, pubkey_id)
+                    num_tx = abe.store.get_number_of_transactions_for_asset_address(
+                        chain, assetref, pubkey_id)
 
                     if assetref.endswith(str(prefix)):
-                        balance_display_qty = util.format_display_quantity(asset, balance)
+                        balance_display_qty = util.format_display_quantity(
+                            asset, balance)
                         body += ['<tr><td><a href="../../' + escape(chain.name) + '/assetref/' + assetref + '">' + name + '</a>',
-                             '</td><td><a href="../../' + escape(chain.name) + '/assetref/' + assetref + '">' + assetref + '</a>',
-                             '</td><td><a href="../../' + escape(chain.name) + '/assetaddress/' + address + '/' + assetref + '">' + str(num_tx) + '</a>',
-                             '</td><td>', balance,
-                             '</td><td>', balance_display_qty,
-                             '</td></tr>']
+                                 '</td><td><a href="../../' +
+                                 escape(chain.name) + '/assetref/' +
+                                 assetref + '">' + assetref + '</a>',
+                                 '</td><td><a href="../../' +
+                                 escape(chain.name) + '/assetaddress/' + address +
+                                 '/' + assetref + '">' + str(num_tx) + '</a>',
+                                 '</td><td>', balance,
+                                 '</td><td>', balance_display_qty,
+                                 '</td></tr>']
                 body += ['</table>']
         except Exception as e:
-            body += ['<div class="alert alert-danger" role="alert">', 'Failed to get asset information: '+str(e), '</div>']
+            body += ['<div class="alert alert-danger" role="alert">',
+                     'Failed to get asset information: '+str(e), '</div>']
             pass
 
-
     # Given an address and asset reference, show transactions for that address and asset
+
     def handle_assetaddress(abe, page):
         chain = page['chain']
 
         # shift address
         address = wsgiref.util.shift_path_info(page['env'])
-        if address in (None, ''): # or page['env']['PATH_INFO'] != '':
+        if address in (None, ''):  # or page['env']['PATH_INFO'] != '':
             raise PageNotFound()
 
         # Shift asset ref
         assetref = wsgiref.util.shift_path_info(page['env'])
         if assetref in (None, '') or page['env']['PATH_INFO'] != '':
-             raise PageNotFound()
+            raise PageNotFound()
 
         page['title'] = 'Address ' + address + ' transactions'
         body = page['body']
@@ -2120,18 +2278,19 @@ class Abe:
             resp = util.jsonrpc(multichain_name, url, "listassets", assetref)
             asset = resp[0]
         except util.JsonrpcException as e:
-            msg= "JSON-RPC error({0}): {1}".format(e.code, e.message)
+            msg = "JSON-RPC error({0}): {1}".format(e.code, e.message)
             # Example error: JSON-RPC error(-8): Asset with this reference not found: 5-264-60087
-            body += ['<div class="alert alert-danger" role="warning">', msg ,'</div>']
+            body += ['<div class="alert alert-danger" role="warning">', msg, '</div>']
             return
         except IOError as e:
-            body += ['<div class="alert alert-danger" role="warning">', e ,'</div>']
+            body += ['<div class="alert alert-danger" role="warning">', e, '</div>']
             return
 
-        name = asset.get('name','').encode('unicode-escape')
+        name = asset.get('name', '').encode('unicode-escape')
         body += ['<h3>' + name.capitalize() + ' (' + assetref + ')</h3>']
 
-        transactions = abe.store.get_transactions_for_asset_address(chain, assetref, address)
+        transactions = abe.store.get_transactions_for_asset_address(
+            chain, assetref, address)
         if transactions is None:
             body += ['No transactions']
             return
@@ -2141,26 +2300,26 @@ class Abe:
                  # '<th>Net Change</th>'
                  '</tr>\n']
 
-
         # local method to get raw units for a given asset from a txin or txout,
+
         def get_asset_amount_from_txinout(tx, this_ch, other_ch, asset, chain):
             binaddr = tx['binaddr']
             if binaddr is None:
                 return 0
             checksum = chain.address_checksum
-            vers = tx['address_version'] # chain.script_addr_ver
+            vers = tx['address_version']  # chain.script_addr_ver
             if checksum is None:
                 addr = util.hash_to_address(vers, binaddr)
             else:
                 addr = util.hash_to_address_multichain(vers, binaddr, checksum)
-            matchaddress = (addr==address)
+            matchaddress = (addr == address)
 
             binscript = tx['binscript']
             if binscript is None:
                 return 0
 
             # for input, we want to examine the txout it represents
-            if this_ch=='i':
+            if this_ch == 'i':
                 binscript = tx['multichain_scriptPubKey']
 
             script_type, data = chain.parse_txout_script(binscript)
@@ -2172,11 +2331,11 @@ class Abe:
             if data is None:
                 return 0
             opdrop_type, val = util.parse_op_drop_data(data, chain)
-            if opdrop_type==util.OP_DROP_TYPE_ISSUE_ASSET:
-                if matchaddress: # and this_ch=='o':
+            if opdrop_type == util.OP_DROP_TYPE_ISSUE_ASSET:
+                if matchaddress:  # and this_ch=='o':
                     return val
                 return 0
-            elif opdrop_type==util.OP_DROP_TYPE_SEND_ASSET or opdrop_type==util.OP_DROP_TYPE_ISSUE_MORE_ASSET:
+            elif opdrop_type == util.OP_DROP_TYPE_SEND_ASSET or opdrop_type == util.OP_DROP_TYPE_ISSUE_MORE_ASSET:
                 for dict in val:
                     quantity = dict['quantity']
                     assetref = dict['assetref']
@@ -2188,7 +2347,7 @@ class Abe:
         for tx in transactions:
             tx_hash = tx['hash']
             try:
-                t = abe.store.export_tx(tx_hash = tx_hash, format = 'browser')
+                t = abe.store.export_tx(tx_hash=tx_hash, format='browser')
             except DataStore.MalformedHash:
                 continue
             if t is None:
@@ -2196,11 +2355,13 @@ class Abe:
 
             out_amount = 0
             for txobj in t['out']:
-                qty = get_asset_amount_from_txinout(txobj, 'o', 'i', asset, chain)
+                qty = get_asset_amount_from_txinout(
+                    txobj, 'o', 'i', asset, chain)
                 out_amount = out_amount + qty
             in_amount = 0
             for txobj in t['in']:
-                qty = get_asset_amount_from_txinout(txobj, 'i', 'o', asset, chain)
+                qty = get_asset_amount_from_txinout(
+                    txobj, 'i', 'o', asset, chain)
                 in_amount = in_amount + qty
 
             # net_amount = out_amount - in_amount
@@ -2214,14 +2375,15 @@ class Abe:
 
             # contextclass='class="' + context + '"'
             body += ['<tr><td><a href="../../../' + escape(chain.name) + '/tx/' + tx['hash'] + '">', tx['hash'], '</a>',    # shorten via tx['hash'][:16]
-                     '</td><td><a href="../../../' + escape(chain.name) + '/block/', tx['blockhash'], '">', tx['height'], '</a>',
+                     '</td><td><a href="../../../' + \
+                     escape(chain.name) + \
+                     '/block/', tx['blockhash'], '">', tx['height'], '</a>',
                      # '</td><td ' + contextclass + '>', net_amount_label,
                      '</td></tr>']
         body += ['</table>']
 
-
-
     # Given an asset reference, display info about asset.
+
     def handle_assetref(abe, page):
         chain = page['chain']
 
@@ -2243,22 +2405,25 @@ class Abe:
 
         # get asset information and issue tx as json
         try:
-            resp = util.jsonrpc(multichain_name, url, "listassets", assetref, True) # verbose to get 'issues' field
+            # verbose to get 'issues' field
+            resp = util.jsonrpc(multichain_name, url,
+                                "listassets", assetref, True)
             asset = resp[0]
             issuetxid = asset['issuetxid']
-            resp = util.jsonrpc(multichain_name, url, "getrawtransaction", issuetxid, 1)
+            resp = util.jsonrpc(multichain_name, url,
+                                "getrawtransaction", issuetxid, 1)
             issuetx = resp
         except util.JsonrpcException as e:
-            msg= "JSON-RPC error({0}): {1}".format(e.code, e.message)
-            body += ['<div class="alert alert-danger" role="warning">', msg ,'</div>']
+            msg = "JSON-RPC error({0}): {1}".format(e.code, e.message)
+            body += ['<div class="alert alert-danger" role="warning">', msg, '</div>']
             return
         except IOError as e:
-            body += ['<div class="alert alert-danger" role="warning">', e ,'</div>']
+            body += ['<div class="alert alert-danger" role="warning">', e, '</div>']
             return
 
         blocktime = issuetx['blocktime']
         blockhash = issuetx['blockhash']
-        name = issuetx['vout'][0]['assets'][0].get('name','')
+        name = issuetx['vout'][0]['assets'][0].get('name', '')
         address_to = issuetx['vout'][0]['scriptPubKey']['addresses'][0]
         address_from = asset['issues'][0]['issuers'][0]
         native_amount = issuetx['vout'][0]['value']
@@ -2268,37 +2433,48 @@ class Abe:
         raw_units = asset['issueraw']
         display_qty = util.format_display_quantity(asset, raw_units)
 
-
-        name = name.encode('unicode-escape') # escaped text will at the final stage be encoded to 'latin-1' i.e. 0-255 bytes.
+        # escaped text will at the final stage be encoded to 'latin-1' i.e. 0-255 bytes.
+        name = name.encode('unicode-escape')
         body += ['<h3>Asset Summary "' + name + '"</h3>\n']
         body += ['<table class="table table-bordered table-condensed">']
 
         if height:
-            body += html_keyvalue_tablerow('Issue Block Height', '<a href="../../' + escape(chain.name) + '/block/', blockhash, '">', height, '</a>')
+            body += html_keyvalue_tablerow('Issue Block Height', '<a href="../../' + escape(
+                chain.name) + '/block/', blockhash, '">', height, '</a>')
 #                                                                                                                '' b['height'] if b['height'] is not None else '')
-        body += html_keyvalue_tablerow('Issue Block Time', blocktime , ' (' , format_time(blocktime) , ')')
-        body += html_keyvalue_tablerow('Issue TXID', '<a href="../../' + escape(chain.name) + '/tx/' + issuetxid + '">', issuetxid, '</a>')
-        body += html_keyvalue_tablerow('Asset Reference', '<a href="../../' + escape(chain.name) + '/assetref/' + assetref + '">' + assetref + '</a>')
-        body += html_keyvalue_tablerow('Name', '<a href="../../' + escape(chain.name) + '/assetref/' + assetref + '">' + name + '</a>')
+        body += html_keyvalue_tablerow('Issue Block Time',
+                                       blocktime, ' (', format_time(blocktime), ')')
+        body += html_keyvalue_tablerow('Issue TXID', '<a href="../../' + escape(
+            chain.name) + '/tx/' + issuetxid + '">', issuetxid, '</a>')
+        body += html_keyvalue_tablerow('Asset Reference', '<a href="../../' + escape(
+            chain.name) + '/assetref/' + assetref + '">' + assetref + '</a>')
+        body += html_keyvalue_tablerow('Name', '<a href="../../' + escape(
+            chain.name) + '/assetref/' + assetref + '">' + name + '</a>')
         holders = abe.store.get_number_of_asset_holders(chain, assetref)
-        body += html_keyvalue_tablerow('Addresses holding units', holders, ' &ndash; <a href="#holders">jump to holders</a>')
-        if num_issues>0:
-            body += html_keyvalue_tablerow('Asset Issues', num_issues, ' &ndash; <a href="#issues">jump to issues</a>')
+        body += html_keyvalue_tablerow('Addresses holding units',
+                                       holders, ' &ndash; <a href="#holders">jump to holders</a>')
+        if num_issues > 0:
+            body += html_keyvalue_tablerow('Asset Issues', num_issues,
+                                           ' &ndash; <a href="#issues">jump to issues</a>')
         body += html_keyvalue_tablerow('Raw units issued', raw_units)
         body += html_keyvalue_tablerow('Display quantity', display_qty)
-        body += html_keyvalue_tablerow('Native amount sent', format_satoshis(native_amount, chain))
-        body += html_keyvalue_tablerow('Issuer Address', '<a href="../../' + escape(chain.name) + '/address/' + address_from + '">', address_from, '</a>')
-        body += html_keyvalue_tablerow('Issue Recipient Address ', '<a href="../../' + escape(chain.name) + '/address/' + address_to + '">', address_to, '</a>')
+        body += html_keyvalue_tablerow('Native amount sent',
+                                       format_satoshis(native_amount, chain))
+        body += html_keyvalue_tablerow('Issuer Address', '<a href="../../' + escape(
+            chain.name) + '/address/' + address_from + '">', address_from, '</a>')
+        body += html_keyvalue_tablerow('Issue Recipient Address ', '<a href="../../' + escape(
+            chain.name) + '/address/' + address_to + '">', address_to, '</a>')
         body += ['</table>']
 
         #body += ['<h3>', asset['name'], '(Asset Reference ', assetref, ')', '</h3>']
         body += ['<p class="text-right">']
         body += ['<button href="#RawJson" class="btn btn-default btn-xs" data-toggle="collapse">MultiChain JSON</button>']
-        body += ['<div id="RawJson" class="collapse"><pre>', json.dumps(resp, sort_keys=True, indent=2), '</pre></div></p>']
+        body += ['<div id="RawJson" class="collapse"><pre>',
+                 json.dumps(resp, sort_keys=True, indent=2), '</pre></div></p>']
         #body += [' <a role="button" class="btn btn-default btn-xs" href="../rawtx/', tx['hash'], '">Bitcoin JSON</a>']
 
         # Show asset issues with display amount and details
-        if num_issues>0:
+        if num_issues > 0:
             body += ['<a name="issues"><h3>Asset Issues</h3></a>']
             body += ['<table class="table table-condensed"><tr>'
                      '<th>Txid</th>'
@@ -2311,7 +2487,8 @@ class Abe:
                          '<td><a href="../../' + escape(chain.name) + '/tx/' + issue_txid + '">', issue_txid[:8], '...</a>']
 
                 issue_raw = issue['raw']
-                issue_display_qty = util.format_display_quantity(asset, issue_raw)
+                issue_display_qty = util.format_display_quantity(
+                    asset, issue_raw)
                 body += ['<td>', issue_display_qty, '</td>']
 
                 issue_details = issue.get('details', {})
@@ -2320,7 +2497,7 @@ class Abe:
                 body += ['<td>']
                 if issue_details:
                     body += ['<table class="table table-bordered table-striped table-condensed">']
-                    for k,v in sorted(issue_details.items()):
+                    for k, v in sorted(issue_details.items()):
                         if isinstance(v, bytes):
                             try:
                                 v.decode('ascii')
@@ -2342,7 +2519,7 @@ class Abe:
                  '</tr>\n']
         holders = abe.store.get_asset_holders(chain, assetref)
         for holder in holders:
-# MULTICHAIN START
+            # MULTICHAIN START
             pubkeyhash = holder['pubkey_hash']
             if (holder['pubkey_flags'] & DataStore.PUBKEY_FLAGS_P2SH) > 0:
                 vers = chain.script_addr_vers
@@ -2352,21 +2529,24 @@ class Abe:
             if checksum is None:
                 address = util.hash_to_address(vers, pubkeyhash)
             else:
-                address = util.hash_to_address_multichain(vers, pubkeyhash, checksum)
+                address = util.hash_to_address_multichain(
+                    vers, pubkeyhash, checksum)
 
-            amount = util.format_display_quantity(asset, float( holder['balance'] ))
+            amount = util.format_display_quantity(
+                asset, float(holder['balance']))
 # MULTICHAIN END
 
             body += ['<tr><td><a href="../../' + escape(chain.name) + '/address/' + address + '">', address, '</a>',    # shorten via tx['hash'][:16]
                      '</td><td>', amount,
-                     ' <a href="../../' + escape(chain.name) + '/assetaddress/' + address + '/' + assetref + '">(transactions)</a>',
+                     ' <a href="../../' + \
+                     escape(chain.name) + '/assetaddress/' + address + \
+                     '/' + assetref + '">(transactions)</a>',
                      '</td></tr>']
 
         body += ['</table>']
 
-
-
         # local method to get raw units for a given asset from a txin or txout,
+
         def get_asset_amount_from_txinout(tx, this_ch, other_ch, asset, chain):
             binaddr = tx['binaddr']
             if binaddr is None:
@@ -2375,7 +2555,7 @@ class Abe:
             if binscript is None:
                 return 0
             # for input, we want to examine the txout it represents
-            if this_ch=='i':
+            if this_ch == 'i':
                 binscript = tx['multichain_scriptPubKey']
             script_type, data = chain.parse_txout_script(binscript)
             if script_type not in [Chain.SCRIPT_TYPE_MULTICHAIN, Chain.SCRIPT_TYPE_MULTICHAIN_P2SH]:
@@ -2384,16 +2564,15 @@ class Abe:
             if data is None:
                 return 0
             opdrop_type, val = util.parse_op_drop_data(data, chain)
-            if opdrop_type==util.OP_DROP_TYPE_ISSUE_ASSET:
+            if opdrop_type == util.OP_DROP_TYPE_ISSUE_ASSET:
                 return val
-            elif opdrop_type==util.OP_DROP_TYPE_SEND_ASSET:
+            elif opdrop_type == util.OP_DROP_TYPE_SEND_ASSET:
                 for dict in val:
                     quantity = dict['quantity']
                     assetref = dict['assetref']
                     if assetref == asset['assetref']:
                         return quantity
             return 0
-
 
         # List any transactions for this asset
 
@@ -2410,7 +2589,7 @@ class Abe:
         for tx in transactions:
             tx_hash = tx['hash']
             try:
-                t = abe.store.export_tx(tx_hash = tx_hash, format = 'browser')
+                t = abe.store.export_tx(tx_hash=tx_hash, format='browser')
             except DataStore.MalformedHash:
                 continue
             if t is None:
@@ -2418,7 +2597,8 @@ class Abe:
 
             out_amount = 0
             for txobj in t['out']:
-                qty = get_asset_amount_from_txinout(txobj, 'o', 'i', asset, chain)
+                qty = get_asset_amount_from_txinout(
+                    txobj, 'o', 'i', asset, chain)
                 out_amount = out_amount + qty
             # in_amount = 0
             # for txobj in t['in']:
@@ -2436,15 +2616,17 @@ class Abe:
 
             # contextclass='class="' + context + '"'
             body += ['<tr><td><a href="../../' + escape(chain.name) + '/tx/' + tx['hash'] + '">', tx['hash'], '</a>',    # shorten via tx['hash'][:16]
-                     '</td><td><a href="../../' + escape(chain.name) + '/block/', tx['blockhash'], '">', tx['height'], '</a>',
+                     '</td><td><a href="../../' + \
+                     escape(chain.name) + \
+                     '/block/', tx['blockhash'], '">', tx['height'], '</a>',
                      # '</td><td>', util.format_display_quantity(asset, in_amount),
                      # '</td><td>', util.format_display_quantity(asset, out_amount),
                      # '</td><td ' + contextclass +'>', net_amount_label,
                      '</td></tr>']
         body += ['</table>']
 
-
     # Page to show the assets that exist on a chain
+
     def handle_assets(abe, page):
         chain = page['chain']
         page['content_type'] = 'text/html'
@@ -2457,15 +2639,15 @@ class Abe:
             resp = util.jsonrpc(multichain_name, url, "listassets")
             num_assets = len(resp)
         except util.JsonrpcException as e:
-            msg= "JSON-RPC error({0}): {1}".format(e.code, e.message)
-            body += ['<div class="alert alert-danger" role="warning">', msg ,'</div>']
+            msg = "JSON-RPC error({0}): {1}".format(e.code, e.message)
+            body += ['<div class="alert alert-danger" role="warning">', msg, '</div>']
             return
         except IOError as e:
-            body += ['<div class="alert alert-danger" role="warning">', e ,'</div>']
+            body += ['<div class="alert alert-danger" role="warning">', e, '</div>']
             return
 
         if num_assets is 0:
-            body += [ "No assets issued"]
+            body += ["No assets issued"]
             return
 
         body += ['<h3>Assets</h3>']
@@ -2484,18 +2666,27 @@ class Abe:
                 continue
             #details = ', '.join("{}={}".format(k,v) for (k,v) in asset['details'].iteritems())
             issueqty = util.format_display_quantity(asset, asset['issueraw'])
-            holders = abe.store.get_number_of_asset_holders(chain, asset['assetref'])
-            numtxs = abe.store.get_number_of_transactions_for_asset(chain, asset['assetref'])
+            holders = abe.store.get_number_of_asset_holders(
+                chain, asset['assetref'])
+            numtxs = abe.store.get_number_of_transactions_for_asset(
+                chain, asset['assetref'])
             s = "{0:17f}".format(asset['units'])
             units = s.rstrip('0').rstrip('.') if '.' in s else s
             # handle anonymous assets
-            assetname = asset.get('name','')
+            assetname = asset.get('name', '')
             body += ['<tr><td><a href="../../' + escape(chain.name) + '/assetref/' + asset['assetref'] + '">' + assetname.encode('unicode-escape') + '</a>',
-                     '</td><td><a href="../../' + escape(chain.name) + '/assetref/' + asset['assetref'] + '">' + asset['assetref'] + '</a>',
-                     '</td><td><a href="../../' + escape(chain.name) + '/tx/' + asset['issuetxid'] + '">',
+                     '</td><td><a href="../../' +
+                     escape(chain.name) + '/assetref/' +
+                     asset['assetref'] + '">' + asset['assetref'] + '</a>',
+                     '</td><td><a href="../../' +
+                     escape(chain.name) + '/tx/' + asset['issuetxid'] + '">',
                      asset['issuetxid'][:20], '...</a>',
-                     '</td><td><a href="../../' + escape(chain.name) + '/assetref/' + asset['assetref'] + '#holders">', holders, '</a>',
-                     '</td><td><a href="../../' + escape(chain.name) + '/assetref/' + asset['assetref'] + '#transactions">', numtxs, '</a>',
+                     '</td><td><a href="../../' +
+                     escape(chain.name) + '/assetref/' +
+                     asset['assetref'] + '#holders">', holders, '</a>',
+                     '</td><td><a href="../../' +
+                     escape(chain.name) + '/assetref/' +
+                     asset['assetref'] + '#transactions">', numtxs, '</a>',
                      '</td><td>', issueqty,
                      '</td><td>', units,
                      '</td></tr>']
@@ -2519,9 +2710,12 @@ class Abe:
             issueqty = util.format_display_quantity(asset, asset['issueqty'])
             s = "{0:17f}".format(asset['units'])
             units = s.rstrip('0').rstrip('.') if '.' in s else s
-            body += ['<tr><td>' + asset.get('name','').encode('unicode-escape'),
+            body += ['<tr><td>' + asset.get('name', '').encode('unicode-escape'),
                      '</td><td>', '-',
-                     '</td><td><a href="../../' + escape(chain.name) + '/mempooltx/' + asset['issuetxid'] + '">', asset['issuetxid'][:16], '...</a>',
+                     '</td><td><a href="../../' +
+                     escape(chain.name) + '/mempooltx/' +
+                     asset['issuetxid'] +
+                     '">', asset['issuetxid'][:16], '...</a>',
                      '</td><td>', '-',
                      '</td><td>', '-',
                      '</td><td>', issueqty,
@@ -2529,8 +2723,8 @@ class Abe:
                      '</td></tr>']
         body += ['</table>']
 
-
     # Page to show the streams that exist on a chain
+
     def handle_streams(abe, page):
         chain = page['chain']
 
@@ -2544,15 +2738,15 @@ class Abe:
             resp = abe.store.list_streams(chain)
             num_streams = len(resp)
         except util.JsonrpcException as e:
-            msg= "JSON-RPC error({0}): {1}".format(e.code, e.message)
-            body += ['<div class="alert alert-danger" role="warning">', msg ,'</div>']
+            msg = "JSON-RPC error({0}): {1}".format(e.code, e.message)
+            body += ['<div class="alert alert-danger" role="warning">', msg, '</div>']
             return
         except IOError as e:
-            body += ['<div class="alert alert-danger" role="warning">', e ,'</div>']
+            body += ['<div class="alert alert-danger" role="warning">', e, '</div>']
             return
 
         if num_streams is 0:
-            body += [ "No streams published"]
+            body += ["No streams published"]
             return
 
         body += ['<h3>Streams</h3>']
@@ -2566,10 +2760,12 @@ class Abe:
 
         for stream in resp:
             #creators = '</br>'.join("{}".format(creator) for creator in stream['creators'])
-            streamname = stream.get('name','')
+            streamname = stream.get('name', '')
             subscribed = stream['subscribed']
             if subscribed:
-                streamitems_cell= '<a href="../../' + escape(chain.name) + '/streamitems/' + streamname + '">' + str(stream['items']) + '</a>'
+                streamitems_cell = '<a href="../../' + \
+                    escape(chain.name) + '/streamitems/' + streamname + \
+                    '">' + str(stream['items']) + '</a>'
             else:
                 streamitems_cell = 'Not subscribed'
 
@@ -2581,13 +2777,16 @@ class Abe:
             body += ['<tr><td><a href="../../' + escape(chain.name) + '/stream/' + streamname + '">' + streamname.encode('unicode-escape') + '</a>',
                      '</td><td>', streamitems_cell,
                      '</td><td>', restrict_str,
-                     '</td><td><a href="../../' + escape(chain.name) + '/address/' + stream['creators'][0] + '">', stream['creators'][0], '</a>',
-                     '</td><td><a href="../../' + escape(chain.name) + '/tx/' + stream['createtxid'] + '">',
+                     '</td><td><a href="../../' +
+                     escape(chain.name) + '/address/' +
+                     stream['creators'][0] +
+                     '">', stream['creators'][0], '</a>',
+                     '</td><td><a href="../../' +
+                     escape(chain.name) + '/tx/' + stream['createtxid'] + '">',
                      stream['createtxid'][:20], '...</a>',
                      '</td></tr>']
 
         body += ['</table>']
-
 
     def handle_stream(abe, page):
         chain = page['chain']
@@ -2606,27 +2805,31 @@ class Abe:
             publishers = abe.store.list_stream_publishers(chain, streamname)
             recentkeys = abe.store.list_stream_keys(chain, streamname)
         except util.JsonrpcException as e:
-            msg= "JSON-RPC error({0}): {1}".format(e.code, e.message)
-            body += ['<div class="alert alert-danger" role="warning">', msg ,'</div>']
+            msg = "JSON-RPC error({0}): {1}".format(e.code, e.message)
+            body += ['<div class="alert alert-danger" role="warning">', msg, '</div>']
             return
         except IOError as e:
-            body += ['<div class="alert alert-danger" role="warning">', e ,'</div>']
+            body += ['<div class="alert alert-danger" role="warning">', e, '</div>']
             return
         except Exception as e:
-            body += ['<div class="alert alert-danger" role="warning">', e ,'</div>']
+            body += ['<div class="alert alert-danger" role="warning">', e, '</div>']
             return
 
         if resp is None:
-            body += ['<div class="alert alert-danger" role="warning">', 'liststreams did not return any data for stream' ,'</div>']
+            body += ['<div class="alert alert-danger" role="warning">',
+                     'liststreams did not return any data for stream', '</div>']
             return
 
         body += ['<h3>Summary</h3>']
         body += ['<table class="table table-bordered table-striped table-condensed">']
-        for k,v in sorted(resp.items()):
+        for k, v in sorted(resp.items()):
             if k in ('confirmed', 'items'):
-                v = '<a href="../../' + escape(chain.name) + '/streamitems/' + streamname + '">' + str(v) + '</a>'
+                v = '<a href="../../' + \
+                    escape(chain.name) + '/streamitems/' + \
+                    streamname + '">' + str(v) + '</a>'
             elif k in ('createtxid'):
-                v = '<a href="../../' + escape(chain.name) + '/tx/' + v + '">' + v + '</a>'
+                v = '<a href="../../' + \
+                    escape(chain.name) + '/tx/' + v + '">' + v + '</a>'
             elif k in ('restrict'):
                 v = ','.join(key for key, val in v.items() if val)
             body += html_keyvalue_tablerow_wrap(50, 300, k, v)
@@ -2642,7 +2845,8 @@ class Abe:
        # body += ['<table class="table table-bordered table-striped table-condensed">']
         for publisher in publishers:
             address = publisher['publisher']
-            publisher_link = '<a href="' + page['dotdot'] + '/' + escape(chain.name) + '/publisheritems/' + streamname + '/' + address + '">' + address + '</a>'
+            publisher_link = '<a href="' + page['dotdot'] + '/' + escape(
+                chain.name) + '/publisheritems/' + streamname + '/' + address + '">' + address + '</a>'
             body += ['<tr><td>', publisher_link,
                      '</td><td>', str(publisher['items']),
                      '</td></tr>']
@@ -2657,17 +2861,18 @@ class Abe:
 
         for obj in recentkeys:
             keylink = '<a href="' + page['dotdot'] + '/' + escape(chain.name)
-            keylink += '/keyitems/' + streamname + '/' + obj['key'] + '">' + obj['key'] + '</a>'
+            keylink += '/keyitems/' + streamname + '/' + \
+                obj['key'] + '">' + obj['key'] + '</a>'
             body += ['<tr><td>', keylink,
                      '</td><td>', str(obj['items']),
                      '</td></tr>']
         body += ['</table>']
 
-
     # Handle URL: base/chain/publisheritems/streamname/publisher
+
     def handle_publisheritems(abe, page):
         streamname = wsgiref.util.shift_path_info(page['env'])
-        if streamname in (None, ''): # or page['env']['PATH_INFO'] != '':
+        if streamname in (None, ''):  # or page['env']['PATH_INFO'] != '':
             raise PageNotFound()
         publisher = wsgiref.util.shift_path_info(page['env'])
         if publisher in (None, '') or page['env']['PATH_INFO'] != '':
@@ -2683,19 +2888,19 @@ class Abe:
 
     def handle_keyitems(abe, page):
         streamname = wsgiref.util.shift_path_info(page['env'])
-        if streamname in (None, ''): # or page['env']['PATH_INFO'] != '':
+        if streamname in (None, ''):  # or page['env']['PATH_INFO'] != '':
             raise PageNotFound()
         key = wsgiref.util.shift_path_info(page['env'])
         if key in (None, '') or page['env']['PATH_INFO'] != '':
             raise PageNotFound()
         abe.do_streamitems(page, streamname, None, key)
 
-
-    def do_streamitems(abe, page, streamname, publisher = None, streamkey = None):
+    def do_streamitems(abe, page, streamname, publisher=None, streamkey=None):
         chain = page['chain']
 
         page['title'] = 'Stream Items'
-        page['h1'] = 'Stream: <a href="' + page['dotdot'] + '/' + escape(chain.name) + '/streams/">' + streamname + '</a>'
+        page['h1'] = 'Stream: <a href="' + page['dotdot'] + '/' + \
+            escape(chain.name) + '/streams/">' + streamname + '</a>'
         body = page['body']
 
         # url = abe.store.get_url_by_chain(chain)
@@ -2708,28 +2913,30 @@ class Abe:
         try:
             resp = abe.store.list_stream(chain, streamname)
             if publisher is not None:
-                resp2 = abe.store.list_stream_publishers(chain, streamname, publisher)
+                resp2 = abe.store.list_stream_publishers(
+                    chain, streamname, publisher)
                 num_publisher_items = resp2[0]['items']
             if streamkey is not None:
-                resp3 = abe.store.list_stream_keys(chain, streamname, streamkey)
+                resp3 = abe.store.list_stream_keys(
+                    chain, streamname, streamkey)
                 num_filterkey_items = resp3[0]['items']
                 if num_filterkey_items == 0:
                     msg = "Stream has no items for key '{0}'".format(streamkey)
-                    body += ['<div class="alert alert-danger" role="warning">', msg ,'</div>']
+                    body += ['<div class="alert alert-danger" role="warning">', msg, '</div>']
                     return
         except util.JsonrpcException as e:
-            msg= "JSON-RPC error({0}): {1}".format(e.code, e.message)
-            body += ['<div class="alert alert-danger" role="warning">', msg ,'</div>']
+            msg = "JSON-RPC error({0}): {1}".format(e.code, e.message)
+            body += ['<div class="alert alert-danger" role="warning">', msg, '</div>']
             return
         except IOError as e:
-            body += ['<div class="alert alert-danger" role="warning">', e ,'</div>']
+            body += ['<div class="alert alert-danger" role="warning">', e, '</div>']
             return
 
         mystream = resp
 
         if mystream is None:
             msg = "Stream '{0}' does not exist".format(streamname)
-            body += ['<div class="alert alert-danger" role="warning">', msg ,'</div>']
+            body += ['<div class="alert alert-danger" role="warning">', msg, '</div>']
             return
 
         if publisher is not None:
@@ -2739,14 +2946,12 @@ class Abe:
         else:
             num_items = mystream['items']
 
-
         if hi is None:
             hi = num_items
 
         # check to make sure hi is not too high
         if hi > num_items:
             hi = num_items
-
 
         if publisher is not None:
             body += ['<h3>Items Published By: ' + publisher + '</h3>']
@@ -2755,17 +2960,19 @@ class Abe:
         else:
             body += ['<h3>Stream Items</h3>']
 
-
         createtxid = mystream['createtxid']
         try:
             if publisher is not None:
-                streamitems = abe.store.list_stream_publisher_items(chain, createtxid, publisher, count, max( hi - count, 0) )
+                streamitems = abe.store.list_stream_publisher_items(
+                    chain, createtxid, publisher, count, max(hi - count, 0))
             elif streamkey is not None:
-                streamitems = abe.store.list_stream_key_items(chain, createtxid, streamkey, count, max(hi - count, 0))
+                streamitems = abe.store.list_stream_key_items(
+                    chain, createtxid, streamkey, count, max(hi - count, 0))
             else:
-                streamitems = abe.store.list_stream_items(chain, createtxid, count, max( hi - count, 0) ) # 0 if remainder is less than count
+                streamitems = abe.store.list_stream_items(chain, createtxid, count, max(
+                    hi - count, 0))  # 0 if remainder is less than count
         except Exception as e:
-            body += ['<div class="alert alert-danger" role="warning">', e ,'</div>']
+            body += ['<div class="alert alert-danger" role="warning">', e, '</div>']
             return
 
         # timestamp, publisher key, data (link to raw data), txid,
@@ -2775,15 +2982,15 @@ class Abe:
         nav = ['<a href="',
                basename, '?count=', str(count), '">&lt;&lt;</a>']
         nav += [' <a href="', basename, '?hi=', str(hi + count),
-                 '&amp;count=', str(count), '">&lt;</a>']
+                '&amp;count=', str(count), '">&lt;</a>']
         nav += [' ', '&gt;']
         if hi >= count:
             nav[-1] = ['<a href="', basename, '?hi=', str(hi - count),
-                        '&amp;count=', str(count), '">', nav[-1], '</a>']
+                       '&amp;count=', str(count), '">', nav[-1], '</a>']
         nav += [' ', '&gt;&gt;']
         if hi != count - 1:
             nav[-1] = ['<a href="', basename, '?hi=', str(count - 1),
-                        '&amp;count=', str(count), '">', nav[-1], '</a>']
+                       '&amp;count=', str(count), '">', nav[-1], '</a>']
         for c in (20, 50, 100, 500):
             nav += [' ']
             if c != count:
@@ -2808,18 +3015,20 @@ class Abe:
                  '</tr>\n']
 
         # sort streamitems in descending order, so most recent timestamp is at top of page
-        sorted_streamitems = sorted(streamitems, key=lambda item: item['time'], reverse=True)
-
+        sorted_streamitems = sorted(
+            streamitems, key=lambda item: item['time'], reverse=True)
 
         for item in sorted_streamitems:
 
-            if len(item['publishers'])==1:
+            if len(item['publishers']) == 1:
                 publisher = item['publishers'][0]
-                publisher_address = '<a href="' + page['dotdot'] + '/' + escape(chain.name) + '/publisheritems/' + streamname + '/' + publisher + '">' + publisher + '</a>'
+                publisher_address = '<a href="' + page['dotdot'] + '/' + escape(
+                    chain.name) + '/publisheritems/' + streamname + '/' + publisher + '">' + publisher + '</a>'
             else:
                 publisher_address = ''
                 for publisher in item['publishers']:
-                    publisher_link = '<a href="' + page['dotdot'] + '/' + escape(chain.name) + '/publisheritems/' + streamname + '/' + publisher + '">' + publisher + '</a>'
+                    publisher_link = '<a href="' + page['dotdot'] + '/' + escape(
+                        chain.name) + '/publisheritems/' + streamname + '/' + publisher + '">' + publisher + '</a>'
                     publisher_address += '{0}<br/>'.format(publisher_link)
 
             # A runtime paramater -maxshowndata=20 determines if the node returns data in json output or not.
@@ -2866,14 +3075,16 @@ class Abe:
                         mydata += '... '
                     printdata = True
 
-            data_ref = '{}/{}/txoutdata/{}/{}'.format(page['dotdot'], escape(chain.name), txid, vout)
-            sizelink ='<a href="' + data_ref + '">' + str(size) + ' bytes</a>'
+            data_ref = '{}/{}/txoutdata/{}/{}'.format(
+                page['dotdot'], escape(chain.name), txid, vout)
+            sizelink = '<a href="' + data_ref + '">' + str(size) + ' bytes</a>'
 
             if printdata:
                 data_html = util.render_long_data_with_popover(mydata)
                 # data_html = mydata
             else:
-                data_html = util.render_long_data_with_link(mydata, data_ref, limit=20)
+                data_html = util.render_long_data_with_link(
+                    mydata, data_ref, limit=20)
                 # data_html = ['<em>', mydata, '</em>']
 
             blocktime = int(item.get('blocktime', -1))
@@ -2890,8 +3101,10 @@ class Abe:
                 keys = item['keys']
 
             # Create a list of key links
-            prefix = '{}/{}/keyitems/{}'.format(page['dotdot'], escape(chain.name), streamname)
-            keylinks = ['<a href="{0}/{1}">{1}</a>'.format(prefix, key) for key in keys]
+            prefix = '{}/{}/keyitems/{}'.format(
+                page['dotdot'], escape(chain.name), streamname)
+            keylinks = [
+                '<a href="{0}/{1}">{1}</a>'.format(prefix, key) for key in keys]
             keyshtml = ', '.join(keylinks)
             # If list is too long, display only first few keys, and enable a popover with the full list
             key_limit = 5
@@ -2906,11 +3119,13 @@ class Abe:
                 '</td><td>', data_html,
                 # '</td><td>', sizelink,
                 '</td><td>', publisher_address,
-                '</td><td>', '<a href="' + page['dotdot'] + '/' + escape(chain.name) + '/tx/' + txid + '">', txid[0:10], '...</a>',
+                '</td><td>', '<a href="' + \
+                page['dotdot'] + '/' + \
+                escape(chain.name) + '/tx/' + txid + \
+                '">', txid[0:10], '...</a>',
                 '</td></tr>\n']
 
         body += ['</table>\n<p>', nav, '</p>\n']
-
 
     def handle_txoutdata(abe, page):
         abe.do_rpc(page, abe.do_rpc_txoutdata)
@@ -2920,13 +3135,13 @@ class Abe:
 
         # Shift txid
         txid = wsgiref.util.shift_path_info(page['env'])
-        if txid in (None, ''): # or page['env']['PATH_INFO'] != '':
+        if txid in (None, ''):  # or page['env']['PATH_INFO'] != '':
             raise PageNotFound()
 
         # Shift vout
         vout = wsgiref.util.shift_path_info(page['env'])
         if vout in (None, '') or page['env']['PATH_INFO'] != '':
-             raise PageNotFound()
+            raise PageNotFound()
 
         page['title'] = 'Data for ' + txid + ' vout ' + vout
         body = page['body']
@@ -2935,15 +3150,16 @@ class Abe:
         url = abe.store.get_url_by_chain(chain)
 
         try:
-            resp = util.jsonrpc(chain_name, url, "gettxoutdata", txid, int(vout))
+            resp = util.jsonrpc(
+                chain_name, url, "gettxoutdata", txid, int(vout))
         except util.JsonrpcException as e:
-            msg= "JSON-RPC error({0}): {1}".format(e.code, e.message)
-            #if e.code != -5:  # -5: transaction not in index.
+            msg = "JSON-RPC error({0}): {1}".format(e.code, e.message)
+            # if e.code != -5:  # -5: transaction not in index.
             s = '<div class="alert alert-danger" role="warning">' + msg + '</div>'
             page['content_type'] = 'text/html'
             return s
         except IOError as e:
-            msg= "I/O error({0}): {1}".format(e.errno, e.strerror)
+            msg = "I/O error({0}): {1}".format(e.errno, e.strerror)
             s = '<div class="alert alert-danger" role="alert">' + msg + '</div>'
             page['title'] = 'IO ERROR'
             page['content_type'] = 'text/html'
@@ -2956,8 +3172,8 @@ class Abe:
 
         return s
 
-
     # Experimental handler for getting json and raw hex data from RPC calls
+
     def do_rpc(abe, page, func):
         page['content_type'] = 'text/plain; charset="UTF-8"'
 
@@ -2967,7 +3183,7 @@ class Abe:
         page['body'] = func(page, page['chain'])
 
     def handle_rpctxjson(abe, page):
-        page['decode_json']=True
+        page['decode_json'] = True
         abe.do_rpc(page, abe.do_rpc_tx)
 
     def handle_rpctxraw(abe, page):
@@ -2994,7 +3210,7 @@ class Abe:
                 is_coinbase = (tx_cc['tx_pos'] == 0)
             elif tx_cc['chain'].id != chain.id:
                 abe.log.warning('Transaction ' + tx['hash'] + ' in multiple chains: '
-                             + tx_cc['chain'].id + ', ' + chain.id)
+                                + tx_cc['chain'].id + ', ' + chain.id)
 
         chain_name = abe.store.get_multichain_name_by_id(chain.id)
         url = abe.store.get_url_by_chain(chain)
@@ -3009,15 +3225,16 @@ class Abe:
         # s += "\nurl = %s" % url
 
         try:
-            resp = util.jsonrpc(chain_name, url, "getrawtransaction", tx_hash, decode_json_flag)
+            resp = util.jsonrpc(
+                chain_name, url, "getrawtransaction", tx_hash, decode_json_flag)
         except util.JsonrpcException as e:
-            msg= "JSON-RPC error({0}): {1}".format(e.code, e.message)
-            #if e.code != -5:  # -5: transaction not in index.
+            msg = "JSON-RPC error({0}): {1}".format(e.code, e.message)
+            # if e.code != -5:  # -5: transaction not in index.
             s = '<div class="alert alert-danger" role="warning">' + msg + '</div>'
             page['content_type'] = 'text/html'
             return s
         except IOError as e:
-            msg= "I/O error({0}): {1}".format(e.errno, e.strerror)
+            msg = "I/O error({0}): {1}".format(e.errno, e.strerror)
             s = '<div class="alert alert-danger" role="alert">' + msg + '</div>'
             page['title'] = 'IO ERROR'
             page['content_type'] = 'text/html'
@@ -3046,21 +3263,22 @@ class Abe:
         chain_name = abe.store.get_multichain_name_by_id(chain.id)
         url = abe.store.get_url_by_chain(chain)
 
-        s=""
+        s = ""
         try:
-            resp = util.jsonrpc(chain_name, url, "getrawtransaction", tx_hash, 1)
+            resp = util.jsonrpc(
+                chain_name, url, "getrawtransaction", tx_hash, 1)
         except util.JsonrpcException as e:
-            msg= "JSON-RPC error({0}): {1}".format(e.code, e.message)
-            #if e.code != -5:  # -5: transaction not in index.
+            msg = "JSON-RPC error({0}): {1}".format(e.code, e.message)
+            # if e.code != -5:  # -5: transaction not in index.
             body += '<div class="alert alert-danger" role="warning">' + msg + '</div>'
             return s
         except IOError as e:
-            msg= "I/O error({0}): {1}".format(e.errno, e.strerror)
+            msg = "I/O error({0}): {1}".format(e.errno, e.strerror)
             body += '<div class="alert alert-danger" role="alert">' + msg + '</div>'
             return s
 
         return abe.show_mempool_tx_json(page, resp)
-        
+
 # MULTICHAIN END
 
     def do_rawtx(abe, page, chain):
@@ -3095,14 +3313,14 @@ class Abe:
                      " to display.</p>"]
             return
 
-        binaddr  = history['binaddr']
-        version  = history['version']
-        chains   = history['chains']
+        binaddr = history['binaddr']
+        version = history['version']
+        chains = history['chains']
         txpoints = history['txpoints']
-        balance  = history['balance']
-        sent     = history['sent']
+        balance = history['balance']
+        sent = history['sent']
         received = history['received']
-        counts   = history['counts']
+        counts = history['counts']
 
         if (not chains):
             page['status'] = '404 Not Found'
@@ -3127,7 +3345,8 @@ class Abe:
                     if checksum is None:
                         other = util.hash_to_address(vers, binaddr)
                     else:
-                        other = util.hash_to_address_multichain(vers, binaddr, checksum)
+                        other = util.hash_to_address_multichain(
+                            vers, binaddr, checksum)
 # MULTICHAIN END
                     if other != address:
                         ret[-1] = ['<a href="', page['dotdot'],
@@ -3137,19 +3356,21 @@ class Abe:
 
         if abe.shortlink_type == "firstbits":
             link = abe.store.get_firstbits(
-                address_version=version, db_pubkey_hash=abe.store.binin(binaddr),
-                chain_id = (page['chain'] and page['chain'].id))
+                address_version=version, db_pubkey_hash=abe.store.binin(
+                    binaddr),
+                chain_id=(page['chain'] and page['chain'].id))
             if link:
                 link = link.replace('l', 'L')
             else:
                 link = address
         else:
-            link = address[0 : abe.shortlink_type]
+            link = address[0: abe.shortlink_type]
 # MULTICHAIN START
         # body += abe.short_link(page, 'a/' + link)
         body += ['<table class="table-bordered table-condensed">']
 
-        body += html_keyvalue_tablerow('Balance', format_amounts(balance, True))
+        body += html_keyvalue_tablerow('Balance',
+                                       format_amounts(balance, True))
 # MULTICHAIN END
 
         if 'subbinaddr' in history:
@@ -3165,25 +3386,27 @@ class Abe:
 # MULTICHAIN START
             tmp = []
             for subbinaddr in history['subbinaddr']:
-                tmp += [' ', hash_to_address_link(chain.address_version, subbinaddr, page['dotdot'], 10) ]
+                tmp += [' ', hash_to_address_link(
+                    chain.address_version, subbinaddr, page['dotdot'], 10)]
             body += html_keyvalue_tablerow('Escrow', tmp)
 # MULTICHAIN END
 
         for chain in chains:
             balance[chain.id] = 0  # Reset for history traversal.
 # MULTICHAIN START
-        body += html_keyvalue_tablerow('Transactions in' , counts[0])
-        body += html_keyvalue_tablerow('Received', format_amounts(received, False))
+        body += html_keyvalue_tablerow('Transactions in', counts[0])
+        body += html_keyvalue_tablerow('Received',
+                                       format_amounts(received, False))
         body += html_keyvalue_tablerow('Transactions out', counts[1])
         body += html_keyvalue_tablerow('Sent', format_amounts(sent, False))
         body += ['</table>']
 
         body += [
-                 '<h3>Transactions</h3>\n'
-                 '<table class="table table-striped">\n<tr><th>Transaction</th><th>Block</th>'
-# MULTICHAIN END
-                 '<th>Approx. Time</th><th>Amount</th><th>Balance</th>'
-                 '<th>Currency</th></tr>\n']
+            '<h3>Transactions</h3>\n'
+            '<table class="table table-striped">\n<tr><th>Transaction</th><th>Block</th>'
+            # MULTICHAIN END
+            '<th>Approx. Time</th><th>Amount</th><th>Balance</th>'
+            '<th>Currency</th></tr>\n']
 
         for elt in txpoints:
             chain = elt['chain']
@@ -3205,8 +3428,9 @@ class Abe:
                 value = format_satoshis(elt['value'], chain)
 
             if 'binaddr' in elt:
-# MULTICHAIN START
-                value = hash_to_address_link(chain.script_addr_vers, elt['binaddr'], page['dotdot'], text=value)
+                # MULTICHAIN START
+                value = hash_to_address_link(
+                    chain.script_addr_vers, elt['binaddr'], page['dotdot'], text=value)
 # MULTICHAIN END
             body += [value, '</td><td class="balance">',
                      format_satoshis(balance[chain.id], chain),
@@ -3217,12 +3441,13 @@ class Abe:
     def search_form(abe, page):
         q = (page['params'].get('q') or [''])[0]
         return [
-# MULTICHAIN START
+            # MULTICHAIN START
             '<p>Search by address, block number or hash, transaction or'
             ' chain name:</label></p>'
             '<form class="form-inline" action="', page['dotdot'], 'search"><p>\n'
             '<div class="form-group">'
-            '<input id="search1" type="text" name="q" size="64" value="', escape(q), '" style="height: 32px; margin-right: 10px;"/>'
+            '<input id="search1" type="text" name="q" size="64" value="', escape(
+                q), '" style="height: 32px; margin-right: 10px;"/>'
             '<button type="submit" class="btn" style="height: 32px; vertical-align: middle;">Search</button>\n'
             '<p class="help-block">Address or hash search requires at least the first ',
             HASH_PREFIX_MIN, ' characters.</p></div></form>\n']
@@ -3242,11 +3467,15 @@ class Abe:
             return
 
         found = []
-        if HEIGHT_RE.match(q):      found += abe.search_number(int(q))
-        if util.possible_address(q):found += abe.search_address(q)
-        elif ADDR_PREFIX_RE.match(q):found += abe.search_address_prefix(q)
+        if HEIGHT_RE.match(q):
+            found += abe.search_number(int(q))
+        if util.possible_address(q):
+            found += abe.search_address(q)
+        elif ADDR_PREFIX_RE.match(q):
+            found += abe.search_address_prefix(q)
 # MULTICHAIN START
-        if is_hash_prefix(q):       found += abe.search_hash_prefix(q, types = ('tx', 'block'))
+        if is_hash_prefix(q):
+            found += abe.search_hash_prefix(q, types=('tx', 'block'))
 # MULTICHAIN END
         found += abe.search_general(q)
         abe.show_search_results(page, found)
@@ -3269,7 +3498,8 @@ class Abe:
         if len(found) == 1:
             # Undo shift_path_info.
             sn = posixpath.dirname(page['env']['SCRIPT_NAME'])
-            if sn == '/': sn = ''
+            if sn == '/':
+                sn = ''
             page['env']['SCRIPT_NAME'] = sn
             page['env']['PATH_INFO'] = '/' + page['dotdot'] + found[0]['uri']
             del(page['env']['QUERY_STRING'])
@@ -3294,7 +3524,7 @@ class Abe:
             return {
                 'name': chain_name + ' ' + name,
                 'uri': 'block/' + hexhash,
-                }
+            }
 
         return map(process, abe.store.selectall("""
             SELECT c.chain_name, b.block_hash, cc.in_longest
@@ -3305,13 +3535,15 @@ class Abe:
              ORDER BY c.chain_name, cc.in_longest DESC
         """, (n,)))
 
-    def search_hash_prefix(abe, q, types = ('tx', 'block', 'pubkey')):
+    def search_hash_prefix(abe, q, types=('tx', 'block', 'pubkey')):
         q = q.lower()
         ret = []
         for t in types:
             def process(row):
-                if   t == 'tx':    name = 'Transaction'
-                elif t == 'block': name = 'Block'
+                if t == 'tx':
+                    name = 'Transaction'
+                elif t == 'block':
+                    name = 'Block'
                 else:
                     # XXX Use Bitcoin address version until we implement
                     # /pubkey/... for this to link to.
@@ -3321,7 +3553,7 @@ class Abe:
                 return {
                     'name': name + ' ' + hash,
                     'uri': t + '/' + hash,
-                    }
+                }
 
             if t == 'pubkey':
                 if len(q) > 40:
@@ -3340,13 +3572,13 @@ class Abe:
         return ret
 
     def _found_address(abe, address):
-# MULTICHAIN START
-        return { 'name': 'Address ' + address, 'uri': 'address/' + address }
+        # MULTICHAIN START
+        return {'name': 'Address ' + address, 'uri': 'address/' + address}
 # MULTICHAIN END
 
     def search_address(abe, address):
         try:
-# MULTICHAIN START
+            # MULTICHAIN START
             # Only search the first chain for now
             chain = abe.store.get_chain_by_id(1)
             version, binaddr = util.decode_check_address_multichain(address)
@@ -3374,12 +3606,14 @@ class Abe:
             hash = abe.store.binout(row[0])
             if hash is None:
                 return None
-            address = util.hash_to_address_multichain(address_version, hash, checksum)
+            address = util.hash_to_address_multichain(
+                address_version, hash, checksum)
             if not address.lower().startswith(ap.lower()):
                 return None
             return abe._found_address(address)
 
-        ret += filter(None, map(process, abe.store.selectall("SELECT pubkey_hash FROM pubkey" )))
+        ret += filter(None, map(process,
+                                abe.store.selectall("SELECT pubkey_hash FROM pubkey")))
         return ret
 # MULTICHAIN END
 
@@ -3393,7 +3627,7 @@ class Abe:
         all_ones = (ones == len(ap))
         minlen = max(len(ap), 24)
         l = max(35, len(ap))  # XXX Increase "35" to support multibyte
-                              # address versions.
+        # address versions.
         al = ap + ('1' * (l - len(ap)))
         ah = ap + ('z' * (l - len(ap)))
 
@@ -3450,8 +3684,8 @@ class Abe:
         Currently, this is limited to chain names and currency codes."""
         def process(row):
             (name, code3) = row
-            return { 'name': name + ' (' + code3 + ')',
-                     'uri': 'chain/' + str(name) }
+            return {'name': name + ' (' + code3 + ')',
+                    'uri': 'chain/' + str(name)}
         ret = map(process, abe.store.selectall("""
             SELECT chain_name, chain_code3
               FROM chain
@@ -3483,7 +3717,8 @@ class Abe:
                 raise PageNotFound()  # XXX want to support /a/...
 
             page['title'] = [escape(chain.name), ' ', height]
-            abe._show_block(page, page['dotdot'] + 'block/', chain, block_number=height)
+            abe._show_block(page, page['dotdot'] +
+                            'block/', chain, block_number=height)
             return
 
         abe.show_search_results(
@@ -3499,7 +3734,7 @@ class Abe:
                 abe._found_address,
                 abe.store.firstbits_to_addresses(
                     arg.lower(),
-                    chain_id = page['chain'] and page['chain'].id))
+                    chain_id=page['chain'] and page['chain'].id))
         else:
             addrs = abe.search_address_prefix(arg)
         abe.show_search_results(page, addrs)
@@ -3529,7 +3764,7 @@ class Abe:
         for address in addrs:
             try:
                 hashes.append(abe.store.binin(
-                        base58.bc_address_to_hash_160(address)))
+                    base58.bc_address_to_hash_160(address)))
                 good_addrs.append(address)
             except Exception:
                 pass
@@ -3579,7 +3814,7 @@ class Abe:
              WHERE cc.in_longest = 1""" + ("" if chain_id is None else """
                AND cc.chain_id = ?""") + """
                AND pubkey.pubkey_hash IN (""" + placeholders + """)""" + (
-                "" if max_rows < 0 else """
+            "" if max_rows < 0 else """
              ORDER BY cc.block_height,
                    block_tx.tx_pos,
                    txout.txout_pos
@@ -3607,14 +3842,14 @@ class Abe:
             value = None if value is None else int(value)
             height = None if height is None else int(height)
             out.append({
-                    'tx_hash': tx_hash,
-                    'tx_output_n': out_pos,
-                    'script': script,
-                    'value': value,
-                    'value_hex': None if value is None else "%x" % value,
-                    'block_number': height})
+                'tx_hash': tx_hash,
+                'tx_output_n': out_pos,
+                'script': script,
+                'value': value,
+                'value_hex': None if value is None else "%x" % value,
+                'block_number': height})
 
-        return json.dumps({ 'unspent_outputs': out }, sort_keys=True, indent=2)
+        return json.dumps({'unspent_outputs': out}, sort_keys=True, indent=2)
 
     def do_raw(abe, page, func):
         page['content_type'] = 'text/plain'
@@ -3634,13 +3869,15 @@ class Abe:
 
         if page['content_type'] == 'text/plain':
             jsonp = page['params'].get('jsonp', [None])[0]
-            fmt = page['params'].get('format', ["jsonp" if jsonp else "csv"])[0]
+            fmt = page['params'].get(
+                'format', ["jsonp" if jsonp else "csv"])[0]
 
             if fmt in ("json", "jsonp"):
                 page['body'] = json.dumps([page['body']])
 
                 if fmt == "jsonp":
-                    page['body'] = (jsonp or "jsonp") + "(" + page['body'] + ")"
+                    page['body'] = (jsonp or "jsonp") + \
+                        "(" + page['body'] + ")"
                     page['content_type'] = 'application/javascript'
                 else:
                     page['content_type'] = 'application/json'
@@ -3840,12 +4077,12 @@ class Abe:
                    AND ints.block_height * ? + ? = cc.block_height)
              WHERE cc.in_longest = 1
                AND cc.chain_id = ?""" + (
-                "" if stop is None else """
+            "" if stop is None else """
                AND ints.block_height <= ?""") + """
              ORDER BY cc.block_height""",
-                                   (interval, start, chain.id)
-                                   if stop is None else
-                                   (interval, start, chain.id, stop_ix))
+            (interval, start, chain.id)
+            if stop is None else
+            (interval, start, chain.id, stop_ix))
         if fmt == "csv":
             ret = NETHASH_HEADER
 
@@ -3864,19 +4101,19 @@ class Abe:
 
         for row in rows:
             height, nTime, chain_work, nBits = row
-            nTime            = float(nTime)
-            nBits            = int(nBits)
-            target           = util.calculate_target(nBits)
-            difficulty       = util.target_to_difficulty(target)
-            work             = util.target_to_work(target)
-            chain_work       = abe.store.binout_int(chain_work) - work
+            nTime = float(nTime)
+            nBits = int(nBits)
+            target = util.calculate_target(nBits)
+            difficulty = util.target_to_difficulty(target)
+            work = util.target_to_work(target)
+            chain_work = abe.store.binout_int(chain_work) - work
 
             if row is not rows[0] or fmt == "svg":
-                height           = int(height)
-                interval_work    = chain_work - prev_chain_work
-                avg_target       = util.work_to_target(
+                height = int(height)
+                interval_work = chain_work - prev_chain_work
+                avg_target = util.work_to_target(
                     interval_work / float(interval))
-                #if avg_target == target - 1:
+                # if avg_target == target - 1:
                 #    avg_target = target
                 interval_seconds = nTime - prev_nTime
                 if interval_seconds <= 0:
@@ -3891,8 +4128,8 @@ class Abe:
 
                 elif fmt in ("json", "jsonp"):
                     ret.append([
-                            height, int(nTime), target, avg_target,
-                            difficulty, work, chain_work, nethash])
+                        height, int(nTime), target, avg_target,
+                        difficulty, work, chain_work, nethash])
 
                 elif fmt == "svg":
                     ret += '<abe:nethash t="%d" d="%d"' \
@@ -4010,9 +4247,9 @@ class Abe:
 
         version, dbhash = util.decode_address(addr)
         ret = abe.store.get_firstbits(
-            address_version = version,
-            db_pubkey_hash = abe.store.binin(dbhash),
-            chain_id = (chain and chain.id))
+            address_version=version,
+            db_pubkey_hash=abe.store.binin(dbhash),
+            chain_id=(chain and chain.id))
 
         if ret is None:
             return 'ERROR: address not in the chain.'
@@ -4036,13 +4273,14 @@ class Abe:
                 '/q/addr/FIRSTBITS\n'
 
         return "\n".join(abe.store.firstbits_to_addresses(
-                fb, chain_id = (chain and chain.id)))
+            fb, chain_id=(chain and chain.id)))
 
     def handle_download(abe, page):
         name = abe.args.download_name
         if name is None:
             name = re.sub(r'\W+', '-', ABE_APPNAME.lower()) + '-' + ABE_VERSION
-        fileobj = lambda: None
+
+        def fileobj(): return None
         fileobj.func_dict['write'] = page['start_response'](
             '200 OK',
             [('Content-type', 'application/x-gtar-compressed'),
@@ -4109,18 +4347,22 @@ class Abe:
             env['PATH_INFO'] = pi
         return ret
 
+
 def find_htdocs():
     return os.path.join(os.path.split(__file__)[0], 'htdocs')
+
 
 def get_int_param(page, name):
     vals = page['params'].get(name)
     return vals and int(vals[0])
+
 
 def path_info_uint(page, default):
     ret = path_info_int(page, None)
     if ret is None or ret < 0:
         return default
     return ret
+
 
 def path_info_int(page, default):
     s = wsgiref.util.shift_path_info(page['env'])
@@ -4131,9 +4373,11 @@ def path_info_int(page, default):
     except ValueError:
         return default
 
+
 def format_time(nTime):
     import time
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(nTime)))
+
 
 def format_satoshis(satoshis, chain):
     decimals = DEFAULT_DECIMALS if chain.decimals is None else chain.decimals
@@ -4150,6 +4394,7 @@ def format_satoshis(satoshis, chain):
             ('.' + (('0' * decimals) + str(frac))[-decimals:])
             .rstrip('0').rstrip('.'))
 
+
 def format_difficulty(diff):
     idiff = int(diff)
     ret = '.%03d' % (int(round((diff - idiff) * 1000)),)
@@ -4159,8 +4404,10 @@ def format_difficulty(diff):
     return str(idiff) + ret
 
 # MULTICHAIN START
+
+
 def hash_to_address_link(version, hash, dotdot, truncate_to=None, text=None, checksum=None):
-# MULTICHAIN END
+    # MULTICHAIN END
     if hash == DataStore.NULL_PUBKEY_HASH:
         return 'Destroyed'
     if hash is None:
@@ -4180,6 +4427,8 @@ def hash_to_address_link(version, hash, dotdot, truncate_to=None, text=None, che
 # MULTICHAIN START
     return ['<a href="', dotdot, 'address/', addr, '">', visible, '</a>']
 # MULTICHAIN END
+
+
 def decode_script(script):
     if script is None:
         return ''
@@ -4188,14 +4437,17 @@ def decode_script(script):
     except KeyError as e:
         return 'Nonstandard script'
 
+
 def b58hex(b58):
     try:
         return base58.b58decode(b58, None).encode('hex_codec')
     except Exception:
         raise PageNotFound()
 
+
 def hexb58(hex):
     return base58.b58encode(hex.decode('hex_codec'))
+
 
 def block_shortlink(block_hash):
     zeroes = 0
@@ -4205,7 +4457,8 @@ def block_shortlink(block_hash):
         else:
             break
     zeroes &= ~1
-    return hexb58("%02x%s" % (zeroes / 2, block_hash[zeroes : zeroes+12]))
+    return hexb58("%02x%s" % (zeroes / 2, block_hash[zeroes: zeroes+12]))
+
 
 def shortlink_block(link):
     try:
@@ -4214,8 +4467,10 @@ def shortlink_block(link):
         raise PageNotFound()
     return ('00' * ord(data[0])) + data[1:].encode('hex_codec')
 
+
 def is_hash_prefix(s):
     return HASH_PREFIX_RE.match(s) and len(s) >= HASH_PREFIX_MIN
+
 
 def flatten(l):
     if isinstance(l, list):
@@ -4223,10 +4478,11 @@ def flatten(l):
     if l is None:
         raise Exception('NoneType in HTML conversion')
     if isinstance(l, unicode):
-# MULTICHAIN START
+        # MULTICHAIN START
         return l.decode('unicode-escape')
     return str(l).decode('unicode-escape')
 # MULTICHAIN END
+
 
 def redirect(page):
     uri = wsgiref.util.request_uri(page['env'])
@@ -4238,6 +4494,7 @@ def redirect(page):
             '<body><h1>Moved</h1><p>This page has moved to '
             '<a href="' + uri + '">' + uri + '</a></body></html>')
 
+
 def process_is_alive(pid):
     # XXX probably fails spectacularly on Windows.
     import errno
@@ -4248,8 +4505,9 @@ def process_is_alive(pid):
         if e.errno == errno.EPERM:
             return True  # process exists, but we can't send it signals.
         if e.errno == errno.ESRCH:
-            return False # no such process.
+            return False  # no such process.
         raise
+
 
 def list_policies():
     import pkgutil
@@ -4259,6 +4517,7 @@ def list_policies():
         if not ispkg:
             policies.append(name)
     return policies
+
 
 def show_policy(policy):
     import inspect
@@ -4306,6 +4565,7 @@ def show_policy(policy):
     if doc is not None:
         print("  %s" % doc.replace('\n', '\n  '))
 
+
 def create_conf():
     conf = {
         "port":                     None,
@@ -4335,10 +4595,11 @@ def create_conf():
             "COPYRIGHT_URL": COPYRIGHT_URL,
             "CONTENT_TYPE": DEFAULT_CONTENT_TYPE,
             "HOMEPAGE": DEFAULT_HOMEPAGE,
-            },
-        }
+        },
+    }
     conf.update(DataStore.CONFIG_DEFAULTS)
     return conf
+
 
 def main(argv):
     if argv[0] == '--show-policy':
@@ -4372,13 +4633,13 @@ All configuration variables may be given as command arguments.
 See abe.conf for commented examples.""")
         return 0
     elif argv[0] in ('-v', '--version'):
-# MULTICHAIN START
+        # MULTICHAIN START
         print(ABE_APPNAME, ABE_VERSION)
         print("Schema version", DataStore.SCHEMA_VERSION)
 # MULTICHAIN END
         return 0
     elif argv[0] == '--print-htdocs-directory':
-# MULTICHAIN START
+        # MULTICHAIN START
         print(find_htdocs())
 # MULTICHAIN END
         return 0
@@ -4391,7 +4652,7 @@ See abe.conf for commented examples.""")
 
     logging.basicConfig(
         stream=sys.stdout,
-        level = logging.DEBUG if args.query is None else logging.ERROR,
+        level=logging.DEBUG if args.query is None else logging.ERROR,
         format=DEFAULT_LOG_FORMAT)
     if args.logging is not None:
         import logging.config as logging_config
@@ -4411,8 +4672,9 @@ See abe.conf for commented examples.""")
         return 1
 
     store = make_store(args)
-    
+
     return 0
+
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))
