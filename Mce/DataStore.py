@@ -2204,7 +2204,7 @@ store._ddl['txout_approx'],
     
     def update_asset_address_balance(store, asset_id, pubkey_id, quantity, tx_hash):
         store.sql("""
-            INSERT OR IGNORE INTO asset_address_balance (asset_id, pubkey_id, balance)
+            INSERT IGNORE INTO asset_address_balance (asset_id, pubkey_id, balance)
             VALUES (?,?,0)""",
         (asset_id, pubkey_id))
         store.sql("""
