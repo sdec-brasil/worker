@@ -4372,7 +4372,7 @@ class Abe:
         except Exception as e:
             abe.log.info("Unable to lookup chain with id = 1")
             abe.log.warning(e)
-                return 0
+            return 0
 
         ## abe.store.catch_up()
         
