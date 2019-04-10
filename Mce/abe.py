@@ -4370,7 +4370,11 @@ class Abe:
         except Exception as e:
             abe.log.info("Unable to lookup chain = MyChain")
             abe.log.warning(e)
-            return 0
+            try:
+                chain = abe.store.get_chain_by_id(1)
+            except Exception:
+                abe.log.info("UNABLE TO GET CHAIN!!")
+                return 0
         ## abe.store.catch_up()
         
         # Currently I am considering a single relevant chain,
