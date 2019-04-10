@@ -4778,7 +4778,7 @@ See abe.conf for commented examples.""")
 
     store = make_store(args)
     abe = Abe(store, args) # not quite sure if this line is necessary at all...
-    abe.exhibit_all_transactions(abe)
+    abe.exhibit_all_transactions()
 
     return 0
 
