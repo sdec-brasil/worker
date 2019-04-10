@@ -4364,7 +4364,8 @@ class Abe:
     # Maybe we have to process the transactions block-by-block, but this is not a problem in itself
 
     def exhibit_all_transactions(abe):
-        ## Hardcoded name!
+        chain = None
+        
         try:
             chain = abe.chain_lookup_by_name("MyChain")
         except Exception as e:
@@ -4375,13 +4376,15 @@ class Abe:
             except Exception:
                 abe.log.info("UNABLE TO GET CHAIN!!")
                 return 0
+        abe.log.info("Able to connect to chain named %s", chain.name )
+
         ## abe.store.catch_up()
         
         # Currently I am considering a single relevant chain,
         # but this can be adapted to multiple chains
         
         # Getting relevant info about our main chain
-        params = abe.get_blockchainparams(abe, chain)
+        params = abe.get_blockchainparams(chain)
         num_txs = abe.store.get_number_of_transactions(chain)
         num_addresses = abe.store.get_number_of_addresses(chain)
         connection_status = True
