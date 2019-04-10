@@ -4367,16 +4367,12 @@ class Abe:
         chain = None
         
         try:
-            chain = abe.chain_lookup_by_name("MyChain")
+            chain = abe.store.get_chain_by_id(1) 
+            abe.log.info("Able to connect to chain named %s ... %s", chain.name )
         except Exception as e:
-            abe.log.info("Unable to lookup chain = MyChain")
+            abe.log.info("Unable to lookup chain with id = 1")
             abe.log.warning(e)
-            try:
-                chain = abe.store.get_chain_by_id(1)
-            except Exception:
-                abe.log.info("UNABLE TO GET CHAIN!!")
                 return 0
-        abe.log.info("Able to connect to chain named %s", chain.name )
 
         ## abe.store.catch_up()
         
@@ -4384,7 +4380,8 @@ class Abe:
         # but this can be adapted to multiple chains
         
         # Getting relevant info about our main chain
-        params = abe.get_blockchainparams(chain)
+        # params = abe.get_blockchainparams(chain)
+        
         num_txs = abe.store.get_number_of_transactions(chain)
         num_addresses = abe.store.get_number_of_addresses(chain)
         connection_status = True
