@@ -4368,7 +4368,7 @@ class Abe:
         
         try:
             chain = abe.store.get_chain_by_id(1) 
-            abe.log.info("Able to connect to chain named %s ... %s", chain.name )
+            abe.log.info("Able to connect to chain named %s ... %s", str(chain.name) ) 
         except Exception as e:
             abe.log.info("Unable to lookup chain with id = 1")
             abe.log.warning(e)
@@ -4383,6 +4383,8 @@ class Abe:
         # params = abe.get_blockchainparams(chain)
         
         num_txs = abe.store.get_number_of_transactions(chain)
+        print( "TOTAL TRANSACTIONS = %d", int(num_txs) )
+
         num_addresses = abe.store.get_number_of_addresses(chain)
         connection_status = True
 
@@ -4401,6 +4403,7 @@ class Abe:
             recenttx = abe.store.get_recent_transactions_as_json(chain, 10)
         except Exception as e:
             abe.log.warning(e)
+            abe.log.info("%s", str(e))
             abe.log.info("Not able to get last 10 transactions for chain = %s", chain.name )
             return 0
         
@@ -4782,6 +4785,7 @@ See abe.conf for commented examples.""")
 
     store = make_store(args)
     abe = Abe(store, args) # not quite sure if this line is necessary at all...
+    
     abe.exhibit_all_transactions()
 
     return 0
