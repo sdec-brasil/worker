@@ -1318,7 +1318,6 @@ store._ddl['txout_approx'],
                 VALUES (?, ?, ?)""",
                       (block_id, tx['tx_id'], tx_pos))
             store.log.info("Testando!! block_tx %d %d", block_id, tx['tx_id'])
-            store.log.info("%s", tx)
         if b['height'] is not None:
             store._populate_block_txin(block_id)
 
@@ -1884,6 +1883,9 @@ store._ddl['txout_approx'],
             'value_out':             block_out,
             'version':               block_version,
             }
+        
+        # Adding print for block structure analysis
+        store.log.info("%s", b)
 
         is_stake_chain = chain is not None and chain.has_feature('nvc_proof_of_stake')
         if is_stake_chain:
