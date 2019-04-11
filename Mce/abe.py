@@ -4390,22 +4390,24 @@ class Abe:
 
         connection_status = True
 
-        try:
+        ''' DEAL with streams later
+        try: 
             num_streams = abe.store.get_number_of_streams(chain)
         except Exception as e:
             connection_status = False
             abe.log.warning(e)
             abe.log.info("Unable to get total_of_streams for MyChain")
             num_streams = -1
+        '''
 
         # This should get the latest 10 transactions of a chain
         # Why not trying this function?
         try:
             mempool = abe.store.get_rawmempool(chain)
-            recenttx = abe.store.get_recent_transactions_as_json(chain, 10)
+            recenttx = abe.store.get_recent_transactions_as_json(chain, 5)
         except Exception as e:
             abe.log.warning(e)
-            abe.log.info("%s", str(e))
+            print("ERROR -> %s" % str(e))
             abe.log.info("Not able to get last 10 transactions for chain = %s", chain.name )
             return 0
         
