@@ -4404,13 +4404,17 @@ class Abe:
         # Why not trying this function?
         try:
             mempool = abe.store.get_rawmempool(chain)
+        except Exception as e:
+            print("ERROR on get_rawmempool method + %s" % (str(e)) )
+
+        try:
             recenttx = abe.store.get_recent_transactions_as_json(chain, 5)
         except Exception as e:
             abe.log.warning(e)
-            print("ERROR -> %s" % str(e))
-            abe.log.info("Not able to get last 10 transactions for chain = %s", chain.name )
-            return 0
+            print("ERROR on get_recent_transactions_as_json -> %s" % str(e))
         
+        print("Letting the explorer continue")
+
         sorted_mempool = sorted(
             mempool_items()[:10], key = lambda tup: tup[1]['time'], reverse = True )
         
