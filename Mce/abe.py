@@ -4380,8 +4380,10 @@ class Abe:
         # but this can be adapted to multiple chains
         
         # Getting relevant info about our main chain
-        # params = abe.get_blockchainparams(chain)
+        params = abe.get_blockchainparams(chain)
         
+        print("PARAMS = %s", str(params) )
+
         num_txs = abe.store.get_number_of_transactions(chain)
         print( "TOTAL TRANSACTIONS = %d" % int(num_txs) )
 
