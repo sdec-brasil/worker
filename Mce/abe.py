@@ -4368,7 +4368,7 @@ class Abe:
         
         try:
             chain = abe.store.get_chain_by_id(1) 
-            abe.log.info("Able to connect to chain named %s ... %s", str(chain.name) ) 
+            abe.log.info("Able to connect to chain named %s ", str(chain.name) ) 
         except Exception as e:
             abe.log.info("Unable to lookup chain with id = 1")
             abe.log.warning(e)
@@ -4383,9 +4383,11 @@ class Abe:
         # params = abe.get_blockchainparams(chain)
         
         num_txs = abe.store.get_number_of_transactions(chain)
-        print( "TOTAL TRANSACTIONS = %d", int(num_txs) )
+        print( "TOTAL TRANSACTIONS = %d" % int(num_txs) )
 
         num_addresses = abe.store.get_number_of_addresses(chain)
+        print( "Total addresses = %d" % int(num_addresses) )
+
         connection_status = True
 
         try:
