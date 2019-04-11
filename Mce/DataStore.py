@@ -1318,6 +1318,9 @@ store._ddl['txout_approx'],
                 VALUES (?, ?, ?)""",
                       (block_id, tx['tx_id'], tx_pos))
             store.log.info("Testando!! block_tx %d %d", block_id, tx['tx_id'])
+            print("Imprimindo a transacao:")
+            print(tx)
+
         if b['height'] is not None:
             store._populate_block_txin(block_id)
 
