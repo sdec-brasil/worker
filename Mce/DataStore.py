@@ -1320,9 +1320,7 @@ store._ddl['txout_approx'],
             store.log.info("Testando!! block_tx %d %d", block_id, tx['tx_id'])
             print("Imprimindo a transacao:")
             # Special print
-            for k, v in tx.items();
-                print(k, v, type(v) )
-
+            print(type(tx))
             
         if b['height'] is not None:
             store._populate_block_txin(block_id)
