@@ -1181,6 +1181,9 @@ store._ddl['txout_approx'],
 
         for pos in xrange(len(b['transactions'])):
             tx = b['transactions'][pos]
+            
+            print("IMPRIMINDO TRANSACAO DE UM JEITO DIFERENTE")
+            print("X = %s" % str(tx) )
 
             if 'hash' not in tx:
                 if chain is None:
