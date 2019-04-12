@@ -1308,6 +1308,27 @@ store._ddl['txout_approx'],
             # This is not an expected error, or our caller may have to
             # rewind a block file.  Let them deal with it.
             raise
+        
+        def transactions_pretty_print(tx):
+            for k in tx.keys():
+                if k == 'value_out':
+                    print(k, int(tx[k]) )
+                elif k == 'hash':
+                    x = int(tx[k], 16)
+                    print(k, x)
+                elif k == 'txIn':
+                    for sub_k in (tx[k]).keys():
+                        if sub_k == 'prevout_hash':
+                            x2 = int(tx[k][sub_k], 16)
+                            print(sub_k, x2)
+                        else:
+                            print(sub_k, tx[k][sub_k])
+                elif k == '__data__':
+                    x = int(tx[k], 16)
+                    print(k, x)
+                else:
+                    print(k, tx[k])
+
 
         # List the block's transactions in block_tx.
         for tx_pos in xrange(len(b['transactions'])):
@@ -1319,9 +1340,9 @@ store._ddl['txout_approx'],
                       (block_id, tx['tx_id'], tx_pos))
             store.log.info("Testando!! block_tx %d %d", block_id, tx['tx_id'])
             print("Imprimindo a transacao de forma diferente")
-            for k in tx.keys():
-                print(k, tx[k], type(k))
-            
+            transactions_pretty_print(tx)
+
+
         if b['height'] is not None:
             store._populate_block_txin(block_id)
 
