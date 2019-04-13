@@ -1182,8 +1182,8 @@ store._ddl['txout_approx'],
         for pos in xrange(len(b['transactions'])):
             tx = b['transactions'][pos]
             
-            print("IMPRIMINDO TRANSACAO DE UM JEITO DIFERENTE")
-            print("X = %s" % str(tx) )
+            # print("IMPRIMINDO TRANSACAO DE UM JEITO DIFERENTE")
+            # print("X = %s" % str(tx) )
 
             if 'hash' not in tx:
                 if chain is None:
@@ -3009,7 +3009,7 @@ store._ddl['txout_approx'],
         def get_tx(rpc_tx_hash):
             try:
                 rpc_tx_hex = rpc("getrawtransaction", rpc_tx_hash)
-
+                print(" rpc_tx = %s " % str(rpc_tx_hex) )
             except util.JsonrpcException, e:
                 if e.code != -5 and e.code!= -710:  # -5 or -710: transaction not in index.
                     raise
