@@ -3026,6 +3026,8 @@ store._ddl['txout_approx'],
                     return None
 
             rpc_tx = rpc_tx_hex.decode('hex')
+            print("rpc_tx decoded = %s" % str(rpc_tx) )
+            
             tx_hash = rpc_tx_hash.decode('hex')[::-1]
 
             computed_tx_hash = chain.transaction_hash(rpc_tx)
@@ -3035,6 +3037,7 @@ store._ddl['txout_approx'],
 
             tx = chain.parse_transaction(rpc_tx)
             tx['hash'] = tx_hash
+            print("tx after parsing = %s" % str(tx) ) 
             return tx
 
         def first_new_block(height, next_hash):
