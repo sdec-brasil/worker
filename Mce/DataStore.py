@@ -3009,7 +3009,9 @@ store._ddl['txout_approx'],
         def get_tx(rpc_tx_hash):
             try:
                 rpc_tx_hex = rpc("getrawtransaction", rpc_tx_hash)
-                #print(" rpc_tx = %s " % str(rpc_tx_hex) )
+                print(" rpc_tx_hex = %s " % str(rpc_tx_hex) )
+                decoded_rpc_tx_hex = rpc("decoderowtransaction", rpc_tx_hex )
+                print(" decoded_rpc_tx_hex = %s " % str(decoded_rpc_tx_hex) )
             except util.JsonrpcException, e:
                 if e.code != -5 and e.code!= -710:  # -5 or -710: transaction not in index.
                     raise
