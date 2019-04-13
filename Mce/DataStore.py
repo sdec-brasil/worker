@@ -3009,7 +3009,7 @@ store._ddl['txout_approx'],
         def get_tx(rpc_tx_hash):
             try:
                 rpc_tx_hex = rpc("getrawtransaction", rpc_tx_hash)
-                print(" rpc_tx = %s " % str(rpc_tx_hex) )
+                #print(" rpc_tx = %s " % str(rpc_tx_hex) )
             except util.JsonrpcException, e:
                 if e.code != -5 and e.code!= -710:  # -5 or -710: transaction not in index.
                     raise
@@ -3026,7 +3026,7 @@ store._ddl['txout_approx'],
                     return None
 
             rpc_tx = rpc_tx_hex.decode('hex')
-            print("rpc_tx decoded = %s" % str(rpc_tx) )
+            #print("rpc_tx decoded = %s" % str(rpc_tx) )
             
             tx_hash = rpc_tx_hash.decode('hex')[::-1]
 
@@ -3037,7 +3037,11 @@ store._ddl['txout_approx'],
 
             tx = chain.parse_transaction(rpc_tx)
             tx['hash'] = tx_hash
-            print("tx after parsing = %s" % str(tx) ) 
+            
+            #print("tx after parsing = %s" % str(tx) ) 
+            obj = deserialize.deserialize_Transaction(tx)
+            print("tx -> obj = %s " % str(obj) )
+
             return tx
 
         def first_new_block(height, next_hash):
