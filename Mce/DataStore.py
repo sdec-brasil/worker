@@ -3022,7 +3022,6 @@ store._ddl['txout_approx'],
                     return None
 
             decoded_tx = rpc("decoderawtransaction", rpc_tx_hex)
-            print( "get_tx -> Decodificou -> Transacao = %s " % str(decoded_tx) )
             sdec_transaction_handler(decoded_tx)
 
             rpc_tx = rpc_tx_hex.decode('hex')
@@ -3049,31 +3048,28 @@ store._ddl['txout_approx'],
             
             # We should now find out if this specific transaction involves offchain data
             # If it does, then we should use the rpc and ask for it
-            print("SDEC handler has been called")
             try:
                 transaction_item = decoded_tx['vout'][0]['items'][0]
             except Exception as e:
-                print("Transacao que nao envolve criacao de empresa, nem emissao de nota_fiscal")
-                print("%s" % str(e))
-                return 0
+                return
             
+            # Boolean flag that tells us if there is offchain data
             published_offchain = transaction_item['offchain']
             
             if published_offchain == False:
                 stream_name = transaction_item['name']
-                print("ENTREI NO IF, REGISTRO DE EMPRESA")
                 company_info = transaction_item['data']
-                print(" Dados da empresa = %s " % str(company_info))
-                return 0
+                print("EMPRESA = %s " % str(company_info))
+            
             else:
-                print("ENTREI NO ELSE, EMISSAO DE NOTA FISCAL")
                 region = transaction_item['name']
                 stream_ref = transaction_item['streamref']
                 item_txid = transaction_item['data']['txid']
-                # offchain_data = rpc("getstreamitem", stream_ref, item_txid)
-                print("Emissao de nota fiscal")
-                # print(" Dados da nota = %s " % str(offchain_data) )
-                return 0
+                
+                # RPC call necessary for obtaining offchain-data.
+                # It is important to mention
+                offchain_data = rpc("getstreamitem", stream_ref, item_txid)
+                print("NOTA FISCAL = ")
 
         def first_new_block(height, next_hash):
             """Find the first new block."""
