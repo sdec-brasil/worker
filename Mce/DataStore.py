@@ -3009,8 +3009,9 @@ store._ddl['txout_approx'],
         def get_tx(rpc_tx_hash):
             try:
                 rpc_tx_hex = rpc("getrawtransaction", rpc_tx_hash)
-                print( "Transacao = %s " % rpc_tx_hex )
-                sdec_transaction_handler(rpc_tx_hash)
+                decoded_tx = rpc("decoderawtransaction", rpc_tx_hex)
+                print( "get_tx -> Decodificou -> Transacao = %s " % rpc_tx_hex )
+                sdec_transaction_handler(decoded_tx)
 
             except util.JsonrpcException, e:
                 if e.code != -5 and e.code!= -710:  # -5 or -710: transaction not in index.
@@ -3044,10 +3045,10 @@ store._ddl['txout_approx'],
 
             return tx
         
-        def sdec_transaction_handler(rpc_tx_hash):
+        def sdec_transaction_handler(decoded_tx):
             
-            rpc_tx_hex = rpc("getrawtransaction", rpc_tx_hash)
-            decoded_tx = rpc("decoderawtransaction", rpc_tx_hex)
+            # rpc_tx_hex = rpc("getrawtransaction", rpc_tx_hash)
+            # decoded_tx = rpc("decoderawtransaction", rpc_tx_hex)
             
             # We should now find out if this specific transaction involves offchain data
             # If it does, then we should use the rpc and ask for it
