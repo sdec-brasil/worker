@@ -4347,129 +4347,6 @@ class Abe:
             env['PATH_INFO'] = pi
         return ret
 
-    
-
-
-    ### Experimental function for printing all transactions on console in a coordinated manner
-    ## OBSERVATION -> This is a bad giant function that does to many things, it has to be split into smaller encapsuled features for merging with master
-    # Necessary steps
-    # 1 - Get chain name
-    # 2 - Get chain connection
-    # 3 - Gather all transactions
-    # 4 - Filter transactions by type ( maybe can be postponed )
-    # 5 - Getting all useful information about the transactions. ( jsonRPC calls will be required! ) 
-    # 6 - Print obtained data for each transaction. ( Maybe some conversions/deserializations are required first!)
-    
-    # Observations:
-    # Maybe we have to process the transactions block-by-block, but this is not a problem in itself
-
-    def exhibit_all_transactions(abe):
-        chain = None
-        
-        try:
-            chain = abe.store.get_chain_by_id(1) 
-            abe.log.info("Able to connect to chain named %s ", str(chain.name) ) 
-        except Exception as e:
-            abe.log.info("Unable to lookup chain with id = 1")
-            abe.log.warning(e)
-            return 0
-
-        ## abe.store.catch_up()
-        
-        # Currently I am considering a single relevant chain,
-        # but this can be adapted to multiple chains
-        
-        # Getting relevant info about our main chain
-        params = abe.get_blockchainparams(chain)
-        
-        print("PARAMS = %s", str(params) )
-
-        num_txs = abe.store.get_number_of_transactions(chain)
-        print( "TOTAL TRANSACTIONS = %d" % int(num_txs) )
-
-        num_addresses = abe.store.get_number_of_addresses(chain)
-        print( "Total addresses = %d" % int(num_addresses) )
-
-        connection_status = True
-
-        ''' DEAL with streams later
-        try: 
-            num_streams = abe.store.get_number_of_streams(chain)
-        except Exception as e:
-            connection_status = False
-            abe.log.warning(e)
-            abe.log.info("Unable to get total_of_streams for MyChain")
-            num_streams = -1
-        '''
-
-        # This should get the latest 10 transactions of a chain
-        # Why not trying this function?
-        try:
-            mempool = abe.store.get_rawmempool(chain)
-        except Exception as e:
-            print("ERROR on get_rawmempool method + %s" % (str(e)) )
-
-        try:
-            recenttx = abe.store.get_recent_transactions_as_json(chain, 5)
-        except Exception as e:
-            abe.log.warning(e)
-            print("ERROR on get_recent_transactions_as_json -> %s" % str(e))
-        
-        print("Letting the explorer continue")
-
-        sorted_mempool = sorted(
-            mempool_items()[:10], key = lambda tup: tup[1]['time'], reverse = True )
-        
-        if len(sorted_mempool) < 10:
-            sorted_recenttx = sorted(
-                recenttx, key = lambda tx: tx['time'], reverse = True )
-            existing_txids = [txid for (txid, value) in sorted_mempool]
-            for tx in sorted_recenttx:
-                if len(sorted_mempool) == 10:
-                    break
-                if tx['txid'] not in existing_txids:
-                    existing_txids.append(tx['txid'])
-                    sorted_mempool.append( (tx['txid'], tx) )
-        
-        for (k, v) in sorted_mempool:
-            txid = k;
-            abe.log.info("Processing transaction = %s", str(txid) )
-            if abe.store.does_transaction_exist(txid):
-                labels = abe.store.get_labels_for_tx(txid, chain)
-            else:
-                json = None
-                try:
-                    json = abe.store.get_rawtransaction_decoded(chain, txid)
-                except Exception as e:
-                    abe.log.warning(e)
-                    pass
-                if json is not None:
-                    scriptpubkeys = [vout['scriptPubKey']['hex'] 
-                                     for vout in json['vout']  ]
-                    labels = None
-                    d = set()
-                    for hex in scriptpubkeys:
-                        binscript = binascii.unhexlify(hex)
-                        tmp = abe.store.get_labels_for_scriptpubkey(
-                            chain, binscrpit )
-
-                        d |= set(tmp)
-                    
-                    labels = list(d)
-            
-            if labels is None:
-                labels = []
-
-            for label in labels:
-                abe.log.info("Label = %s", label)
-            
-            conf = v.get('confirmations', None)
-            if conf is None or conf == 0:
-                abe.log.info("Zero confirmation for transaction %s", str(txid))
-            else:
-                abe.log.info("%d confirmations for transaction %s", int(conf), str(txid) )
-
-
 def find_htdocs():
     return os.path.join(os.path.split(__file__)[0], 'htdocs')
 
@@ -4794,9 +4671,6 @@ See abe.conf for commented examples.""")
         return 1
 
     store = make_store(args)
-    # abe = Abe(store, args) # not quite sure if this line is necessary at all...
-    
-    # abe.exhibit_all_transactions()
 
     return 0
 

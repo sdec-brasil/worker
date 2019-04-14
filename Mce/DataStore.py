@@ -1182,9 +1182,6 @@ store._ddl['txout_approx'],
         for pos in xrange(len(b['transactions'])):
             tx = b['transactions'][pos]
             
-            # print("IMPRIMINDO TRANSACAO DE UM JEITO DIFERENTE")
-            # print("X = %s" % str(tx) )
-
             if 'hash' not in tx:
                 if chain is None:
                     store.log.debug("Falling back to SHA256 transaction hash")
@@ -1312,27 +1309,6 @@ store._ddl['txout_approx'],
             # rewind a block file.  Let them deal with it.
             raise
         
-        def transactions_pretty_print(tx):
-            for k in tx.keys():
-                if k == 'value_out':
-                    print(k, int(tx[k]) )
-                elif k == 'hash':
-                    x = int(tx[k], 16)
-                    print(k, x)
-                elif k == 'txIn':
-                    for sub_k in (tx[k]).keys():
-                        if sub_k == 'prevout_hash':
-                            x2 = int(tx[k][sub_k], 16)
-                            print(sub_k, x2)
-                        else:
-                            print(sub_k, tx[k][sub_k])
-                elif k == '__data__':
-                    x = int(tx[k], 16)
-                    print(k, x)
-                else:
-                    print(k, tx[k])
-
-
         # List the block's transactions in block_tx.
         for tx_pos in xrange(len(b['transactions'])):
             tx = b['transactions'][tx_pos]
@@ -1341,8 +1317,7 @@ store._ddl['txout_approx'],
                     (block_id, tx_id, tx_pos)
                 VALUES (?, ?, ?)""",
                       (block_id, tx['tx_id'], tx_pos))
-            store.log.info("Testando!! block_tx %d %d", block_id, tx['tx_id'])
-            # transactions_pretty_print(tx)
+            store.log.info("block_tx %d %d", block_id, tx['tx_id'])
 
 
         if b['height'] is not None:
