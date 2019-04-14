@@ -3009,10 +3009,6 @@ store._ddl['txout_approx'],
         def get_tx(rpc_tx_hash):
             try:
                 rpc_tx_hex = rpc("getrawtransaction", rpc_tx_hash)
-                decoded_tx = rpc("decoderawtransaction", rpc_tx_hex)
-                print( "get_tx -> Decodificou -> Transacao = %s " % str(decoded_tx) )
-                sdec_transaction_handler(decoded_tx)
-
             except util.JsonrpcException, e:
                 if e.code != -5 and e.code!= -710:  # -5 or -710: transaction not in index.
                     raise
@@ -3027,6 +3023,10 @@ store._ddl['txout_approx'],
                     store.log.error("genesis transaction unavailable via RPC;"
                                     " see import-tx in abe.conf")
                     return None
+
+            decoded_tx = rpc("decoderawtransaction", rpc_tx_hex)
+            print( "get_tx -> Decodificou -> Transacao = %s " % str(decoded_tx) )
+            sdec_transaction_handler(decoded_tx)
 
             rpc_tx = rpc_tx_hex.decode('hex')
             
@@ -3053,7 +3053,6 @@ store._ddl['txout_approx'],
             # We should now find out if this specific transaction involves offchain data
             # If it does, then we should use the rpc and ask for it
             print("SDEC handler has been called")
-            transaction_item = {}
             try:
                 transaction_item = decoded_tx['vout'][0]['items'][0]
             except Exception as e:
@@ -3068,6 +3067,7 @@ store._ddl['txout_approx'],
                 print("ENTREI NO IF, REGISTRO DE EMPRESA")
                 company_info = transaction_item['data']
                 print(" Dados da empresa = %s " % str(company_info))
+                return 0
             else:
                 print("ENTREI NO ELSE, EMISSAO DE NOTA FISCAL")
                 region = transaction_item['name']
@@ -3076,7 +3076,7 @@ store._ddl['txout_approx'],
                 offchain_data = rpc("getstreamitem", stream_ref, item_txid)
                 print("Emissao de nota fiscal")
                 print(" Dados da nota = %s " % str(offchain_data) )
-
+                retunn 0
 
         def first_new_block(height, next_hash):
             """Find the first new block."""
