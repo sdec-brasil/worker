@@ -1910,9 +1910,6 @@ store._ddl['txout_approx'],
             'value_out':             block_out,
             'version':               block_version,
             }
-        
-        # Adding print for block structure analysis
-        store.log.info("%s", b)
 
         is_stake_chain = chain is not None and chain.has_feature('nvc_proof_of_stake')
         if is_stake_chain:
@@ -3041,7 +3038,7 @@ store._ddl['txout_approx'],
             tx['hash'] = tx_hash
             
             #print("tx after parsing = %s" % str(tx) ) 
-            obj = deserialize.deserialize_Transaction(tx)
+            # obj = deserialize.deserialize_Transaction(tx)
 
             return tx
         
@@ -3194,24 +3191,24 @@ store._ddl['txout_approx'],
                                              format = "binary")
                         if tx is None:
                             tx = get_tx(rpc_tx_hash)
-                        if tx is None:
-                            store.log.error("RPC service lacks full txindex")
-                            return False
+                            if tx is None:
+                                store.log.error("RPC service lacks full txindex")
+                                return False
 
-                    block['transactions'].append(tx)
+                        block['transactions'].append(tx)
 
-                store.import_block(block, chain = chain)
-                store.imported_bytes(block['size'])
-                rpc_hash = rpc_block.get('nextblockhash')
+                    store.import_block(block, chain = chain)
+                    store.imported_bytes(block['size'])
+                    rpc_hash = rpc_block.get('nextblockhash')
 
-            height += 1
-            if rpc_hash is None:
-                rpc_hash = catch_up_mempool(height)
-                # Also look backwards in case we end up on an orphan block.
-                # NB: Call only when rpc_hash is not None, otherwise
-                #     we'll override catch_up_mempool's behavior.
-                if rpc_hash:
-                    height, rpc_hash = first_new_block(height, rpc_hash)
+                height += 1
+                if rpc_hash is None:
+                    rpc_hash = catch_up_mempool(height)
+                    # Also look backwards in case we end up on an orphan block.
+                    # NB: Call only when rpc_hash is not None, otherwise
+                    #     we'll override catch_up_mempool's behavior.
+                    if rpc_hash:
+                        height, rpc_hash = first_new_block(height, rpc_hash)
 
         except util.JsonrpcMethodNotFound, e:
             store.log.error("bitcoind %s not supported", e.method)
