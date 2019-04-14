@@ -3006,192 +3006,194 @@ store._ddl['txout_approx'],
         # Returns -1 on error, so we'll get 0 on empty chain
         height = store.get_block_number(chain.id) + 1
     
-        def get_tx(rpc_tx_hash):
-            try:
-                rpc_tx_hex = rpc("getrawtransaction", rpc_tx_hash)
-                decoded_rpc_tx_hex = rpc("decoderawtransaction", rpc_tx_hex )
-                
-            except util.JsonrpcException, e:
-                if e.code != -5 and e.code!= -710:  # -5 or -710: transaction not in index.
-                    raise
-                if height != 0:
-                    return None
-
-                # The genesis transaction is unavailable.  This is
-                # normal.
-                import genesis_tx
-                rpc_tx_hex = genesis_tx.get(rpc_tx_hash)
-                if rpc_tx_hex is None:
-                    store.log.error("genesis transaction unavailable via RPC;"
-                                    " see import-tx in abe.conf")
-                    return None
-
-            rpc_tx = rpc_tx_hex.decode('hex')
-            
-            tx_hash = rpc_tx_hash.decode('hex')[::-1]
-
-            computed_tx_hash = chain.transaction_hash(rpc_tx)
-            if tx_hash != computed_tx_hash:
-                #raise InvalidBlock('transaction hash mismatch')
-                store.log.debug('transaction hash mismatch: %r != %r', tx_hash, computed_tx_hash)
-
-            tx = chain.parse_transaction(rpc_tx)
-            tx['hash'] = tx_hash
-            
-            #print("tx after parsing = %s" % str(tx) ) 
-            obj = deserialize.deserialize_Transaction(tx)
-
-            return tx
-        
-        def sdec_transaction_handler(rpc_tx_hash):
-            
-            rpc_tx_hex = rpc("getrawtransaction", rpc_tx_hash)
-            decoded_tx = rpc("decoderawtransaction", rpc_tx_hex)
-            
-            # We should now find out if this specific transaction involves offchain data
-            # If it does, then we should use the rpc and ask for it
-            transaction_item = {}
-            try:
-                transaction_item = decoded_tx['vout'][0]['items'][0]
-            except Exception as e:
-                print("Transacao que nao envolve criacao de empresa, nem emissao de nota_fiscal")
-                print("%s" % str(e))
-                return
-            
-            published_offchain = transaction_item['offchain']
-            
-            if published_offchain == False:
-                stream_name = transaction_item['name']
-                if name == 'Registros':
-                    print("Empresa esta sendo cadastrada no sistema!")
-                    company_info = transaction_item['data']
-                    print(" Dados da empresa = %s " % str(company_info))
-            else:
-                region = transaction_item['name']
-                stream_createtxid = transaction_item['createtxid']
-                item_txid= transaction_item['txid']
-                offchain_data = rpc("getstreamitem", stream_createtxid, item_txid)
-                print("Emissao de nota fiscal")
-                print(" Dados da nota = %s " % str(offchain_data) )
-
-
-        def first_new_block(height, next_hash):
-            """Find the first new block."""
-
-            while height > 0:
-                hash = get_blockhash(height - 1)
-
-                if hash is not None and (1,) == store.selectrow("""
-                    SELECT 1
-                      FROM chain_candidate cc
-                      JOIN block b ON (cc.block_id = b.block_id)
-                     WHERE b.block_hash = ?
-                       AND b.block_height IS NOT NULL
-                       AND cc.chain_id = ?""", (
-                        store.hashin_hex(str(hash)), chain.id)):
-                    break
-
-                next_hash = hash
-                height -= 1
-
-            return (height, next_hash)
-
-        def catch_up_mempool(height):
-            # imported tx cache, so we can avoid querying DB on each pass
-            imported_tx = set()
-            # Next height check time
-            height_chk = time.time() + 1
-
-            while store.rpc_load_mempool:
-                # Import the memory pool.
-                for rpc_tx_hash in rpc("getrawmempool"):
-                    if rpc_tx_hash in imported_tx: continue
-
-                    # Break loop if new block found
-                    if height_chk < time.time():
-                        rpc_hash = get_blockhash(height)
-                        if rpc_hash:
-                            return rpc_hash
-                        height_chk = time.time() + 1
-
-                    tx = get_tx(rpc_tx_hash)
+            def get_tx(rpc_tx_hash):
+                try:
+                    rpc_tx_hex = rpc("getrawtransaction", rpc_tx_hash)
+                    print( "Transacao = %s " % rpc_tx_hex )
                     sdec_transaction_handler(rpc_tx_hash)
 
-                    if tx is None:
-                        # NB: On new blocks, older mempool tx are often missing
-                        # This happens some other times too, just get over with
-                        store.log.info("tx %s gone from mempool" % rpc_tx_hash)
-                        continue
+                except util.JsonrpcException, e:
+                    if e.code != -5 and e.code!= -710:  # -5 or -710: transaction not in index.
+                        raise
+                    if height != 0:
+                        return None
 
-                    # XXX Race condition in low isolation levels.
-                    tx_id = store.tx_find_id_and_value(tx, False, check_only=True)
-                    if tx_id is None:
-                        tx_id = store.import_tx(tx, False, chain)
-                        store.log.info("mempool tx %d", tx_id)
-                        store.imported_bytes(tx['size'])
-                    imported_tx.add(rpc_tx_hash)
+                    # The genesis transaction is unavailable.  This is
+                    # normal.
+                    import genesis_tx
+                    rpc_tx_hex = genesis_tx.get(rpc_tx_hash)
+                    if rpc_tx_hex is None:
+                        store.log.error("genesis transaction unavailable via RPC;"
+                                        " see import-tx in abe.conf")
+                        return None
 
-                store.log.info("mempool load completed, starting over...")
-                time.sleep(3)
-            return None
+                rpc_tx = rpc_tx_hex.decode('hex')
+                
+                tx_hash = rpc_tx_hash.decode('hex')[::-1]
 
-        try:
+                computed_tx_hash = chain.transaction_hash(rpc_tx)
+                if tx_hash != computed_tx_hash:
+                    #raise InvalidBlock('transaction hash mismatch')
+                    store.log.debug('transaction hash mismatch: %r != %r', tx_hash, computed_tx_hash)
 
-            # Get block hash at height, and at the same time, test
-            # bitcoind connectivity.
-            try:
-                next_hash = get_blockhash(height)
-            except util.JsonrpcException, e:
-                raise
-            except Exception, e:
-                # Connectivity failure.
-                store.log.error("RPC failed: %s", e)
-                return False
+                tx = chain.parse_transaction(rpc_tx)
+                tx['hash'] = tx_hash
+                
+                #print("tx after parsing = %s" % str(tx) ) 
+                obj = deserialize.deserialize_Transaction(tx)
 
-            # Get the first new block (looking backward until hash match)
-            height, next_hash = first_new_block(height, next_hash)
-
-            # Import new blocks.
-            rpc_hash = next_hash or get_blockhash(height)
-            if rpc_hash is None:
-                rpc_hash = catch_up_mempool(height)
-            while rpc_hash is not None:
-                hash = rpc_hash.decode('hex')[::-1]
-
-                if store.offer_existing_block(hash, chain.id):
-                    rpc_hash = get_blockhash(height + 1)
+                return tx
+            
+            def sdec_transaction_handler(rpc_tx_hash):
+                
+                rpc_tx_hex = rpc("getrawtransaction", rpc_tx_hash)
+                decoded_tx = rpc("decoderawtransaction", rpc_tx_hex)
+                
+                # We should now find out if this specific transaction involves offchain data
+                # If it does, then we should use the rpc and ask for it
+                transaction_item = {}
+                try:
+                    transaction_item = decoded_tx['vout'][0]['items'][0]
+                except Exception as e:
+                    print("Transacao que nao envolve criacao de empresa, nem emissao de nota_fiscal")
+                    print("%s" % str(e))
+                    return
+                
+                published_offchain = transaction_item['offchain']
+                
+                if published_offchain == False:
+                    stream_name = transaction_item['name']
+                    print("Entrei no if ( nao tem info offchain ")
+                    if name == 'Registros':
+                        print("Empresa esta sendo cadastrada no sistema!")
+                        company_info = transaction_item['data']
+                        print(" Dados da empresa = %s " % str(company_info))
                 else:
-                    rpc_block = rpc("getblock", rpc_hash)
-                    assert rpc_hash == rpc_block['hash']
+                    print("Entrei no else ( tem info offchain) ")
+                    region = transaction_item['name']
+                    stream_createtxid = transaction_item['createtxid']
+                    item_txid= transaction_item['txid']
+                    offchain_data = rpc("getstreamitem", stream_createtxid, item_txid)
+                    print("Emissao de nota fiscal")
+                    print(" Dados da nota = %s " % str(offchain_data) )
 
-                    prev_hash = \
-                        rpc_block['previousblockhash'].decode('hex')[::-1] \
-                        if 'previousblockhash' in rpc_block \
-                        else chain.genesis_hash_prev
 
-                    block = {
-                        'hash':     hash,
-                        'version':  int(rpc_block['version']),
-                        'hashPrev': prev_hash,
-                        'hashMerkleRoot':
-                            rpc_block['merkleroot'].decode('hex')[::-1],
-                        'nTime':    int(rpc_block['time']),
-                        'nBits':    int(rpc_block['bits'], 16),
-                        'nNonce':   int(rpc_block['nonce']),
-                        'transactions': [],
-                        'size':     int(rpc_block['size']),
-                        'height':   height,
-                        }
+            def first_new_block(height, next_hash):
+                """Find the first new block."""
 
-                    if chain.block_header_hash(chain.serialize_block_header(
-                            block)) != hash:
-                        raise InvalidBlock('block hash mismatch')
+                while height > 0:
+                    hash = get_blockhash(height - 1)
 
-                    for rpc_tx_hash in rpc_block['tx']:
-                        tx = store.export_tx(tx_hash = str(rpc_tx_hash),
-                                             format = "binary")
+                    if hash is not None and (1,) == store.selectrow("""
+                        SELECT 1
+                          FROM chain_candidate cc
+                          JOIN block b ON (cc.block_id = b.block_id)
+                         WHERE b.block_hash = ?
+                           AND b.block_height IS NOT NULL
+                           AND cc.chain_id = ?""", (
+                            store.hashin_hex(str(hash)), chain.id)):
+                        break
+
+                    next_hash = hash
+                    height -= 1
+
+                return (height, next_hash)
+
+            def catch_up_mempool(height):
+                # imported tx cache, so we can avoid querying DB on each pass
+                imported_tx = set()
+                # Next height check time
+                height_chk = time.time() + 1
+
+                while store.rpc_load_mempool:
+                    # Import the memory pool.
+                    for rpc_tx_hash in rpc("getrawmempool"):
+                        if rpc_tx_hash in imported_tx: continue
+
+                        # Break loop if new block found
+                        if height_chk < time.time():
+                            rpc_hash = get_blockhash(height)
+                            if rpc_hash:
+                                return rpc_hash
+                            height_chk = time.time() + 1
+
+                        tx = get_tx(rpc_tx_hash)
+
                         if tx is None:
-                            tx = get_tx(rpc_tx_hash)
+                            # NB: On new blocks, older mempool tx are often missing
+                            # This happens some other times too, just get over with
+                            store.log.info("tx %s gone from mempool" % rpc_tx_hash)
+                            continue
+
+                        # XXX Race condition in low isolation levels.
+                        tx_id = store.tx_find_id_and_value(tx, False, check_only=True)
+                        if tx_id is None:
+                            tx_id = store.import_tx(tx, False, chain)
+                            store.log.info("mempool tx %d", tx_id)
+                            store.imported_bytes(tx['size'])
+                        imported_tx.add(rpc_tx_hash)
+
+                    store.log.info("mempool load completed, starting over...")
+                    time.sleep(3)
+                return None
+
+            try:
+
+                # Get block hash at height, and at the same time, test
+                # bitcoind connectivity.
+                try:
+                    next_hash = get_blockhash(height)
+                except util.JsonrpcException, e:
+                    raise
+                except Exception, e:
+                    # Connectivity failure.
+                    store.log.error("RPC failed: %s", e)
+                    return False
+
+                # Get the first new block (looking backward until hash match)
+                height, next_hash = first_new_block(height, next_hash)
+
+                # Import new blocks.
+                rpc_hash = next_hash or get_blockhash(height)
+                if rpc_hash is None:
+                    rpc_hash = catch_up_mempool(height)
+                while rpc_hash is not None:
+                    hash = rpc_hash.decode('hex')[::-1]
+
+                    if store.offer_existing_block(hash, chain.id):
+                        rpc_hash = get_blockhash(height + 1)
+                    else:
+                        rpc_block = rpc("getblock", rpc_hash)
+                        assert rpc_hash == rpc_block['hash']
+
+                        prev_hash = \
+                            rpc_block['previousblockhash'].decode('hex')[::-1] \
+                            if 'previousblockhash' in rpc_block \
+                            else chain.genesis_hash_prev
+
+                        block = {
+                            'hash':     hash,
+                            'version':  int(rpc_block['version']),
+                            'hashPrev': prev_hash,
+                            'hashMerkleRoot':
+                                rpc_block['merkleroot'].decode('hex')[::-1],
+                            'nTime':    int(rpc_block['time']),
+                            'nBits':    int(rpc_block['bits'], 16),
+                            'nNonce':   int(rpc_block['nonce']),
+                            'transactions': [],
+                            'size':     int(rpc_block['size']),
+                            'height':   height,
+                            }
+
+                        if chain.block_header_hash(chain.serialize_block_header(
+                                block)) != hash:
+                            raise InvalidBlock('block hash mismatch')
+
+                        for rpc_tx_hash in rpc_block['tx']:
+                            tx = store.export_tx(tx_hash = str(rpc_tx_hash),
+                                                 format = "binary")
+                            if tx is None:
+                                tx = get_tx(rpc_tx_hash)
                             if tx is None:
                                 store.log.error("RPC service lacks full txindex")
                                 return False
