@@ -3005,13 +3005,12 @@ store._ddl['txout_approx'],
 
         # Returns -1 on error, so we'll get 0 on empty chain
         height = store.get_block_number(chain.id) + 1
-
+    
         def get_tx(rpc_tx_hash):
             try:
                 rpc_tx_hex = rpc("getrawtransaction", rpc_tx_hash)
-                print(" rpc_tx_hex = %s " % str(rpc_tx_hex) )
                 decoded_rpc_tx_hex = rpc("decoderawtransaction", rpc_tx_hex )
-                print(" decoded_rpc_tx_hex = %s " % str(decoded_rpc_tx_hex) )
+                
             except util.JsonrpcException, e:
                 if e.code != -5 and e.code!= -710:  # -5 or -710: transaction not in index.
                     raise
@@ -3028,7 +3027,6 @@ store._ddl['txout_approx'],
                     return None
 
             rpc_tx = rpc_tx_hex.decode('hex')
-            #print("rpc_tx decoded = %s" % str(rpc_tx) )
             
             tx_hash = rpc_tx_hash.decode('hex')[::-1]
 
@@ -3042,9 +3040,40 @@ store._ddl['txout_approx'],
             
             #print("tx after parsing = %s" % str(tx) ) 
             obj = deserialize.deserialize_Transaction(tx)
-            print("tx -> obj = %s " % str(obj) )
 
             return tx
+        
+        def sdec_transaction_handler(rpc_tx_hash):
+            
+            rpc_tx_hex = rpc("getrawtransaction", rpc_tx_hash)
+            decoded_tx = rpc("decoderawtransaction", rpc_tx_hex)
+            
+            # We should now find out if this specific transaction involves offchain data
+            # If it does, then we should use the rpc and ask for it
+            transaction_item = {}
+            try:
+                transaction_item = decoded_tx['vout'][0]['items'][0]
+            except Exception as e:
+                print("Transacao que nao envolve criacao de empresa, nem emissao de nota_fiscal")
+                print("%s" % str(e))
+                return
+            
+            published_offchain = transaction_item['offchain']
+            
+            if published_offchain == False:
+                stream_name = transaction_item['name']
+                if name == 'Registros':
+                    print("Empresa esta sendo cadastrada no sistema!")
+                    company_info = transaction_item['data']
+                    print(" Dados da empresa = %s " % str(company_info))
+            else:
+                region = transaction_item['name']
+                stream_createtxid = transaction_item['createtxid']
+                item_txid= transaction_item['txid']
+                offchain_data = rpc("getstreamitem", stream_createtxid, item_txid)
+                print("Emissao de nota fiscal")
+                print(" Dados da nota = %s " % str(offchain_data) )
+
 
         def first_new_block(height, next_hash):
             """Find the first new block."""
@@ -3086,6 +3115,8 @@ store._ddl['txout_approx'],
                         height_chk = time.time() + 1
 
                     tx = get_tx(rpc_tx_hash)
+                    sdec_transaction_handler(rpc_tx_hash)
+
                     if tx is None:
                         # NB: On new blocks, older mempool tx are often missing
                         # This happens some other times too, just get over with
