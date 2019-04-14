@@ -3059,21 +3059,21 @@ store._ddl['txout_approx'],
             except Exception as e:
                 print("Transacao que nao envolve criacao de empresa, nem emissao de nota_fiscal")
                 print("%s" % str(e))
-                return
+                return 0
             
             published_offchain = transaction_item['offchain']
             
             if published_offchain == False:
                 stream_name = transaction_item['name']
-                print("Entrei no if ( nao tem info offchain ")
+                print("ENTREI NO IF, REGISTRO DE EMPRESA")
                 company_info = transaction_item['data']
                 print(" Dados da empresa = %s " % str(company_info))
             else:
-                print("Entrei no else ( tem info offchain) ")
+                print("ENTREI NO ELSE, EMISSAO DE NOTA FISCAL")
                 region = transaction_item['name']
-                stream_createtxid = transaction_item['createtxid']
-                item_txid= transaction_item['txid']
-                offchain_data = rpc("getstreamitem", stream_createtxid, item_txid)
+                stream_ref = transaction_item['streamref']
+                item_txid = transaction_item['data']['txid']
+                offchain_data = rpc("getstreamitem", stream_ref, item_txid)
                 print("Emissao de nota fiscal")
                 print(" Dados da nota = %s " % str(offchain_data) )
 
