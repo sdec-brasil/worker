@@ -1181,6 +1181,9 @@ store._ddl['txout_approx'],
 
         for pos in xrange(len(b['transactions'])):
             tx = b['transactions'][pos]
+            
+            # print("IMPRIMINDO TRANSACAO DE UM JEITO DIFERENTE")
+            # print("X = %s" % str(tx) )
 
             if 'hash' not in tx:
                 if chain is None:
@@ -1308,6 +1311,27 @@ store._ddl['txout_approx'],
             # This is not an expected error, or our caller may have to
             # rewind a block file.  Let them deal with it.
             raise
+        
+        def transactions_pretty_print(tx):
+            for k in tx.keys():
+                if k == 'value_out':
+                    print(k, int(tx[k]) )
+                elif k == 'hash':
+                    x = int(tx[k], 16)
+                    print(k, x)
+                elif k == 'txIn':
+                    for sub_k in (tx[k]).keys():
+                        if sub_k == 'prevout_hash':
+                            x2 = int(tx[k][sub_k], 16)
+                            print(sub_k, x2)
+                        else:
+                            print(sub_k, tx[k][sub_k])
+                elif k == '__data__':
+                    x = int(tx[k], 16)
+                    print(k, x)
+                else:
+                    print(k, tx[k])
+
 
         # List the block's transactions in block_tx.
         for tx_pos in xrange(len(b['transactions'])):
@@ -1317,7 +1341,9 @@ store._ddl['txout_approx'],
                     (block_id, tx_id, tx_pos)
                 VALUES (?, ?, ?)""",
                       (block_id, tx['tx_id'], tx_pos))
-            store.log.info("block_tx %d %d", block_id, tx['tx_id'])
+            store.log.info("Testando!! block_tx %d %d", block_id, tx['tx_id'])
+            # transactions_pretty_print(tx)
+
 
         if b['height'] is not None:
             store._populate_block_txin(block_id)
@@ -2976,11 +3002,10 @@ store._ddl['txout_approx'],
 
         # Returns -1 on error, so we'll get 0 on empty chain
         height = store.get_block_number(chain.id) + 1
-
+    
         def get_tx(rpc_tx_hash):
             try:
                 rpc_tx_hex = rpc("getrawtransaction", rpc_tx_hash)
-
             except util.JsonrpcException, e:
                 if e.code != -5 and e.code!= -710:  # -5 or -710: transaction not in index.
                     raise
@@ -2996,7 +3021,11 @@ store._ddl['txout_approx'],
                                     " see import-tx in abe.conf")
                     return None
 
+            decoded_tx = rpc("decoderawtransaction", rpc_tx_hex)
+            sdec_transaction_handler(decoded_tx)
+
             rpc_tx = rpc_tx_hex.decode('hex')
+            
             tx_hash = rpc_tx_hash.decode('hex')[::-1]
 
             computed_tx_hash = chain.transaction_hash(rpc_tx)
@@ -3006,7 +3035,41 @@ store._ddl['txout_approx'],
 
             tx = chain.parse_transaction(rpc_tx)
             tx['hash'] = tx_hash
+            
+            #print("tx after parsing = %s" % str(tx) ) 
+            # obj = deserialize.deserialize_Transaction(tx)
+
             return tx
+        
+        def sdec_transaction_handler(decoded_tx):
+            
+            # rpc_tx_hex = rpc("getrawtransaction", rpc_tx_hash)
+            # decoded_tx = rpc("decoderawtransaction", rpc_tx_hex)
+            
+            # We should now find out if this specific transaction involves offchain data
+            # If it does, then we should use the rpc and ask for it
+            try:
+                transaction_item = decoded_tx['vout'][0]['items'][0]
+            except Exception as e:
+                return
+            
+            # Boolean flag that tells us if there is offchain data
+            published_offchain = transaction_item['offchain']
+            
+            if published_offchain == False:
+                stream_name = transaction_item['name']
+                company_info = transaction_item['data']
+                print("EMPRESA = %s " % str(company_info))
+            
+            else:
+                region = transaction_item['name']
+                stream_ref = transaction_item['streamref']
+                item_txid = transaction_item['data']['txid']
+                
+                # RPC call necessary for obtaining offchain-data.
+                # It is important to mention
+                offchain_data = rpc("getstreamitem", stream_ref, item_txid)
+                print("NOTA FISCAL = %s ", str(offchain_data) )
 
         def first_new_block(height, next_hash):
             """Find the first new block."""
@@ -3048,6 +3111,7 @@ store._ddl['txout_approx'],
                         height_chk = time.time() + 1
 
                     tx = get_tx(rpc_tx_hash)
+
                     if tx is None:
                         # NB: On new blocks, older mempool tx are often missing
                         # This happens some other times too, just get over with
