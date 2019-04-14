@@ -3064,10 +3064,8 @@ store._ddl['txout_approx'],
             if published_offchain == False:
                 stream_name = transaction_item['name']
                 print("Entrei no if ( nao tem info offchain ")
-                if name == 'Registros':
-                    print("Empresa esta sendo cadastrada no sistema!")
-                    company_info = transaction_item['data']
-                    print(" Dados da empresa = %s " % str(company_info))
+                company_info = transaction_item['data']
+                print(" Dados da empresa = %s " % str(company_info))
             else:
                 print("Entrei no else ( tem info offchain) ")
                 region = transaction_item['name']
