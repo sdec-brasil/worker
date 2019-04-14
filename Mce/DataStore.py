@@ -3010,7 +3010,7 @@ store._ddl['txout_approx'],
             try:
                 rpc_tx_hex = rpc("getrawtransaction", rpc_tx_hash)
                 decoded_tx = rpc("decoderawtransaction", rpc_tx_hex)
-                print( "get_tx -> Decodificou -> Transacao = %s " % rpc_tx_hex )
+                print( "get_tx -> Decodificou -> Transacao = %s " % str(decoded_tx) )
                 sdec_transaction_handler(decoded_tx)
 
             except util.JsonrpcException, e:
@@ -3052,6 +3052,7 @@ store._ddl['txout_approx'],
             
             # We should now find out if this specific transaction involves offchain data
             # If it does, then we should use the rpc and ask for it
+            print("SDEC handler has been called")
             transaction_item = {}
             try:
                 transaction_item = decoded_tx['vout'][0]['items'][0]
