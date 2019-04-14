@@ -3073,9 +3073,9 @@ store._ddl['txout_approx'],
                 region = transaction_item['name']
                 stream_ref = transaction_item['streamref']
                 item_txid = transaction_item['data']['txid']
-                offchain_data = rpc("getstreamitem", stream_ref, item_txid)
+                # offchain_data = rpc("getstreamitem", stream_ref, item_txid)
                 print("Emissao de nota fiscal")
-                print(" Dados da nota = %s " % str(offchain_data) )
+                # print(" Dados da nota = %s " % str(offchain_data) )
                 return 0
 
         def first_new_block(height, next_hash):
