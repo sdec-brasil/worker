@@ -3076,7 +3076,7 @@ store._ddl['txout_approx'],
                 offchain_data = rpc("getstreamitem", stream_ref, item_txid)
                 print("Emissao de nota fiscal")
                 print(" Dados da nota = %s " % str(offchain_data) )
-                retunn 0
+                return 0
 
         def first_new_block(height, next_hash):
             """Find the first new block."""
