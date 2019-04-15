@@ -3044,7 +3044,7 @@ store._ddl['txout_approx'],
                 # RPC call necessary for obtaining offchain-data.
                 # It is important to mention
                 offchain_data = rpc("getstreamitem", stream_ref, item_txid)
-                print("NOTA FISCAL = %s ", str(offchain_data) )
+                print("NOTA FISCAL = %s " % str(offchain_data) )
 
         def first_new_block(height, next_hash):
             """Find the first new block."""
