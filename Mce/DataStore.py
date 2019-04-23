@@ -3015,6 +3015,8 @@ store._ddl['txout_approx'],
             # obj = deserialize.deserialize_Transaction(tx)
 
             return tx
+
+        ### SDEC HANDLERS ###    
         
         def sdec_transaction_handler(decoded_tx):
             
@@ -3023,6 +3025,8 @@ store._ddl['txout_approx'],
             
             # We should now find out if this specific transaction involves offchain data
             # If it does, then we should use the rpc and ask for it
+            # print( "DECODED TRANSACTION = %s " % str(decoded_tx) )
+
             try:
                 transaction_item = decoded_tx['vout'][0]['items'][0]
             except Exception as e:
@@ -3030,21 +3034,263 @@ store._ddl['txout_approx'],
             
             # Boolean flag that tells us if there is offchain data
             published_offchain = transaction_item['offchain']
-            
+             
             if published_offchain == False:
                 stream_name = transaction_item['name']
-                company_info = transaction_item['data']
-                print("EMPRESA = %s " % str(company_info))
+                company_data = transaction_item['data']
+                bd_insert_company(company_data['json']) 
             
             else:
+                print("EMISSAO DE NOTA_FISCAL")
                 region = transaction_item['name']
                 stream_ref = transaction_item['streamref']
                 item_txid = transaction_item['data']['txid']
+                company_address = transaction_item['publishers'][0]
                 
                 # RPC call necessary for obtaining offchain-data.
                 # It is important to mention
                 offchain_data = rpc("getstreamitem", stream_ref, item_txid)
-                print("NOTA FISCAL = %s " % str(offchain_data) )
+                offchain_data = offchain_data['data']['json']
+
+                bd_insert_receipt(offchain_data, company_address, item_txid)
+       
+        def is_equal(x, y, epsilon=1*10**(-2) ):
+            return abs(x - y) <= epsilon
+
+        def bd_insert_receipt(receipt_offchain_data, company_address, item_txid):
+            print("INSERCAO DE NOTA FOI CHAMADA!!!!!")
+            emissor                     = receipt_offchain_data.get('emissor', None)
+            base_calculo                = receipt_offchain_data['prestacao'].get('baseCalculo', None)
+            aliquota_servicos           = receipt_offchain_data['prestacao'].get('aliqServicos', None)
+            valor_iss                   = receipt_offchain_data['prestacao'].get('valIss', None)
+            valor_liquido_nota          = receipt_offchain_data['prestacao'].get('valLiquiNfse', None)
+            competencia                 = receipt_offchain_data['prestacao'].get('competencia', None)
+            valor_servicos              = receipt_offchain_data['prestacao'].get('valServicos', None)
+            valor_deducoes              = receipt_offchain_data['prestacao'].get('valDeducoes', None)
+            valor_pis                   = receipt_offchain_data['prestacao'].get('valPis', None)
+            valor_cofins                = receipt_offchain_data['prestacao'].get('valCofins', None)
+            valor_inss                  = receipt_offchain_data['prestacao'].get('valInss', None)
+            valor_ir                    = receipt_offchain_data['prestacao'].get('valIr', None)
+            valor_csll                  = receipt_offchain_data['prestacao'].get('valCsll', None)
+            outras_retencoes            = receipt_offchain_data['prestacao'].get('outrasRetencoes', None)
+            valor_total_tributos        = receipt_offchain_data['prestacao'].get('valtotalTributos', None)
+            aliquota                    = receipt_offchain_data['prestacao'].get('aliquota')
+            desconto_incondicionado     = receipt_offchain_data['prestacao'].get('descontoIncond', None)
+            desconto_condicionado       = receipt_offchain_data['prestacao'].get('descontoCond', None)
+            iss_retido                  = receipt_offchain_data['prestacao'].get('issRetido', None)
+            responsavel_retencao        = receipt_offchain_data['prestacao'].get('respRetencao', None)
+            item_lista_servico          = receipt_offchain_data['prestacao'].get('itemLista', None)
+            codigo_cnae                 = receipt_offchain_data['prestacao'].get('codigo_cnae', None)
+            codigo_nbs                  = receipt_offchain_data['prestacao'].get('codNBS', None)
+            prefeitura_incidencia       = receipt_offchain_data['prestacao'].get('codTributMunicipio', None)
+            discriminacao               = receipt_offchain_data['prestacao'].get('discriminacao', None)
+            exigibilidade_iss           = receipt_offchain_data['prestacao'].get('exigibilidadeISS', None)
+            numero_processo             = receipt_offchain_data['prestacao'].get('numProcesso', None)
+            regime_especial_tributacao  = receipt_offchain_data['prestacao'].get('regimeEspTribut', None) 
+            optante_simples_nacional    = receipt_offchain_data['prestacao'].get('simplesNacional', None)
+            incentivo_fiscal            = receipt_offchain_data['prestacao'].get('incentivoFiscal', None)
+            codigo_servico              = receipt_offchain_data['prestacao'].get('codServico', None)  #check later
+            endereco_empresa            = str(company_address)
+            data_emissao                = str(time.strftime('%Y-%m-%d %H:%M:%S') )
+            estado_nota = 0 # estado default que representa nota_pendente 
+            # Applying casts
+            if base_calculo is not None:
+                base_calculo = float(base_calculo)
+            if aliquota_servicos is not None:
+                aliquota_servicos = float(aliquota_servicos)
+            if valor_iss is not None:
+                valor_iss = float(valor_iss)
+            if valor_liquido_nota is not None:
+                valor_liquido_nota = float(valor_liquido_nota)
+            if valor_servicos is not None:
+                valor_servicos = float(valor_servicos)
+            if valor_deducoes is not None:
+                valor_deducoes = float(valor_deducoes)
+            if valor_pis is not None:
+                valor_pis = float(valor_pis)
+            if valor_cofins is not None:
+                valor_cofins = float(valor_cofins)
+            if valor_inss is not None:
+                valor_inss = float(valor_inss)
+            if valor_ir is not None:
+                valor_ir = float(valor_ir)
+            if valor_csll is not None:
+                valor_csll = float(valor_csll)
+            if outras_retencoes is not None:
+                outras_retencoes = float(outras_retencoes)
+            if valor_total_tributos is not None:
+                valor_total_tributos = float(valor_total_tributos)
+            if desconto_incondicionado is not None:
+                desconto_incondicionado = float(desconto_incondicionado)
+            if desconto_condicionado is not None:
+                desconto_condicionado = float(desconto_condicionado)
+            if iss_retido is not None:
+                if iss_retido == '1':
+                    iss_retido = True
+                elif iss_retido == '2':
+                    iss_retido = False
+                else:
+                    print("VALOR INVALIDO NO CAMPO ISS_RETIDO na nota_fiscal. ( talvez return -1? )")
+            if responsavel_retencao is not None:
+                responsavel_retencao = int(responsavel_retencao)
+            if exigibilidade_iss is not None:
+                exigibilidade_iss = int(exigibilidade_iss)
+            if regime_especial_tributacao is not None:
+                regime_especial_tributacao = int(regime_especial_tributacao)
+            if optante_simples_nacional is not None:
+                if optante_simples_nacional == '1':
+                    optante_simples_nacional = True
+                elif optante_simples_nacional == '2':
+                    optante_simples_nacional = False
+                else:
+                    print("VALOR INVALIDO NO CAMPO OPTANTE_SIMPLES_NACIONAL na nota_fiscal.")
+            if incentivo_fiscal is not None:
+                if incentivo_fiscal == '1':
+                    incentivo_fiscal = True
+                elif incentivo_fiscal == '2':
+                    incentivo_fiscal = False
+                else:
+                    print("VALOR INVALIDO NO CAMPO INCENTIVO_FISCAL na nota_fiscal")
+            
+
+            def weak_receipt_validator():
+                ###### Checking for the presence of mandatory_fields
+                mandatory_fields = (valor_servicos, base_calculo, item_lista_servico,
+                                    exigibilidade_iss, emissor, competencia,
+                                    iss_retido, discriminacao, optante_simples_nacional,
+                                    incentivo_fiscal, emissor )
+                
+                for item in mandatory_fields:
+                    if item is None:
+                        print("Mandatory field is missing")
+                        return False
+                
+                ###### Check if base_calculo is corresponding to it's specification
+                expected_base_calculo = valor_servicos
+                if valor_deducoes is not None:
+                    expected_base_calculo -= valor_deducoes
+                
+                if desconto_incondicionado is not None:
+                    expected_base_calculo -= desconto_incondicionado
+                
+                if is_equal(expected_base_calculo,base_calculo) == False:
+                    print(expected_base_calculo, base_calculo )
+                    print("Valor de base_calculo nao satisfaz as especificacoes")
+                    return False
+                
+                
+                ###### Check if valor_liquido_nfse is corresponding to it's specification
+                expected_valor_liquido_nfse  = valor_servicos
+                decrement_list = (valor_pis, valor_cofins, valor_inss, valor_ir,
+                                  valor_csll, outras_retencoes, 
+                                  desconto_incondicionado, desconto_condicionado)
+                
+                if iss_retido == True:
+                    expected_valor_liquido_nfse -= valor_iss
+
+                for val in decrement_list:
+                    if val is not None:
+                        expected_valor_liquido_nfse -= val
+                
+                if valor_liquido_nota is not None and is_equal(expected_valor_liquido_nfse, valor_liquido_nota) == False:
+                    print(expected_valor_liquido_nfse, valor_liquido_nota)
+                    print("Valor_liquido_nota nao satisfaz as especificacoes")
+                    return False
+                
+                ###### Check if all values present in the receipt are non-negative
+                numerical_fields = (base_calculo, aliquota_servicos, valor_iss,
+                                    valor_liquido_nota, valor_servicos,
+                                    valor_deducoes, valor_pis, valor_cofins,
+                                    valor_inss, valor_ir, valor_csll, 
+                                    outras_retencoes, valor_total_tributos,
+                                    desconto_incondicionado, desconto_condicionado,
+                                    codigo_cnae, regime_especial_tributacao, iss_retido)
+                
+                for val in numerical_fields:
+                    if val is not None:
+                        if val < 0:
+                            print("Algum campo numerico nao nulo da Nota Fiscal esta com valor negativo")
+                            return False
+                
+                ###### Check field dependency
+                if iss_retido == True:
+                    if responsavel_retencao is None:
+                        print("ISS retido na nota_fiscal sem indicar qual o orgao responsavel pela retencao")
+                        return False
+                
+                return True
+            
+            # Checando se a nota esta inconsistente
+            if weak_receipt_validator() == False:
+                estado_nota = 4
+
+            store.sql("""
+            INSERT INTO nota_fiscal (
+                txid, endereco_emissor, base_calculo, aliquota_servicos, valor_iss, valor_liquido_nota,
+                competencia, valor_servicos, valor_deducoes, valor_pis, codigo_servico,
+                valor_cofins, valor_inss, valor_ir, valor_csll,
+                outras_retencoes, valor_total_tributos, desconto_incondicionado,
+                desconto_condicionado, iss_retido, responsavel_retencao,
+                item_lista_servico, codigo_cnae, codigo_nbs,
+                prefeitura_incidencia, discriminacao, exigibilidade_iss,
+                numero_processo, regime_especial_tributacao,
+                optante_simples_nacional, incentivo_fiscal, data_emissao, estado
+            ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+            """, (item_txid, emissor, base_calculo, aliquota_servicos, valor_iss, valor_liquido_nota,
+                  competencia, valor_servicos, valor_deducoes, valor_pis, codigo_servico,
+                  valor_cofins, valor_inss, valor_ir, valor_csll,
+                  outras_retencoes, valor_total_tributos, desconto_incondicionado,
+                  desconto_condicionado, iss_retido, responsavel_retencao,
+                  item_lista_servico, codigo_cnae, codigo_nbs,
+                  prefeitura_incidencia, discriminacao, exigibilidade_iss,
+                  numero_processo, regime_especial_tributacao, 
+                  optante_simples_nacional, incentivo_fiscal, data_emissao, estado_nota)
+            )
+            store.commit()
+
+
+        def bd_insert_company(company_data):
+            # print("Inserindo uma empresa no banco de dados")
+            # NEEDS TO BE VALIDATED!!!!
+            
+            # There is a field that has a weird character that I am not
+            # considering, but it does not seem to be important 
+            # print( "DADOS DA COMPANIA ")
+            # print( company_data )
+            # Extracting info from company_data
+            pais_endereco        = company_data.get('paisEnd', None)
+            razao_social         = company_data.get('razao', None)
+            cidade_endereco      = company_data.get('cidadeEnd', None)
+            nome_fantasia        = company_data.get('fantasia', None)
+            endereco_blockchain  = company_data.get('endBlock', None)
+            bairro_endereco      = company_data.get('bairroEnd', None)
+            estado_endereco      = company_data.get('estadoEnd', None)
+            email                = company_data.get('email', None)
+            complemento_endereco = company_data.get('compEnd', None)
+            identificacao        = company_data.get('id', None)
+            numero_endereco      = company_data.get('numEnd', None)
+            telefone             = company_data.get('tel', None)
+            logradouro_endereco  = company_data.get('logEnd', None)
+            cep_endereco         = company_data.get('cepEnd', None)
+            
+            print("Endereco_blockchain da empresa = %s " % str(endereco_blockchain))
+            
+            # Inserting new company on our database
+            store.sql("""
+                INSERT INTO empresa (
+                cnpj, endereco_blockchain, razao_social, nome_fantasia, endereco_empresa,
+                numero_endereco, complemento_endereco, bairro_endereco,
+                cidade_endereco, unidade_federacao, pais_endereco, cep,
+                email, telefone
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, 
+            (identificacao, str(endereco_blockchain), razao_social, nome_fantasia, logradouro_endereco, 
+             numero_endereco, complemento_endereco, bairro_endereco, 
+             cidade_endereco, estado_endereco, pais_endereco, cep_endereco, email, telefone)
+            )
+            store.commit()
+
+        ### END SDEC HANDLERS ###
 
         def first_new_block(height, next_hash):
             """Find the first new block."""
