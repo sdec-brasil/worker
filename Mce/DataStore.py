@@ -2997,6 +2997,9 @@ store._ddl['txout_approx'],
                     return None
 
             decoded_tx = rpc("decoderawtransaction", rpc_tx_hex)
+            
+            # print("Decoded Transaction = %s" % str(decoded_tx) )
+
             sdec_transaction_handler(decoded_tx)
 
             rpc_tx = rpc_tx_hex.decode('hex')
@@ -3023,10 +3026,15 @@ store._ddl['txout_approx'],
             # rpc_tx_hex = rpc("getrawtransaction", rpc_tx_hash)
             # decoded_tx = rpc("decoderawtransaction", rpc_tx_hex)
             
+            stream_creation = decoded_tx.get('create', None)
+            if stream_creation is not None:
+                bd_insert_stream(decoded_tx)
+                return
+            
             # We should now find out if this specific transaction involves offchain data
             # If it does, then we should use the rpc and ask for it
             # print( "DECODED TRANSACTION = %s " % str(decoded_tx) )
-
+            
             try:
                 transaction_item = decoded_tx['vout'][0]['items'][0]
             except Exception as e:
@@ -3056,6 +3064,29 @@ store._ddl['txout_approx'],
        
         def is_equal(x, y, epsilon=1*10**(-2) ):
             return abs(x - y) <= epsilon
+        
+        def bd_insert_stream(decoded_tx):
+            print("INSERINDO UMA NOVA STREAM!")
+            stream_creation = decoded_tx.get('create', None)
+            stream_name = stream_creation['name']
+            stream_creation_txid = decoded_tx.get('txid', None)
+            stream_id = decoded_tx['create'].get('streamref', None)
+            print(stream_creation, stream_name, stream_creation_txid, stream_id)
+
+            if stream_name != 'Registros':
+            	store.sql("""
+	            INSERT INTO stream ( stream_id, creation_txid, name, unidade_federacao)
+	            VALUES(?, ?, ?, ?) 
+	            """, (stream_id, stream_creation_txid, stream_name, stream_name)
+	            )
+            else:
+            	store.sql("""
+	            INSERT INTO stream (stream_id, creation_txid, name)
+	            VALUES(?, ?, ?) 
+	            """, (stream_id, stream_creation_txid, stream_name)
+	            )
+            
+            store.commit()
 
         def bd_insert_receipt(receipt_offchain_data, company_address, item_txid):
             print("INSERCAO DE NOTA FOI CHAMADA!!!!!")
