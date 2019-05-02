@@ -3073,14 +3073,15 @@ store._ddl['txout_approx'],
             stream_name = stream_creation['name']
             stream_creation_txid = decoded_tx.get('txid', None)
             stream_id = decoded_tx['create'].get('streamref', None)
+            stream_region = decoded_tx['create'].get('details', None)
+            stream_uf = stream_region.get('UF', None)
             print("Imprimindo os fields = "),
-            print(stream_creation, stream_name, stream_creation_txid, stream_id)
-
+            print(stream_name, stream_creation_txid, stream_uf, stream_id, stream_name)
             if stream_name != 'Registros':
             	store.sql("""
-	            INSERT INTO stream (stream_id, creation_txid, name, uf )
-	            VALUES(?, ?, ?, ?) 
-	            """, (stream_id, stream_creation_txid, stream_name, stream_name)
+	            INSERT INTO stream (stream_id, creation_txid, name, uf, nome_regiao)
+	            VALUES(?, ?, ?, ?, ?) 
+	            """, (stream_id, stream_creation_txid, stream_name, stream_uf, stream_name)
 	            )
             else:
             	store.sql("""
