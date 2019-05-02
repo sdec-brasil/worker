@@ -3068,11 +3068,12 @@ store._ddl['txout_approx'],
         def bd_insert_stream(decoded_tx):
             print("INSERINDO UMA NOVA STREAM!")
             print("!!!!!!!!!!!!!!!!!!!!!!!!!")
-            print( decoded_tx )
+            print("Decoded TX => %s" % str(decoded_tx) )
             stream_creation = decoded_tx.get('create', None)
             stream_name = stream_creation['name']
             stream_creation_txid = decoded_tx.get('txid', None)
             stream_id = decoded_tx['create'].get('streamref', None)
+            print("Imprimindo os fields = "),
             print(stream_creation, stream_name, stream_creation_txid, stream_id)
 
             if stream_name != 'Registros':
