@@ -4491,7 +4491,7 @@ def serve(store):
     bhs.BaseHTTPRequestHandler.address_string = lambda x: x.client_address[0]	
     del(bhs)	
 
-     if args.query is not None:	
+    if args.query is not None:	
         def start_response(status, headers):	
             pass	
         import urlparse	
