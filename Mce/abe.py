@@ -4504,13 +4504,13 @@ def serve(store):
                 'QUERY_STRING': parsed.query	
 # MULTICHAIN START	
                 }, start_response))	
-# MULTICHAIN END	
+        # MULTICHAIN END	
     elif args.host or args.port:	
         # HTTP server.	
         if args.host is None:	
             args.host = "localhost"	
         from wsgiref.simple_server import make_server	
-# MULTICHAIN START	
+        # MULTICHAIN START	
         from wsgiref import simple_server	
         class ExplorerWSGIServer(simple_server.WSGIServer):	
             # To increase the backlog	
@@ -4538,7 +4538,7 @@ def serve(store):
         thread.daemon = True	
         thread.start()	
         abe.log.warning("Launched background thread to catch up tx every {0} seconds".format(interval))	
-# MULTICHAIN END	
+        # MULTICHAIN END	
         # httpd.shutdown() sometimes hangs, so don't call it.  XXX	
         httpd.serve_forever()	
     else:	
@@ -4567,6 +4567,15 @@ def serve(store):
             Timer(interval, watch).start()	
         WSGIServer(abe).run()
 
+def redirect(page):
+    uri = wsgiref.util.request_uri(page['env'])
+    page['start_response'](
+        '301 Moved Permanently',
+        [('Location', str(uri)),
+         ('Content-Type', 'text/html')])
+    return ('<html><head><title>Moved</title></head>\n'
+            '<body><h1>Moved</h1><p>This page has moved to '
+            '<a href="' + uri + '">' + uri + '</a></body></html>')
 
 def process_is_alive(pid):
     # XXX probably fails spectacularly on Windows.
