@@ -3020,7 +3020,15 @@ store._ddl['txout_approx'],
             return tx
 
         ### SDEC HANDLERS ###    
-        
+        def has_error(offchain_data):
+            error = offchain_data.get('error', None)
+            
+            if error is None:
+                return False
+            
+            return True
+
+
         def sdec_transaction_handler(decoded_tx):
             
             # rpc_tx_hex = rpc("getrawtransaction", rpc_tx_hash)
@@ -3058,9 +3066,12 @@ store._ddl['txout_approx'],
                 # RPC call necessary for obtaining offchain-data.
                 # It is important to mention
                 offchain_data = rpc("getstreamitem", stream_ref, item_txid)
-                offchain_data = offchain_data['data']['json']
-
-                bd_insert_receipt(offchain_data, company_address, item_txid)
+                if has_error( offchain_data ) == True:
+                    bd_insert_partial_receipt( company_address, item_txid )
+                
+                else:
+                    offchain_data = offchain_data['data']['json']
+                    bd_insert_receipt(offchain_data, company_address, item_txid)
        
         def is_equal(x, y, epsilon=1*10**(-2) ):
             return abs(x - y) <= epsilon
@@ -3091,9 +3102,21 @@ store._ddl['txout_approx'],
 	            )
             
             store.commit()
+        
+        def bd_insert_partial_receipt( company_address, item_txid ):
+            
+            data_emissao = str( time.strftime('%Y-%m-%d %H:%M:%S') )
+            enedereco_empresa = str( company_address )
+            
+            store.sql("""
+            INSERT INTO nota_fiscal_parcial (
+                txid, data_emissao, endereco_empresa) VALUES(?, ?, ?)
+            """, (item_txid, data_emissao, endereco_empresa)
+            )
+            store.commit()
+
 
         def bd_insert_receipt(receipt_offchain_data, company_address, item_txid):
-            print("INSERCAO DE NOTA FOI CHAMADA!!!!!")
             emissor                     = receipt_offchain_data.get('emissor', None)
             base_calculo                = receipt_offchain_data['prestacao'].get('baseCalculo', None)
             aliquota_servicos           = receipt_offchain_data['prestacao'].get('aliqServicos', None)
