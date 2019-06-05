@@ -3067,17 +3067,21 @@ store._ddl['txout_approx'],
         
         def bd_insert_stream(decoded_tx):
             print("INSERINDO UMA NOVA STREAM!")
+            print("!!!!!!!!!!!!!!!!!!!!!!!!!")
+            print("Decoded TX => %s" % str(decoded_tx) )
             stream_creation = decoded_tx.get('create', None)
             stream_name = stream_creation['name']
             stream_creation_txid = decoded_tx.get('txid', None)
             stream_id = decoded_tx['create'].get('streamref', None)
-            print(stream_creation, stream_name, stream_creation_txid, stream_id)
-
+            stream_region = decoded_tx['create'].get('details', None)
+            stream_uf = stream_region.get('UF', None)
+            print("Imprimindo os fields = "),
+            print(stream_name, stream_creation_txid, stream_uf, stream_id, stream_name)
             if stream_name != 'Registros':
             	store.sql("""
-	            INSERT INTO stream ( stream_id, creation_txid, name, unidade_federacao)
-	            VALUES(?, ?, ?, ?) 
-	            """, (stream_id, stream_creation_txid, stream_name, stream_name)
+	            INSERT INTO stream (stream_id, creation_txid, name, uf, nome_regiao)
+	            VALUES(?, ?, ?, ?, ?) 
+	            """, (stream_id, stream_creation_txid, stream_name, stream_uf, stream_name)
 	            )
             else:
             	store.sql("""
