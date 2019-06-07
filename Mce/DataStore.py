@@ -3079,14 +3079,11 @@ store._ddl['txout_approx'],
                 # This is on purpose, to handle the case of unavailable extra receipt information
                 offchain_data = rpc_no_raise("getstreamitem", stream_ref, item_txid)
                 
-                # For testing purposes, I will consider every receipt as partial
-                bd_insert_partial_receipt( company_address, item_txid )
-
-
-                '''if has_error( offchain_data ) == True:                
+                if has_error( offchain_data ) == True:                
+                    bd_insert_partial_receipt( company_address, item_txid )
                 else:
                     offchain_data = offchain_data['data']['json']
-                    bd_insert_receipt(offchain_data, company_address, item_txid)'''
+                    bd_insert_receipt(offchain_data, company_address, item_txid)
        
         def is_equal(x, y, epsilon=1*10**(-2) ):
             return abs(x - y) <= epsilon
