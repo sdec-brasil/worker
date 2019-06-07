@@ -290,7 +290,7 @@ def jsonrpc_no_raise(chain_name, url, method, *params):
    						   "chain_name": chain_name,
    						   "method": method,
    						   "params": params,
-   						   "id": str(jsonrpc_id_countert())})
+   						   "id": str(jsonrpc_id_counter())})
     respdata = urllib.urlopen(url, postdata).read()
     resp = json.loads(respdata)
 
