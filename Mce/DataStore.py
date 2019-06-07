@@ -2967,7 +2967,7 @@ store._ddl['txout_approx'],
             store.rpclog.info("RPC>> %s %s %s", chain_name, func, params)
             ret = util.jsonrpc_no_raise(chain_name, url, func, *params)
 
-            if( store.rpclog.isEnabledFor(logginf.INFO)):
+            if( store.rpclog.isEnabledFor(logging.INFO)):
                 store.rpclog.info("RPC << %s", 
                                   re.sub(r'\[[^\]]{100,}\]', '[...]', str(ret)))
             return ret   
