@@ -284,6 +284,17 @@ def jsonrpc(chain_name, url, method, *params):
         raise JsonrpcException(resp['error'], method, params)
     return resp['result']
 
+def jsonrpc_no_raise(chain_name, url, method, *params):
+    import json, urllib
+    postdata = json.dumps({"jsonrpc": "2.0",
+   						   "chain_name": chain_name,
+   						   "method": method,
+   						   "params": params,
+   						   "id": str(jsonrpc_id_countert())})
+    respdata = urllib.urlopen(url, postdata).read()
+    resp = json.loads(respdata)
+
+    return resp['result']
 
 def str_to_ds(s):
     import BCDataStream

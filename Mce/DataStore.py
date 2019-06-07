@@ -2962,6 +2962,16 @@ store._ddl['txout_approx'],
                                   re.sub(r'\[[^\]]{100,}\]', '[...]', str(ret)))
             return ret
 
+        # This is a function only to be used in the getstreamitem function, for handling partial receipts
+        def rpc_no_raise(func, *params):
+            store.rpclog.inf("RPC>> %s %s %s", chain_name, func, params)
+            ret = util.jsonrpc_no_raise(chain_name, url, func, *params)
+
+            if( store.rpclog.isEnabledFor(logginf.INFO)):
+                store.rpclog.info("RPC << %s", 
+                                  re.sub(r'\[[^\]]{100,}\]', '[...]', str(ret)))
+            return ret   
+
         def get_blockhash(height):
             try:
                 return rpc("getblockhash", height)
@@ -3057,7 +3067,7 @@ store._ddl['txout_approx'],
                 bd_insert_company(company_data['json']) 
             
             else:
-                print("EMISSAO DE NOTA_FISCAL")
+                print("EMISSAO DE NOTA_FISCAL PARCIAL!")
                 region = transaction_item['name']
                 stream_ref = transaction_item['streamref']
                 item_txid = transaction_item['data']['txid']
@@ -3065,13 +3075,18 @@ store._ddl['txout_approx'],
                 
                 # RPC call necessary for obtaining offchain-data.
                 # It is important to mention
-                offchain_data = rpc("getstreamitem", stream_ref, item_txid)
-                if has_error( offchain_data ) == True:
-                    bd_insert_partial_receipt( company_address, item_txid )
+                # We are going to do a special rpc call that does not raise errors.
+                # This is on purpose, to handle the case of unavailable extra receipt information
+                offchain_data = rpc_no_raise("getstreamitem", stream_ref, item_txid)
                 
+                # For testing purposes, I will consider every receipt as partial
+                bd_insert_partial_receipt( company_address, item_txid )
+
+
+                '''if has_error( offchain_data ) == True:                
                 else:
                     offchain_data = offchain_data['data']['json']
-                    bd_insert_receipt(offchain_data, company_address, item_txid)
+                    bd_insert_receipt(offchain_data, company_address, item_txid)'''
        
         def is_equal(x, y, epsilon=1*10**(-2) ):
             return abs(x - y) <= epsilon
