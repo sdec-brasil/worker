@@ -2964,7 +2964,7 @@ store._ddl['txout_approx'],
 
         # This is a function only to be used in the getstreamitem function, for handling partial receipts
         def rpc_no_raise(func, *params):
-            store.rpclog.inf("RPC>> %s %s %s", chain_name, func, params)
+            store.rpclog.info("RPC>> %s %s %s", chain_name, func, params)
             ret = util.jsonrpc_no_raise(chain_name, url, func, *params)
 
             if( store.rpclog.isEnabledFor(logginf.INFO)):
