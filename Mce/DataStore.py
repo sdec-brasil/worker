@@ -3122,10 +3122,10 @@ store._ddl['txout_approx'],
             
             data_emissao = str( time.strftime('%Y-%m-%d %H:%M:%S') )
             endereco_empresa = str( company_address )
-            
+
             store.sql("""
             INSERT INTO nota_fiscal_parcial (
-                txid, data_emissao, endereco_empresa) VALUES(?, ?, ?)
+                txid, data_emissao, endereco_emissor) VALUES(?, ?)
             """, (item_txid, data_emissao, endereco_empresa)
             )
             store.commit()
