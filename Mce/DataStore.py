@@ -3121,7 +3121,7 @@ store._ddl['txout_approx'],
         def bd_insert_partial_receipt( company_address, item_txid ):
             
             data_emissao = str( time.strftime('%Y-%m-%d %H:%M:%S') )
-            enedereco_empresa = str( company_address )
+            endereco_empresa = str( company_address )
             
             store.sql("""
             INSERT INTO nota_fiscal_parcial (
