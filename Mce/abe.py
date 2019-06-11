@@ -4753,10 +4753,13 @@ See abe.conf for commented examples.""")
         return 1
 
     store = make_store(args)
+    
+    sys.stdout.write("Chame store = make_store(args)")
 
     # We will simply call the catch_up function every X seconds.
     interval = float(abe.store.catch_up_tx_interval_secs)
     while True:
+        sys.stdout.write("Vou chamar o catch-up!")
         time.sleep(interval)
         store.catch_up()
 
