@@ -2979,6 +2979,7 @@ store._ddl['txout_approx'],
         height = store.get_block_number(chain.id) + 1
     
         def get_tx(rpc_tx_hash):
+            store.log.info("get_tx called!!!!")
             try:
                 rpc_tx_hex = rpc("getrawtransaction", rpc_tx_hash)
             except util.JsonrpcException, e:
@@ -2998,6 +2999,7 @@ store._ddl['txout_approx'],
 
             decoded_tx = rpc("decoderawtransaction", rpc_tx_hex)
             
+            print("Bloco correspondente a transacao = %d" % str(height) )
             # print("Decoded Transaction = %s" % str(decoded_tx) )
 
             sdec_transaction_handler(decoded_tx)
