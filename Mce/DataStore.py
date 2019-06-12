@@ -3008,6 +3008,8 @@ store._ddl['txout_approx'],
 
             decoded_tx = rpc("decoderawtransaction", rpc_tx_hex)
             
+            print("Bloco da transacao = %d " % str(height) )
+
             # print("Decoded Transaction = %s" % str(decoded_tx) )
 
             sdec_transaction_handler(decoded_tx)
@@ -3707,7 +3709,7 @@ store._ddl['txout_approx'],
             ds.read_cursor = end
 
             store.bytes_since_commit += length
-            if store.bytes_since_commit >= store.commit_bytes:
+            if store.bytes_since_commit >= store.commit_bytes:ge_
                 store.save_blkfile_offset(dircfg, ds.read_cursor)
                 store.flush()
                 store._refresh_dircfg(dircfg)
