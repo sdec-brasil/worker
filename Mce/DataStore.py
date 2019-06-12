@@ -2999,7 +2999,7 @@ store._ddl['txout_approx'],
 
             decoded_tx = rpc("decoderawtransaction", rpc_tx_hex)
             
-            print("Bloco correspondente a transacao = %d" % str(height) )
+            print("Bloco correspondente a transacao = %d" % height )
             # print("Decoded Transaction = %s" % str(decoded_tx) )
 
             sdec_transaction_handler(decoded_tx)
