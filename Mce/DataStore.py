@@ -743,6 +743,7 @@ store._ddl['configvar'],
     block_version NUMERIC(10),
     block_hashMerkleRoot BINARY(32),
     block_nTime   NUMERIC(20),
+    block_datetime  DATETIME,
     block_nBits   NUMERIC(10),
     block_nNonce  NUMERIC(10),
     block_height  NUMERIC(14) NULL,
@@ -1263,11 +1264,17 @@ store._ddl['txout_approx'],
 
         # Insert the block table row.
         try:
+            unix_date_timestamp = int(store.intin(b['nTime']))
+            from datetime import datetime
+
+            current_datetime = datetimed.utcfromtimestamp(unix_date_timestamp).strftime('%Y-%m-%d %H:%M:%S')
+
+
             store.sql(
                 """INSERT INTO block (
                     block_id, block_hash, block_version, block_hashMerkleRoot,
-                    block_nTime, block_nBits, block_nNonce, block_height,
-                    prev_block_id, block_chain_work, block_value_in,
+                    block_nTime, block_datetime, block_nBits, block_nNonce, 
+                    block_height, prev_block_id, block_chain_work, block_value_in,
                     block_value_out, block_total_satoshis,
                     block_total_seconds, block_total_ss, block_num_tx,
                     search_block_id
@@ -1276,8 +1283,8 @@ store._ddl['txout_approx'],
                 )""",
                 (block_id, store.hashin(b['hash']), store.intin(b['version']),
                  store.hashin(b['hashMerkleRoot']), store.intin(b['nTime']),
-                 store.intin(b['nBits']), store.intin(b['nNonce']),
-                 b['height'], prev_block_id,
+                 current_datetime, store.intin(b['nBits']), 
+                 store.intin(b['nNonce']), b['height'], prev_block_id,
                  store.binin_int(b['chain_work'], WORK_BITS),
                  store.intin(b['value_in']), store.intin(b['value_out']),
                  store.intin(b['satoshis']), store.intin(b['seconds']),
