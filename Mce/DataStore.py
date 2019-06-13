@@ -1267,7 +1267,7 @@ store._ddl['txout_approx'],
             unix_date_timestamp = int(store.intin(b['nTime']))
             from datetime import datetime
 
-            current_datetime = datetimed.utcfromtimestamp(unix_date_timestamp).strftime('%Y-%m-%d %H:%M:%S')
+            current_datetime = datetime.utcfromtimestamp(unix_date_timestamp).strftime('%Y-%m-%d %H:%M:%S')
 
 
             store.sql(
