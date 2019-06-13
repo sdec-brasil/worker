@@ -3005,12 +3005,13 @@ store._ddl['txout_approx'],
                     return None
 
             decoded_tx = rpc("decoderawtransaction", rpc_tx_hex)
-            get_tx_data = rpc("gettransaction", rpc_tx_hex )
-            print("Transacao completa: %s" % str(get_tx_data) )
+            # get_tx_data = rpc("gettransaction", rpc_tx_hex )
+            # print("Transacao completa: %s" % str(get_tx_data) )
 
-            print("Bloco correspondente a transacao = %d" % height )
+            # print("Bloco correspondente a transacao = %d" % height )
             # print("Decoded Transaction = %s" % str(decoded_tx) )
 
+            # Lembrar de descomentar essa linha no MERGE para garantir que esta tudo funcionando como deveria
             # sdec_transaction_handler(decoded_tx)
 
             rpc_tx = rpc_tx_hex.decode('hex')
