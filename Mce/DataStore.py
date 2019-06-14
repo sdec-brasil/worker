@@ -740,6 +740,7 @@ store._ddl['configvar'],
 """CREATE TABLE block (
     block_id      NUMERIC(14) NOT NULL PRIMARY KEY,
     block_hash    BINARY(32)  UNIQUE NOT NULL,
+    block_hash_string   VARCHAR(32) UNIQUE NOT NULL,
     block_version NUMERIC(10),
     block_hashMerkleRoot BINARY(32),
     block_nTime   NUMERIC(20),
@@ -1265,7 +1266,7 @@ store._ddl['txout_approx'],
         try:
             store.sql(
                 """INSERT INTO block (
-                    block_id, block_hash, block_version, block_hashMerkleRoot,
+                    block_id, block_hash, block_hash_string, block_version, block_hashMerkleRoot,
                     block_nTime, block_nBits, block_nNonce, block_height,
                     prev_block_id, block_chain_work, block_value_in,
                     block_value_out, block_total_satoshis,
@@ -1274,10 +1275,10 @@ store._ddl['txout_approx'],
                 ) VALUES (
                     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                 )""",
-                (block_id, store.hashin(b['hash']), store.intin(b['version']),
-                 store.hashin(b['hashMerkleRoot']), store.intin(b['nTime']),
-                 store.intin(b['nBits']), store.intin(b['nNonce']),
-                 b['height'], prev_block_id,
+                (block_id, store.hashin(b['hash']), str(store.hashin(b['hash'])),
+                 store.intin(b['version']), store.hashin(b['hashMerkleRoot']), 
+                 store.intin(b['nTime']), store.intin(b['nBits']), 
+                 store.intin(b['nNonce']), b['height'], prev_block_id,
                  store.binin_int(b['chain_work'], WORK_BITS),
                  store.intin(b['value_in']), store.intin(b['value_out']),
                  store.intin(b['satoshis']), store.intin(b['seconds']),
