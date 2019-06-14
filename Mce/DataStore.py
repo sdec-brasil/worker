@@ -1273,18 +1273,19 @@ store._ddl['txout_approx'],
 
             store.sql(
                 """INSERT INTO block (
-                    block_id, block_hash, block_version, block_hashMerkleRoot,
+                    block_id, block_hash, block_hash_string, 
+                    block_version, block_hashMerkleRoot,
                     block_nTime, block_datetime, block_nBits, block_nNonce, 
                     block_height, prev_block_id, block_chain_work, block_value_in,
                     block_value_out, block_total_satoshis,
                     block_total_seconds, block_total_ss, block_num_tx,
                     search_block_id
                 ) VALUES (
-                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                 )""",
-                (block_id, store.hashin(b['hash']), store.intin(b['version']),
-                 store.hashin(b['hashMerkleRoot']), store.intin(b['nTime']),
-                 current_datetime, store.intin(b['nBits']), 
+                (block_id, store.hashin(b['hash']), str(store.hashin(b['hash'])), 
+                 store.intin(b['version']), store.hashin(b['hashMerkleRoot']), 
+                 store.intin(b['nTime']), current_datetime, store.intin(b['nBits']), 
                  store.intin(b['nNonce']), b['height'], prev_block_id,
                  store.binin_int(b['chain_work'], WORK_BITS),
                  store.intin(b['value_in']), store.intin(b['value_out']),
