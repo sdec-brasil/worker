@@ -740,6 +740,7 @@ store._ddl['configvar'],
 """CREATE TABLE block (
     block_id      NUMERIC(14) NOT NULL PRIMARY KEY,
     block_hash    BINARY(32)  UNIQUE NOT NULL,
+    block_hash_string   VARCHAR(32)  UNIQUE NOT NULL,
     block_version NUMERIC(10),
     block_hashMerkleRoot BINARY(32),
     block_nTime   NUMERIC(20),
