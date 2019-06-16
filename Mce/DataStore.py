@@ -3266,11 +3266,6 @@ store._ddl['txout_approx'],
             if weak_receipt_validator() == False:
                 estado_nota = 4
 
-            codigo_cnae = int(codigo_cnae)
-            print('Codigo cnae = %d' % (codigo_cnae) )
-
-            
-
             store.sql("""
             INSERT INTO invoice (
                 txId, enderecoEmissor, baseCalculo, aliqServicos, valIss, valLiquiNfse,
