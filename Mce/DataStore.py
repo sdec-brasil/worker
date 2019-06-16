@@ -3273,7 +3273,7 @@ store._ddl['txout_approx'],
                 valCofins, valInss, valIr, valCsll,
                 outrasRetencoes, valTotalTributos, descontoIncond,
                 descontoCond, issRetido, respRetencao,
-                itemLista, codCnae, codNbs,
+                itemLista, codCnae, codNBS,
                 prefeituraIncidencia, discriminacao, exigibilidadeISS,
                 numProcesso, regimeEspTribut,
                 optanteSimplesNacional, incentivoFiscal, estado
@@ -3320,9 +3320,9 @@ store._ddl['txout_approx'],
             # Inserting new company on our database
             store.sql("""
                 INSERT INTO empresa (
-                cnpj, endereco_blockchain, razao_social, nome_fantasia, endereco_empresa,
-                numero_endereco, complemento_endereco, bairro_endereco,
-                cidade_endereco, unidade_federacao, pais_endereco, cep,
+                cnpj, enderecoBlockchain, razaoSocial, nomeFantasia, enderecoEmpresa,
+                numeroEndereco, complementoEndereco, bairroEndereco,
+                cidadeEndereco, unidadeFederacao, paisEndereco, cep,
                 email, telefone
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, 
