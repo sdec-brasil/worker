@@ -3085,7 +3085,7 @@ store._ddl['txout_approx'],
             print(stream_name, stream_creation_txid, stream_uf, stream_id, stream_name)
             if stream_name != 'Registros':
             	store.sql("""
-	            INSERT INTO stream (stream_id, creation_txid, name, uf, nome_regiao)
+	            INSERT INTO stream (stream_id, creation_txid, name, uf, nomeRegiao)
 	            VALUES(?, ?, ?, ?, ?) 
 	            """, (stream_id, stream_creation_txid, stream_name, stream_uf, stream_name)
 	            )
