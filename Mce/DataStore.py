@@ -3266,22 +3266,10 @@ store._ddl['txout_approx'],
             if weak_receipt_validator() == False:
                 estado_nota = 4
 
-            def watcher(variable):
-                print variable, '=', repr(eval(variable))
+            codigo_cnae = int(codigo_cnae)
+            print('Codigo cnae = %d' % (codigo_cnae) )
 
-            print("Checagem dos valores do INVOICE\n")
-            tupla_valores = (item_txid, emissor, base_calculo, aliquota_servicos, valor_iss, valor_liquido_nota,
-                  competencia, valor_servicos, valor_deducoes, valor_pis, codigo_servico,
-                  valor_cofins, valor_inss, valor_ir, valor_csll,
-                  outras_retencoes, valor_total_tributos, desconto_incondicionado,
-                  desconto_condicionado, iss_retido, responsavel_retencao,
-                  item_lista_servico, codigo_cnae, codigo_nbs,
-                  prefeitura_incidencia, discriminacao, exigibilidade_iss,
-                  numero_processo, regime_especial_tributacao, 
-                  optante_simples_nacional, incentivo_fiscal, estado_nota)
-
-            for x in tupla_valores:
-                watcher(x)
+            
 
             store.sql("""
             INSERT INTO invoice (
