@@ -3066,7 +3066,7 @@ store._ddl['txout_approx'],
                 offchain_data = rpc("getstreamitem", stream_ref, item_txid)
                 offchain_data = offchain_data['data']['json']
 
-                bd_insert_receipt(offchain_data, company_address, item_txid)
+                bd_insert_invoice(offchain_data, company_address, item_txid, height)
        
         def is_equal(x, y, epsilon=1*10**(-2) ):
             return abs(x - y) <= epsilon
@@ -3085,7 +3085,7 @@ store._ddl['txout_approx'],
             print(stream_name, stream_creation_txid, stream_uf, stream_id, stream_name)
             if stream_name != 'Registros':
             	store.sql("""
-	            INSERT INTO stream (stream_id, creation_txid, name, uf, nome_regiao)
+	            INSERT INTO stream (stream_id, creation_txid, name, uf, nomeRegiao)
 	            VALUES(?, ?, ?, ?, ?) 
 	            """, (stream_id, stream_creation_txid, stream_name, stream_uf, stream_name)
 	            )
@@ -3098,8 +3098,9 @@ store._ddl['txout_approx'],
             
             store.commit()
 
-        def bd_insert_receipt(receipt_offchain_data, company_address, item_txid):
-            print("INSERCAO DE NOTA FOI CHAMADA!!!!!")
+        def bd_insert_invoice(receipt_offchain_data, company_address, item_txid, block_height):
+            # Posteriormente devemos inserir block_height como FK para a tabela blockchain/block.js
+            print("INSERCAO DE INVOICE FOI CHAMADA!!!!!")
             emissor                     = receipt_offchain_data.get('emissor', None)
             base_calculo                = receipt_offchain_data['prestacao'].get('baseCalculo', None)
             aliquota_servicos           = receipt_offchain_data['prestacao'].get('aliqServicos', None)
@@ -3114,14 +3115,14 @@ store._ddl['txout_approx'],
             valor_ir                    = receipt_offchain_data['prestacao'].get('valIr', None)
             valor_csll                  = receipt_offchain_data['prestacao'].get('valCsll', None)
             outras_retencoes            = receipt_offchain_data['prestacao'].get('outrasRetencoes', None)
-            valor_total_tributos        = receipt_offchain_data['prestacao'].get('valtotalTributos', None)
+            valor_total_tributos        = receipt_offchain_data['prestacao'].get('valTotalTributos', None)
             aliquota                    = receipt_offchain_data['prestacao'].get('aliquota')
             desconto_incondicionado     = receipt_offchain_data['prestacao'].get('descontoIncond', None)
             desconto_condicionado       = receipt_offchain_data['prestacao'].get('descontoCond', None)
             iss_retido                  = receipt_offchain_data['prestacao'].get('issRetido', None)
             responsavel_retencao        = receipt_offchain_data['prestacao'].get('respRetencao', None)
             item_lista_servico          = receipt_offchain_data['prestacao'].get('itemLista', None)
-            codigo_cnae                 = receipt_offchain_data['prestacao'].get('codigo_cnae', None)
+            codigo_cnae                 = receipt_offchain_data['prestacao'].get('codCnae', None)
             codigo_nbs                  = receipt_offchain_data['prestacao'].get('codNBS', None)
             prefeitura_incidencia       = receipt_offchain_data['prestacao'].get('codTributMunicipio', None)
             discriminacao               = receipt_offchain_data['prestacao'].get('discriminacao', None)
@@ -3266,17 +3267,17 @@ store._ddl['txout_approx'],
                 estado_nota = 4
 
             store.sql("""
-            INSERT INTO nota_fiscal (
-                txid, endereco_emissor, base_calculo, aliquota_servicos, valor_iss, valor_liquido_nota,
-                competencia, valor_servicos, valor_deducoes, valor_pis, codigo_servico,
-                valor_cofins, valor_inss, valor_ir, valor_csll,
-                outras_retencoes, valor_total_tributos, desconto_incondicionado,
-                desconto_condicionado, iss_retido, responsavel_retencao,
-                item_lista_servico, codigo_cnae, codigo_nbs,
-                prefeitura_incidencia, discriminacao, exigibilidade_iss,
-                numero_processo, regime_especial_tributacao,
-                optante_simples_nacional, incentivo_fiscal, data_emissao, estado
-            ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+            INSERT INTO invoice (
+                txId, enderecoEmissor, baseCalculo, aliqServicos, valIss, valLiquiNfse,
+                competencia, valServicos, valDeducoes, valPis, codServico,
+                valCofins, valInss, valIr, valCsll,
+                outrasRetencoes, valTotalTributos, descontoIncond,
+                descontoCond, issRetido, respRetencao,
+                itemLista, codCnae, codNBS,
+                prefeituraIncidencia, discriminacao, exigibilidadeISS,
+                numProcesso, regimeEspTribut,
+                optanteSimplesNacional, incentivoFiscal, estado
+            ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
             """, (item_txid, emissor, base_calculo, aliquota_servicos, valor_iss, valor_liquido_nota,
                   competencia, valor_servicos, valor_deducoes, valor_pis, codigo_servico,
                   valor_cofins, valor_inss, valor_ir, valor_csll,
@@ -3285,7 +3286,7 @@ store._ddl['txout_approx'],
                   item_lista_servico, codigo_cnae, codigo_nbs,
                   prefeitura_incidencia, discriminacao, exigibilidade_iss,
                   numero_processo, regime_especial_tributacao, 
-                  optante_simples_nacional, incentivo_fiscal, data_emissao, estado_nota)
+                  optante_simples_nacional, incentivo_fiscal, estado_nota)
             )
             store.commit()
 
@@ -3319,9 +3320,9 @@ store._ddl['txout_approx'],
             # Inserting new company on our database
             store.sql("""
                 INSERT INTO empresa (
-                cnpj, endereco_blockchain, razao_social, nome_fantasia, endereco_empresa,
-                numero_endereco, complemento_endereco, bairro_endereco,
-                cidade_endereco, unidade_federacao, pais_endereco, cep,
+                cnpj, enderecoBlockchain, razaoSocial, nomeFantasia, enderecoEmpresa,
+                numeroEndereco, complementoEndereco, bairroEndereco,
+                cidadeEndereco, unidadeFederacao, paisEndereco, cep,
                 email, telefone
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, 
