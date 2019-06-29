@@ -1269,6 +1269,8 @@ store._ddl['txout_approx'],
             from datetime import datetime
             current_datetime = datetime.utcfromtimestamp(unix_date_timestamp).strftime('%Y-%m-%d %H-%M-%S')
             
+            print(str((b['hash'])));
+
             store.sql(
                 """INSERT INTO block (
                     block_id, block_hash, block_hash_string, block_version, block_hashMerkleRoot,
@@ -1280,7 +1282,7 @@ store._ddl['txout_approx'],
                 ) VALUES (
                     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                 )""",
-                (block_id, store.hashin(b['hash']), str(store.hashin(b['hash'])),
+                (block_id, store.hashin(b['hash']), str((b['hash'])),
                  store.intin(b['version']), store.hashin(b['hashMerkleRoot']), 
                  store.intin(b['nTime']), current_datetime, store.intin(b['nBits']), 
                  store.intin(b['nNonce']), b['height'], prev_block_id,
