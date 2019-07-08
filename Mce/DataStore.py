@@ -740,7 +740,7 @@ store._ddl['configvar'],
 """CREATE TABLE block (
     block_id      NUMERIC(14) NOT NULL PRIMARY KEY,
     block_hash    BINARY(32)  UNIQUE NOT NULL,
-    block_hash_string   VARCHAR(32) UNIQUE NOT NULL,
+    block_hash_string   VARCHAR(64) UNIQUE NOT NULL,
     block_version NUMERIC(10),
     block_hashMerkleRoot BINARY(32),
     block_nTime   NUMERIC(20),
@@ -1268,8 +1268,6 @@ store._ddl['txout_approx'],
             unix_date_timestamp = int(store.intin(b['nTime']))
             from datetime import datetime
             current_datetime = datetime.utcfromtimestamp(unix_date_timestamp).strftime('%Y-%m-%d %H-%M-%S')
-            
-            print(str((b['hash'])));
 
             store.sql(
                 """INSERT INTO block (
@@ -1282,7 +1280,7 @@ store._ddl['txout_approx'],
                 ) VALUES (
                     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                 )""",
-                (block_id, store.hashin(b['hash']), str((b['hash'])),
+                (block_id, store.hashin(b['hash']), str(b['hashString']),
                  store.intin(b['version']), store.hashin(b['hashMerkleRoot']), 
                  store.intin(b['nTime']), current_datetime, store.intin(b['nBits']), 
                  store.intin(b['nNonce']), b['height'], prev_block_id,
@@ -3431,6 +3429,7 @@ store._ddl['txout_approx'],
 
                     block = {
                         'hash':     hash,
+                        'hashString': rpc_hash,
                         'version':  int(rpc_block['version']),
                         'hashPrev': prev_hash,
                         'hashMerkleRoot':
