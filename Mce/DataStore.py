@@ -1268,6 +1268,12 @@ store._ddl['txout_approx'],
             unix_date_timestamp = int(store.intin(b['nTime']))
             from datetime import datetime
             current_datetime = datetime.utcfromtimestamp(unix_date_timestamp).strftime('%Y-%m-%d %H-%M-%S')
+            
+            hashString = '000'
+            try:
+                hashString = str(b['hashString'])
+            except:
+                hashString = str(b['hash'])
 
             store.sql(
                 """INSERT INTO block (
@@ -1280,7 +1286,7 @@ store._ddl['txout_approx'],
                 ) VALUES (
                     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                 )""",
-                (block_id, store.hashin(b['hash']), str(b['hashString']),
+                (block_id, store.hashin(b['hash']), hashString,
                  store.intin(b['version']), store.hashin(b['hashMerkleRoot']), 
                  store.intin(b['nTime']), current_datetime, store.intin(b['nBits']), 
                  store.intin(b['nNonce']), b['height'], prev_block_id,
@@ -3415,6 +3421,7 @@ store._ddl['txout_approx'],
                 rpc_hash = catch_up_mempool(height)
             while rpc_hash is not None:
                 hash = rpc_hash.decode('hex')[::-1]
+                hashString = rpc_hash
 
                 if store.offer_existing_block(hash, chain.id):
                     rpc_hash = get_blockhash(height + 1)
@@ -3429,7 +3436,7 @@ store._ddl['txout_approx'],
 
                     block = {
                         'hash':     hash,
-                        'hashString': rpc_hash,
+                        'hashString': hashString,
                         'version':  int(rpc_block['version']),
                         'hashPrev': prev_hash,
                         'hashMerkleRoot':
@@ -3664,6 +3671,12 @@ store._ddl['txout_approx'],
             if not store.offer_existing_block(hash, chain.id):
                 b = chain.ds_parse_block(ds)
                 b["hash"] = hash
+
+                # We should decode/transform this hash to a viable string
+                # because this function is called the first ~10 blocks
+                # I'm not sure how to do it right now, so I'll leave a TODO
+                # and implement it wrongly here
+                b["hashString"] = str(hash)
 
                 if (store.log.isEnabledFor(logging.DEBUG) and b["hashPrev"] == chain.genesis_hash_prev):
                     try:
