@@ -3088,7 +3088,7 @@ store._ddl['txout_approx'],
             baseCalculo             = p.get('baseCalculo', None)
             aliqServicos            = p.get('aliqServicos', None)
             valLiquiNfse            = p.get('valLiquiNfse', None)
-            competencia             = p.get('competencia', None)
+            dataIncidencia          = p.get('dataIncidencia', None)
             valServicos             = p.get('valServicos', None)
             valDeducoes             = p.get('valDeducoes', None)
             valPis                  = p.get('valPis', None)
@@ -3156,7 +3156,7 @@ store._ddl['txout_approx'],
                     
                     INSERT INTO invoice (
                         txId, substitutes, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
-                        aliqServicos, valLiquiNfse, competencia, valServicos, valDeducoes,
+                        aliqServicos, valLiquiNfse, dataIncidencia, valServicos, valDeducoes,
                         valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, valTotalTributos,
                         valIss, descontoIncond, descontoCond, issRetido, respRetencao, itemLista,
                         codCnae, codServico, codNBS, discriminacao, exigibilidadeISS,
@@ -3169,7 +3169,7 @@ store._ddl['txout_approx'],
                     
                     COMMIT;
                     """, (txId, substitutes, txId, substitutes, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
-                        aliqServicos, valLiquiNfse, competencia, valServicos, valDeducoes,
+                        aliqServicos, valLiquiNfse, dataIncidencia, valServicos, valDeducoes,
                         valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, valTotalTributos,
                         valIss, descontoIncond, descontoCond, issRetido, respRetencao, itemLista,
                         codCnae, codServico, codNBS, discriminacao, exigibilidadeISS,
@@ -3193,7 +3193,7 @@ store._ddl['txout_approx'],
                 
                 INSERT INTO invoice (
                     txId, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
-                    aliqServicos, valLiquiNfse, competencia, valServicos, valDeducoes,
+                    aliqServicos, valLiquiNfse, dataIncidencia, valServicos, valDeducoes,
                     valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, valTotalTributos,
                     valIss, descontoIncond, descontoCond, issRetido, respRetencao, itemLista,
                     codCnae, codServico, codNBS, discriminacao, exigibilidadeISS,
@@ -3204,7 +3204,7 @@ store._ddl['txout_approx'],
                 
                 COMMIT;
                 """, (txId, substitutes, txId, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
-                    aliqServicos, valLiquiNfse, competencia, valServicos, valDeducoes,
+                    aliqServicos, valLiquiNfse, dataIncidencia, valServicos, valDeducoes,
                     valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, valTotalTributos,
                     valIss, descontoIncond, descontoCond, issRetido, respRetencao, itemLista,
                     codCnae, codServico, codNBS, discriminacao, exigibilidadeISS,
@@ -3222,7 +3222,7 @@ store._ddl['txout_approx'],
             baseCalculo             = p.get('baseCalculo', None)
             aliqServicos            = p.get('aliqServicos', None)
             valLiquiNfse            = p.get('valLiquiNfse', None)
-            competencia             = p.get('competencia', None)
+            dataIncidencia          = p.get('dataIncidencia', None)
             valServicos             = p.get('valServicos', None)
             valDeducoes             = p.get('valDeducoes', None)
             valPis                  = p.get('valPis', None)
@@ -3280,7 +3280,7 @@ store._ddl['txout_approx'],
                 store.sql("""
                 INSERT INTO invoice (
                     txId, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
-                    aliqServicos, valLiquiNfse, competencia, valServicos, valDeducoes,
+                    aliqServicos, valLiquiNfse, dataIncidencia, valServicos, valDeducoes,
                     valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, valTotalTributos,
                     valIss, descontoIncond, descontoCond, issRetido, respRetencao, itemLista,
                     codCnae, codServico, codNBS, discriminacao, exigibilidadeISS,
@@ -3291,7 +3291,7 @@ store._ddl['txout_approx'],
                 ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                 """, (txId, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
-                    aliqServicos, valLiquiNfse, competencia, valServicos, valDeducoes,
+                    aliqServicos, valLiquiNfse, dataIncidencia, valServicos, valDeducoes,
                     valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, valTotalTributos,
                     valIss, descontoIncond, descontoCond, issRetido, respRetencao, itemLista,
                     codCnae, codServico, codNBS, discriminacao, exigibilidadeISS,
@@ -3310,7 +3310,7 @@ store._ddl['txout_approx'],
                 store.sql("""
                 INSERT INTO invoice (
                     txId, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
-                    aliqServicos, valLiquiNfse, competencia, valServicos, valDeducoes,
+                    aliqServicos, valLiquiNfse, dataIncidencia, valServicos, valDeducoes,
                     valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, valTotalTributos,
                     valIss, descontoIncond, descontoCond, issRetido, respRetencao, itemLista,
                     codCnae, codServico, codNBS, discriminacao, exigibilidadeISS,
@@ -3319,7 +3319,7 @@ store._ddl['txout_approx'],
                 ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                          ?, ?, ?, ?, ?, ?, ?) 
                 """, (txId, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
-                    aliqServicos, valLiquiNfse, competencia, valServicos, valDeducoes,
+                    aliqServicos, valLiquiNfse, dataIncidencia, valServicos, valDeducoes,
                     valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, valTotalTributos,
                     valIss, descontoIncond, descontoCond, issRetido, respRetencao, itemLista,
                     codCnae, codServico, codNBS, discriminacao, exigibilidadeISS,
