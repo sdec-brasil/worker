@@ -161,7 +161,6 @@ class DataStore(object):
         if args.redisPort is not None and args.redisHost is not None and args.redisDb is not None:
             store.redis = redis.Redis(host = args.redisHost, port = args.redisPort, db = args.redisDb)
 
-
         sql_args = lambda: 1
         sql_args.module = store.dbmodule
         sql_args.connect_args = args.connect_args
@@ -3369,6 +3368,8 @@ store._ddl['txout_approx'],
             )
 
             store.commit()
+
+            store.redis.publish('company:new:' + str(_cnpj), meta['txid'])
 
             print('empresa nova: %s', str(enderecoBlockchain))
 
