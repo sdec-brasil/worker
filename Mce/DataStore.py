@@ -161,7 +161,7 @@ class DataStore(object):
         print(args)
 
         if args.redisPort is not None and args.redisHost is not None and args.redisDb is not None:
-            store.redis = redis.Redis(host = redisHost, port = redisPort, db = redisDb)
+            store.redis = redis.Redis(host = args.redisHost, port = args.redisPort, db = args.redisDb)
 
 
         sql_args = lambda: 1
