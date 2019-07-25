@@ -26,6 +26,7 @@ import re
 import time
 import errno
 import logging
+import redis
 
 import SqlAbstraction
 
@@ -156,6 +157,10 @@ class DataStore(object):
             store._sql = None
             return
         store.dbmodule = __import__(args.dbtype)
+
+        if args.redisPort is not None and args.redisHost is not None and args.redisDb is not None:
+            store.redis = redis.Redis(host = redisHost, port = redisPort, db = redisDb)
+
 
         sql_args = lambda: 1
         sql_args.module = store.dbmodule
