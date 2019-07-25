@@ -197,6 +197,7 @@ def html_keyvalue_tablerow_wrap(minwidth, maxwidth, key, *values):
 
 
 def make_store(args):
+    print(args)
     store = DataStore.new(args)
     if (not args.no_load):
         store.catch_up()
@@ -4584,6 +4585,9 @@ def create_conf():
         "logging":                  None,
         "address_history_rows_max": None,
         "shortlink_type":           None,
+        "redisPort":                None,
+        "redisHost":                None,
+        "redisDb":                  None,
 
         "template":     DEFAULT_TEMPLATE,
         "template_vars": {
