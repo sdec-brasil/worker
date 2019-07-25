@@ -158,12 +158,6 @@ class DataStore(object):
             return
         store.dbmodule = __import__(args.dbtype)
 
-        print(args.redisPort)
-        print(args)
-
-        for k,v in args.iteritems():
-            print(k, v)
-
         if args.redisPort is not None and args.redisHost is not None and args.redisDb is not None:
             store.redis = redis.Redis(host = args.redisHost, port = args.redisPort, db = args.redisDb)
 

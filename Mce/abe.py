@@ -197,7 +197,6 @@ def html_keyvalue_tablerow_wrap(minwidth, maxwidth, key, *values):
 
 
 def make_store(args):
-    print(args)
     store = DataStore.new(args)
     if (not args.no_load):
         store.catch_up()
