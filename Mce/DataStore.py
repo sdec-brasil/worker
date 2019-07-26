@@ -3087,6 +3087,9 @@ store._ddl['txout_approx'],
             email                   = None
             tel                     = None
 
+            # Not returned, object
+            tomador                 = data.get('tomador', None)
+
             if (data.get('intermediario', None) is not None):
                 identificacaoIntermed   = data['intermediario'].get('identificacaoIntermed', None)
                 nomeRazaoIntermed       = data['intermediario'].get('nomeRazaoIntermed', None)
