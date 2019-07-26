@@ -3218,6 +3218,8 @@ store._ddl['txout_approx'],
                         )
                     )
                 store.commit()
+                txids = substitutes + ' ' + meta['txid']
+                store.redis.publish('invoice:update:' + str(_cnpj), txids)
             else:
                 store.sql("""
                 START TRANSACTION;
@@ -3249,6 +3251,8 @@ store._ddl['txout_approx'],
                     identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado)
                 )
                 store.commit()
+                txids = substitutes + ' ' + meta['txid']
+                store.redis.publish('invoice:update:' + str(_cnpj), txids)
 
         def bd_insert_invoice(data, meta):
             txId                    = meta['txid']	
@@ -3292,6 +3296,7 @@ store._ddl['txout_approx'],
                 store.commit()
 
                 print('nota nova: %s', txId)
+                store.redis.publish('invoice:new:' + str(_cnpj), meta['txid'])
 
             else:
                 store.sql("""
@@ -3316,6 +3321,7 @@ store._ddl['txout_approx'],
                 store.commit()
 
                 print('nota nova: %s', txId)
+                store.redis.publish('invoice:new:' + str(_cnpj), meta['txid'])
 
         def bd_insert_company(company_data, meta):
             paisEndereco        = company_data.get('paisEnd', None)
@@ -3353,7 +3359,6 @@ store._ddl['txout_approx'],
             store.commit()
 
             store.redis.publish('company:new:' + str(_cnpj), meta['txid'])
-
             print('empresa nova: %s', str(enderecoBlockchain))
 
         ### END SDEC HANDLERS ###
