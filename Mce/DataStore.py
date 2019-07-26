@@ -3165,6 +3165,10 @@ store._ddl['txout_approx'],
             return abs(x - y) <= epsilon
         
         def bd_update_and_insert_invoice(data, meta):
+            txId                    = meta['txid']	
+            enderecoEmissor         = meta['publishers'][0]	
+            blocoConfirmacaoId      = meta['height']
+            
             substitutes, prefeituraIncidencia, baseCalculo, aliqServicos, valLiquiNfse, \
             dataIncidencia, valServicos, valDeducoes, valPis, valCofins, valInss, valIr, valCsll, \
             outrasRetencoes, valTotalTributos, valIss, descontoIncond, descontoCond, issRetido, \
@@ -3243,6 +3247,10 @@ store._ddl['txout_approx'],
                 store.commit()
 
         def bd_insert_invoice(data, meta):
+            txId                    = meta['txid']	
+            enderecoEmissor         = meta['publishers'][0]	
+            blocoConfirmacaoId      = meta['height']
+
             substitutes, prefeituraIncidencia, baseCalculo, aliqServicos, valLiquiNfse, \
             dataIncidencia, valServicos, valDeducoes, valPis, valCofins, valInss, valIr, valCsll, \
             outrasRetencoes, valTotalTributos, valIss, descontoIncond, descontoCond, issRetido, \
