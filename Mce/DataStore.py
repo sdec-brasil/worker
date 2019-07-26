@@ -3174,7 +3174,7 @@ store._ddl['txout_approx'],
             nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, estadoEnd, paisEnd, cepEnd, email, \
             tel = sdec_invoice_fields(data)
 
-            if (tomador is not None):
+            if (tomadorEncriptado is None):
                 store.sql("""
                     START TRANSACTION;
                     
@@ -3252,7 +3252,7 @@ store._ddl['txout_approx'],
             nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, estadoEnd, paisEnd, cepEnd, email, \
             tel = sdec_invoice_fields(data)
 
-            if (tomador is not None):
+            if (tomadorEncriptado is None):
                 store.sql("""
                 INSERT INTO invoice (
                     txId, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
