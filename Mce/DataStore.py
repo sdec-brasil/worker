@@ -3038,6 +3038,94 @@ store._ddl['txout_approx'],
 
         ### SDEC HANDLERS ###    
         
+        def sdec_invoice_fields(data):
+            p                       = data['prestacao']
+            substitutes             = p.get('substitutes', None)
+            prefeituraIncidencia    = p.get('prefeituraIncidencia', None)
+            baseCalculo             = p.get('baseCalculo', None)
+            aliqServicos            = p.get('aliqServicos', None)
+            valLiquiNfse            = p.get('valLiquiNfse', None)
+            dataIncidencia          = p.get('dataIncidencia', None)
+            valServicos             = p.get('valServicos', None)
+            valDeducoes             = p.get('valDeducoes', None)
+            valPis                  = p.get('valPis', None)
+            valCofins               = p.get('valCofins', None)
+            valInss                 = p.get('valInss', None)
+            valIr                   = p.get('valIr', None)
+            valCsll                 = p.get('valCsll', None)
+            outrasRetencoes         = p.get('outrasRetencoes', None)
+            valTotalTributos        = p.get('valTotalTributos', None)
+            valIss                  = p.get('valIss', None)
+            descontoIncond          = p.get('descontoIncond', None)
+            descontoCond            = p.get('descontoCond', None)
+            issRetido               = p.get('issRetido', None)
+            respRetencao            = p.get('respRetencao', None)
+            itemLista               = p.get('itemLista', None)
+            codCnae                 = p.get('codCnae', None)
+            codServico              = p.get('codServico', None)
+            codNBS                  = p.get('codNBS', None)
+            discriminacao           = p.get('discriminacao', None)
+            exigibilidadeISS        = p.get('exigibilidadeISS', None)
+            numProcesso             = p.get('numProcesso', None)
+            regimeEspTribut         = p.get('regimeEspTribut', None)
+            optanteSimplesNacional  = p.get('optanteSimplesNacional', None)
+            incentivoFiscal         = p.get('incentivoFiscal', None)
+            # Nested Optional Fields
+            identificacaoIntermed   = None
+            nomeRazaoIntermed       = None
+            cidadeIntermed          = None
+            codObra                 = None
+            art                     = None
+            tomadorEncriptado       = None
+            identificacaoTomador    = None
+            nif                     = None
+            nomeRazaoTomador        = None
+            logEnd                  = None
+            numEnd                  = None
+            compEnd                 = None
+            bairroEnd               = None
+            cidadeEnd               = None
+            estadoEnd               = None
+            paisEnd                 = None
+            cepEnd                  = None
+            email                   = None
+            tel                     = None
+
+            # Not returned, object
+            tomador                 = data.get('tomador', None)
+
+            if (data.get('intermediario', None) is not None):
+                identificacaoIntermed   = data['intermediario'].get('identificacaoIntermed', None)
+                nomeRazaoIntermed       = data['intermediario'].get('nomeRazaoIntermed', None)
+                cidadeIntermed          = data['intermediario'].get('cidadeIntermed', None)
+            if (data.get('constCivil', None) is not None):
+                codObra                 = data['constCivil'].get('codObra', None)
+                art                     = data['constCivil'].get('art', None)
+            if (data.get('tomador', None) is not None):
+                identificacaoTomador    = tomador.get('identificacaoTomador', None)
+                nif                     = tomador.get('nif', None)
+                nomeRazaoTomador        = tomador.get('nomeRazaoTomador', None)
+                logEnd                  = tomador.get('logEnd', None)
+                numEnd                  = tomador.get('numEnd', None)
+                compEnd                 = tomador.get('compEnd', None)
+                bairroEnd               = tomador.get('bairroEnd', None)
+                cidadeEnd               = tomador.get('cidadeEnd', None)
+                estadoEnd               = tomador.get('estadoEnd', None)
+                paisEnd                 = tomador.get('paisEnd', None)
+                cepEnd                  = tomador.get('cepEnd', None)
+                email                   = tomador.get('email', None)
+                tel                     = tomador.get('tel', None)
+            else:
+                tomadorEncriptado = data.get('tomadorEncriptado', None)
+            
+            return substitutes, prefeituraIncidencia, baseCalculo, aliqServicos, valLiquiNfse, \
+                dataIncidencia, valServicos, valDeducoes, valPis, valCofins, valInss, valIr, valCsll, \
+                outrasRetencoes, valTotalTributos, valIss, descontoIncond, descontoCond, issRetido, \
+                respRetencao, itemLista, codCnae, codServico, codNBS, discriminacao, exigibilidadeISS, \
+                numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, identificacaoIntermed, \
+                nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado, identificacaoTomador, nif, \
+                nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, estadoEnd, paisEnd, cepEnd, email, tel
+
         def sdec_transaction_handler(decoded_tx, height):
             meta = {
                 'txid': decoded_tx['txid'],
@@ -3081,74 +3169,20 @@ store._ddl['txout_approx'],
             return abs(x - y) <= epsilon
         
         def bd_update_and_insert_invoice(data, meta):
-            p                       = data['prestacao']
-
-            txId                    = meta['txid']
-            enderecoEmissor         = meta['publishers'][0]
+            txId                    = meta['txid']	
+            enderecoEmissor         = meta['publishers'][0]	
             blocoConfirmacaoId      = meta['height']
+            
+            substitutes, prefeituraIncidencia, baseCalculo, aliqServicos, valLiquiNfse, \
+            dataIncidencia, valServicos, valDeducoes, valPis, valCofins, valInss, valIr, valCsll, \
+            outrasRetencoes, valTotalTributos, valIss, descontoIncond, descontoCond, issRetido, \
+            respRetencao, itemLista, codCnae, codServico, codNBS, discriminacao, exigibilidadeISS, \
+            numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, identificacaoIntermed, \
+            nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado, identificacaoTomador, nif, \
+            nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, estadoEnd, paisEnd, cepEnd, email, \
+            tel = sdec_invoice_fields(data)
 
-            substitutes             = p.get('substitutes', None)
-            prefeituraIncidencia    = p.get('prefeituraIncidencia', None)
-            baseCalculo             = p.get('baseCalculo', None)
-            aliqServicos            = p.get('aliqServicos', None)
-            valLiquiNfse            = p.get('valLiquiNfse', None)
-            dataIncidencia          = p.get('dataIncidencia', None)
-            valServicos             = p.get('valServicos', None)
-            valDeducoes             = p.get('valDeducoes', None)
-            valPis                  = p.get('valPis', None)
-            valCofins               = p.get('valCofins', None)
-            valInss                 = p.get('valInss', None)
-            valIr                   = p.get('valIr', None)
-            valCsll                 = p.get('valCsll', None)
-            outrasRetencoes         = p.get('outrasRetencoes', None)
-            valTotalTributos        = p.get('valTotalTributos', None)
-            valIss                  = p.get('valIss', None)
-            descontoIncond          = p.get('descontoIncond', None)
-            descontoCond            = p.get('descontoCond', None)
-            issRetido               = p.get('issRetido', None)
-            respRetencao            = p.get('respRetencao', None)
-            itemLista               = p.get('itemLista', None)
-            codCnae                 = p.get('codCnae', None)
-            codServico              = p.get('codServico', None)
-            codNBS                  = p.get('codNBS', None)
-            discriminacao           = p.get('discriminacao', None)
-            exigibilidadeISS        = p.get('exigibilidadeISS', None)
-            numProcesso             = p.get('numProcesso', None)
-            regimeEspTribut         = p.get('regimeEspTribut', None)
-            optanteSimplesNacional  = p.get('optanteSimplesNacional', None)
-            incentivoFiscal         = p.get('incentivoFiscal', None)
-
-            identificacaoIntermed   = None
-            nomeRazaoIntermed       = None
-            cidadeIntermed          = None
-            codObra                 = None
-            art                     = None
-
-            if (data.get('intermediario', None) is not None):
-                identificacaoIntermed   = data['intermediario'].get('identificacaoIntermed', None)
-                nomeRazaoIntermed       = data['intermediario'].get('nomeRazaoIntermed', None)
-                cidadeIntermed          = data['intermediario'].get('cidadeIntermed', None)
-            if (data.get('constCivil', None) is not None):
-                codObra                 = data['constCivil'].get('codObra', None)
-                art                     = data['constCivil'].get('art', None)
-
-            tomador = data.get('tomador', None)
-
-            if (tomador is not None):
-                identificacaoTomador    = tomador.get('identificacaoTomador', None)
-                nif                     = tomador.get('nif', None)
-                nomeRazaoTomador        = tomador.get('nomeRazaoTomador', None)
-                logEnd                  = tomador.get('logEnd', None)
-                numEnd                  = tomador.get('numEnd', None)
-                compEnd                 = tomador.get('compEnd', None)
-                bairroEnd               = tomador.get('bairroEnd', None)
-                cidadeEnd               = tomador.get('cidadeEnd', None)
-                estadoEnd               = tomador.get('estadoEnd', None)
-                paisEnd                 = tomador.get('paisEnd', None)
-                cepEnd                  = tomador.get('cepEnd', None)
-                email                   = tomador.get('email', None)
-                tel                     = tomador.get('tel', None)
-
+            if (tomadorEncriptado is None):
                 store.sql("""
                     START TRANSACTION;
                     
@@ -3185,7 +3219,6 @@ store._ddl['txout_approx'],
                     )
                 store.commit()
             else:
-                tomadorEncriptado = data.get('tomadorEncriptado', None)
                 store.sql("""
                 START TRANSACTION;
                     
@@ -3218,69 +3251,20 @@ store._ddl['txout_approx'],
                 store.commit()
 
         def bd_insert_invoice(data, meta):
-            p                       = data['prestacao']
-            txId                    = meta['txid']
-            enderecoEmissor         = meta['publishers'][0]
+            txId                    = meta['txid']	
+            enderecoEmissor         = meta['publishers'][0]	
             blocoConfirmacaoId      = meta['height']
-            prefeituraIncidencia    = p.get('prefeituraIncidencia', None)
-            baseCalculo             = p.get('baseCalculo', None)
-            aliqServicos            = p.get('aliqServicos', None)
-            valLiquiNfse            = p.get('valLiquiNfse', None)
-            dataIncidencia          = p.get('dataIncidencia', None)
-            valServicos             = p.get('valServicos', None)
-            valDeducoes             = p.get('valDeducoes', None)
-            valPis                  = p.get('valPis', None)
-            valCofins               = p.get('valCofins', None)
-            valInss                 = p.get('valInss', None)
-            valIr                   = p.get('valIr', None)
-            valCsll                 = p.get('valCsll', None)
-            outrasRetencoes         = p.get('outrasRetencoes', None)
-            valTotalTributos        = p.get('valTotalTributos', None)
-            valIss                  = p.get('valIss', None)
-            descontoIncond          = p.get('descontoIncond', None)
-            descontoCond            = p.get('descontoCond', None)
-            issRetido               = p.get('issRetido', None)
-            respRetencao            = p.get('respRetencao', None)
-            itemLista               = p.get('itemLista', None)
-            codCnae                 = p.get('codCnae', None)
-            codServico              = p.get('codServico', None)
-            codNBS                  = p.get('codNBS', None)
-            discriminacao           = p.get('discriminacao', None)
-            exigibilidadeISS        = p.get('exigibilidadeISS', None)
-            numProcesso             = p.get('numProcesso', None)
-            regimeEspTribut         = p.get('regimeEspTribut', None)
-            optanteSimplesNacional  = p.get('optanteSimplesNacional', None)
-            incentivoFiscal         = p.get('incentivoFiscal', None)
-            identificacaoIntermed   = None
-            nomeRazaoIntermed       = None
-            cidadeIntermed          = None
-            codObra                 = None
-            art                     = None
-            if (data.get('intermediario', None) is not None):
-                identificacaoIntermed   = data['intermediario'].get('identificacaoIntermed', None)
-                nomeRazaoIntermed       = data['intermediario'].get('nomeRazaoIntermed', None)
-                cidadeIntermed          = data['intermediario'].get('cidadeIntermed', None)
-            if (data.get('constCivil', None) is not None):
-                codObra                 = data['constCivil'].get('codObra', None)
-                art                     = data['constCivil'].get('art', None)
 
-            tomador = data.get('tomador', None)
+            substitutes, prefeituraIncidencia, baseCalculo, aliqServicos, valLiquiNfse, \
+            dataIncidencia, valServicos, valDeducoes, valPis, valCofins, valInss, valIr, valCsll, \
+            outrasRetencoes, valTotalTributos, valIss, descontoIncond, descontoCond, issRetido, \
+            respRetencao, itemLista, codCnae, codServico, codNBS, discriminacao, exigibilidadeISS, \
+            numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, identificacaoIntermed, \
+            nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado, identificacaoTomador, nif, \
+            nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, estadoEnd, paisEnd, cepEnd, email, \
+            tel = sdec_invoice_fields(data)
 
-            if (tomador is not None):
-                identificacaoTomador    = tomador.get('identificacaoTomador', None)
-                nif                     = tomador.get('nif', None)
-                nomeRazaoTomador        = tomador.get('nomeRazaoTomador', None)
-                logEnd                  = tomador.get('logEnd', None)
-                numEnd                  = tomador.get('numEnd', None)
-                compEnd                 = tomador.get('compEnd', None)
-                bairroEnd               = tomador.get('bairroEnd', None)
-                cidadeEnd               = tomador.get('cidadeEnd', None)
-                estadoEnd               = tomador.get('estadoEnd', None)
-                paisEnd                 = tomador.get('paisEnd', None)
-                cepEnd                  = tomador.get('cepEnd', None)
-                email                   = tomador.get('email', None)
-                tel                     = tomador.get('tel', None)
-
+            if (tomadorEncriptado is None):
                 store.sql("""
                 INSERT INTO invoice (
                     txId, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
@@ -3310,7 +3294,6 @@ store._ddl['txout_approx'],
                 print('nota nova: %s', txId)
 
             else:
-                tomadorEncriptado = data.get('tomadorEncriptado', None)
                 store.sql("""
                 INSERT INTO invoice (
                     txId, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
