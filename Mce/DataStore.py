@@ -26,6 +26,7 @@ import re
 import time
 import errno
 import logging
+import redis
 
 import SqlAbstraction
 
@@ -156,6 +157,9 @@ class DataStore(object):
             store._sql = None
             return
         store.dbmodule = __import__(args.dbtype)
+
+        if args.redisPort is not None and args.redisHost is not None and args.redisDb is not None:
+            store.redis = redis.Redis(host = args.redisHost, port = args.redisPort, db = args.redisDb)
 
         sql_args = lambda: 1
         sql_args.module = store.dbmodule
@@ -3214,6 +3218,8 @@ store._ddl['txout_approx'],
                         )
                     )
                 store.commit()
+                txids = substitutes + ' ' + meta['txid']
+                store.redis.publish('invoice:update:' + str(_cnpj), txids)
             else:
                 store.sql("""
                 START TRANSACTION;
@@ -3245,6 +3251,8 @@ store._ddl['txout_approx'],
                     identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado)
                 )
                 store.commit()
+                txids = substitutes + ' ' + meta['txid']
+                store.redis.publish('invoice:update:' + str(_cnpj), txids)
 
         def bd_insert_invoice(data, meta):
             txId                    = meta['txid']	
@@ -3288,6 +3296,7 @@ store._ddl['txout_approx'],
                 store.commit()
 
                 print('nota nova: %s', txId)
+                store.redis.publish('invoice:new:' + str(_cnpj), meta['txid'])
 
             else:
                 store.sql("""
@@ -3312,6 +3321,7 @@ store._ddl['txout_approx'],
                 store.commit()
 
                 print('nota nova: %s', txId)
+                store.redis.publish('invoice:new:' + str(_cnpj), meta['txid'])
 
         def bd_insert_company(company_data, meta):
             paisEndereco        = company_data.get('paisEnd', None)
@@ -3348,6 +3358,7 @@ store._ddl['txout_approx'],
 
             store.commit()
 
+            store.redis.publish('company:new:' + str(_cnpj), meta['txid'])
             print('empresa nova: %s', str(enderecoBlockchain))
 
         ### END SDEC HANDLERS ###

@@ -224,6 +224,7 @@ class Abe:
     def __init__(abe, store, args):
         abe.store = store
         abe.args = args
+        print(abe.args)
         abe.htdocs = args.document_root or find_htdocs()
         abe.static_path = '' if args.static_path is None else args.static_path
         abe.template_vars = args.template_vars.copy()
@@ -4583,6 +4584,9 @@ def create_conf():
         "logging":                  None,
         "address_history_rows_max": None,
         "shortlink_type":           None,
+        "redisPort":                None,
+        "redisHost":                None,
+        "redisDb":                  None,
 
         "template":     DEFAULT_TEMPLATE,
         "template_vars": {
