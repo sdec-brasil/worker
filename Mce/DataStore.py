@@ -3301,8 +3301,6 @@ store._ddl['txout_approx'],
                     substitutedBy = ?
                 WHERE
                     txId = ?;
-                
-                VALUES(?, ?)
                 """, (txId, substitutes)
                 )
             store.commit()
