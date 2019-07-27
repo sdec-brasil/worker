@@ -3168,93 +3168,7 @@ store._ddl['txout_approx'],
         def is_equal(x, y, epsilon=1*10**(-2) ):
             return abs(x - y) <= epsilon
         
-        def bd_update_and_insert_invoice(data, meta):
-            txId                    = meta['txid']	
-            enderecoEmissor         = meta['publishers'][0]	
-            blocoConfirmacaoId      = meta['height']
-            
-            substitutes, prefeituraIncidencia, baseCalculo, aliqServicos, valLiquiNfse, \
-            dataIncidencia, valServicos, valDeducoes, valPis, valCofins, valInss, valIr, valCsll, \
-            outrasRetencoes, valTotalTributos, valIss, descontoIncond, descontoCond, issRetido, \
-            respRetencao, itemLista, codCnae, codServico, codNBS, discriminacao, exigibilidadeISS, \
-            numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, identificacaoIntermed, \
-            nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado, identificacaoTomador, nif, \
-            nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, estadoEnd, paisEnd, cepEnd, email, \
-            tel = sdec_invoice_fields(data)
-
-            if (tomadorEncriptado is None):
-                store.sql("""
-                    START TRANSACTION;
-                    
-                    UPDATE invoice
-                    SET
-                        substitutedBy = ?
-                    WHERE
-                        txId = ?;
-                    
-                    INSERT INTO invoice (
-                        txId, substitutes, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
-                        aliqServicos, valLiquiNfse, dataIncidencia, valServicos, valDeducoes,
-                        valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, valTotalTributos,
-                        valIss, descontoIncond, descontoCond, issRetido, respRetencao, itemLista,
-                        codCnae, codServico, codNBS, discriminacao, exigibilidadeISS,
-                        numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, 
-                        identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, codObra, art,
-                        identificacaoTomador, nif, nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, 
-                        estadoEnd, paisEnd, cepEnd, email, tel
-                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
-                    
-                    COMMIT;
-                    """, (txId, substitutes, txId, substitutes, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
-                        aliqServicos, valLiquiNfse, dataIncidencia, valServicos, valDeducoes,
-                        valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, valTotalTributos,
-                        valIss, descontoIncond, descontoCond, issRetido, respRetencao, itemLista,
-                        codCnae, codServico, codNBS, discriminacao, exigibilidadeISS,
-                        numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, 
-                        identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, codObra, art, 
-                        identificacaoTomador, nif, nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, 
-                        estadoEnd, paisEnd, cepEnd, email, tel
-                        )
-                    )
-                store.commit()
-                txids = substitutes + ' ' + meta['txid']
-                store.redis.publish('invoice:update:' + str(enderecoEmissor), txids)
-            else:
-                store.sql("""
-                START TRANSACTION;
-                    
-                    UPDATE invoice
-                    SET
-                        substitutedBy = ?
-                    WHERE
-                        txId = ?;
-                
-                INSERT INTO invoice (
-                    txId, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
-                    aliqServicos, valLiquiNfse, dataIncidencia, valServicos, valDeducoes,
-                    valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, valTotalTributos,
-                    valIss, descontoIncond, descontoCond, issRetido, respRetencao, itemLista,
-                    codCnae, codServico, codNBS, discriminacao, exigibilidadeISS,
-                    numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, 
-                    identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado
-                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                         ?, ?, ?, ?, ?, ?, ?, ?) 
-                
-                COMMIT;
-                """, (txId, substitutes, txId, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
-                    aliqServicos, valLiquiNfse, dataIncidencia, valServicos, valDeducoes,
-                    valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, valTotalTributos,
-                    valIss, descontoIncond, descontoCond, issRetido, respRetencao, itemLista,
-                    codCnae, codServico, codNBS, discriminacao, exigibilidadeISS,
-                    numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, 
-                    identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado)
-                )
-                store.commit()
-                txids = substitutes + ' ' + meta['txid']
-                store.redis.publish('invoice:update:' + str(enderecoEmissor), txids)
-
-        def bd_insert_invoice(data, meta):
+        def bd_insert_invoice(data, meta, isReplacement = False):
             txId                    = meta['txid']	
             enderecoEmissor         = meta['publishers'][0]	
             blocoConfirmacaoId      = meta['height']
@@ -3296,7 +3210,10 @@ store._ddl['txout_approx'],
                 store.commit()
 
                 print('nota nova: %s', txId)
-                store.redis.publish('invoice:new:' + str(enderecoEmissor), meta['txid'])
+                if isReplacement is True:
+                    store.redis.publish('invoice:update:' + str(enderecoEmissor), meta['txid'])
+                else:
+                    store.redis.publish('invoice:new:' + str(enderecoEmissor), meta['txid'])
 
             else:
                 store.sql("""
@@ -3321,7 +3238,10 @@ store._ddl['txout_approx'],
                 store.commit()
 
                 print('nota nova: %s', txId)
-                store.redis.publish('invoice:new:' + str(enderecoEmissor), meta['txid'])
+                if isReplacement is True:
+                    store.redis.publish('invoice:update:' + str(enderecoEmissor), meta['txid'])
+                else:
+                    store.redis.publish('invoice:new:' + str(enderecoEmissor), meta['txid'])
 
         def bd_insert_company(company_data, meta):
             paisEndereco        = company_data.get('paisEnd', None)
@@ -3360,6 +3280,33 @@ store._ddl['txout_approx'],
 
             store.redis.publish('company:new:' + str(_cnpj), meta['txid'])
             print('empresa nova: %s', str(enderecoBlockchain))
+
+        def bd_update_and_insert_invoice(data, meta):
+            txId                    = meta['txid']	
+            enderecoEmissor         = meta['publishers'][0]	
+            blocoConfirmacaoId      = meta['height']
+            
+            substitutes, prefeituraIncidencia, baseCalculo, aliqServicos, valLiquiNfse, \
+            dataIncidencia, valServicos, valDeducoes, valPis, valCofins, valInss, valIr, valCsll, \
+            outrasRetencoes, valTotalTributos, valIss, descontoIncond, descontoCond, issRetido, \
+            respRetencao, itemLista, codCnae, codServico, codNBS, discriminacao, exigibilidadeISS, \
+            numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, identificacaoIntermed, \
+            nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado, identificacaoTomador, nif, \
+            nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, estadoEnd, paisEnd, cepEnd, email, \
+            tel = sdec_invoice_fields(data)
+
+            store.sql("""
+                UPDATE invoice
+                SET
+                    substitutedBy = ?
+                WHERE
+                    txId = ?;
+                
+                VALUES(?, ?)
+                """, (txId, substitutes)
+                )
+            store.commit()
+            bd_insert_invoice(data, meta, True)
 
         ### END SDEC HANDLERS ###
 
