@@ -3219,7 +3219,7 @@ store._ddl['txout_approx'],
                     )
                 store.commit()
                 txids = substitutes + ' ' + meta['txid']
-                store.redis.publish('invoice:update:' + str(_cnpj), txids)
+                store.redis.publish('invoice:update:' + str(enderecoEmissor), txids)
             else:
                 store.sql("""
                 START TRANSACTION;
@@ -3252,7 +3252,7 @@ store._ddl['txout_approx'],
                 )
                 store.commit()
                 txids = substitutes + ' ' + meta['txid']
-                store.redis.publish('invoice:update:' + str(_cnpj), txids)
+                store.redis.publish('invoice:update:' + str(enderecoEmissor), txids)
 
         def bd_insert_invoice(data, meta):
             txId                    = meta['txid']	
@@ -3296,7 +3296,7 @@ store._ddl['txout_approx'],
                 store.commit()
 
                 print('nota nova: %s', txId)
-                store.redis.publish('invoice:new:' + str(_cnpj), meta['txid'])
+                store.redis.publish('invoice:new:' + str(enderecoEmissor), meta['txid'])
 
             else:
                 store.sql("""
@@ -3321,7 +3321,7 @@ store._ddl['txout_approx'],
                 store.commit()
 
                 print('nota nova: %s', txId)
-                store.redis.publish('invoice:new:' + str(_cnpj), meta['txid'])
+                store.redis.publish('invoice:new:' + str(enderecoEmissor), meta['txid'])
 
         def bd_insert_company(company_data, meta):
             paisEndereco        = company_data.get('paisEnd', None)
