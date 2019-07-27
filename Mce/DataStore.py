@@ -3193,9 +3193,9 @@ store._ddl['txout_approx'],
                     numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, 
                     identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, codObra, art,
                     identificacaoTomador, nif, nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, 
-                    estadoEnd, paisEnd, cepEnd, email, tel
+                    estadoEnd, paisEnd, cepEnd, email, tel, substitutes
                 ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                 """, (txId, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
                     aliqServicos, valLiquiNfse, dataIncidencia, valServicos, valDeducoes,
                     valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, valTotalTributos,
@@ -3204,7 +3204,7 @@ store._ddl['txout_approx'],
                     numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, 
                     identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, codObra, art, 
                     identificacaoTomador, nif, nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, 
-                    estadoEnd, paisEnd, cepEnd, email, tel
+                    estadoEnd, paisEnd, cepEnd, email, tel, substitutes
                     )
                 )
                 store.commit()
@@ -3224,16 +3224,16 @@ store._ddl['txout_approx'],
                     valIss, descontoIncond, descontoCond, issRetido, respRetencao, itemLista,
                     codCnae, codServico, codNBS, discriminacao, exigibilidadeISS,
                     numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, 
-                    identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado
+                    identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado, substitutes
                 ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                         ?, ?, ?, ?, ?, ?, ?) 
+                         ?, ?, ?, ?, ?, ?, ?, ?) 
                 """, (txId, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
                     aliqServicos, valLiquiNfse, dataIncidencia, valServicos, valDeducoes,
                     valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, valTotalTributos,
                     valIss, descontoIncond, descontoCond, issRetido, respRetencao, itemLista,
                     codCnae, codServico, codNBS, discriminacao, exigibilidadeISS,
                     numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, 
-                    identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado)
+                    identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado, substitutes)
                 )
                 store.commit()
 
