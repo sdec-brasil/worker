@@ -3102,6 +3102,7 @@ store._ddl['txout_approx'],
             if (data.get('constCivil', None) is not None):
                 codObra                 = data['constCivil'].get('codObra', None)
                 art                     = data['constCivil'].get('art', None)
+
             if (data.get('tomador', None) is not None):
                 identificacaoTomador    = tomador.get('identificacaoTomador', None)
                 nif                     = tomador.get('nif', None)
@@ -3116,6 +3117,8 @@ store._ddl['txout_approx'],
                 cepEnd                  = tomador.get('cepEnd', None)
                 email                   = tomador.get('email', None)
                 tel                     = tomador.get('tel', None)
+                if (identificacaoTomador is not None):
+                    identificacaoTomador.replace('.','').replace('/','').replace('-','')
             else:
                 tomadorEncriptado = data.get('tomadorEncriptado', None)
             
