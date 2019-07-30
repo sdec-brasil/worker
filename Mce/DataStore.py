@@ -3039,6 +3039,7 @@ store._ddl['txout_approx'],
         ### SDEC HANDLERS ###    
         
         def sdec_invoice_fields(data):
+            cnpj                    = data['cnpj']
             p                       = data['prestacao']
             substitutes             = p.get('substitutes', None)
             prefeituraIncidencia    = p.get('prefeituraIncidencia', None)
@@ -3124,7 +3125,7 @@ store._ddl['txout_approx'],
                 respRetencao, itemLista, codCnae, codServico, codNBS, discriminacao, exigibilidadeISS, \
                 numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, identificacaoIntermed, \
                 nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado, identificacaoTomador, nif, \
-                nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, estadoEnd, paisEnd, cepEnd, email, tel
+                nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, estadoEnd, paisEnd, cepEnd, email, tel, cnpj
 
         def sdec_transaction_handler(decoded_tx, height):
             meta = {
@@ -3180,7 +3181,7 @@ store._ddl['txout_approx'],
             numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, identificacaoIntermed, \
             nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado, identificacaoTomador, nif, \
             nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, estadoEnd, paisEnd, cepEnd, email, \
-            tel = sdec_invoice_fields(data)
+            tel, cnpj = sdec_invoice_fields(data)
 
             if (tomadorEncriptado is None):
                 store.sql("""
@@ -3211,9 +3212,9 @@ store._ddl['txout_approx'],
 
                 print('nota nova: %s', txId)
                 if isReplacement is True:
-                    store.redis.publish('invoice:update:' + str(enderecoEmissor), meta['txid'])
+                    store.redis.publish('invoice:update', str(cnpj) + '|' + str(enderecoEmissor) + '|' + meta['txid'])
                 else:
-                    store.redis.publish('invoice:new:' + str(enderecoEmissor), meta['txid'])
+                    store.redis.publish('invoice:new', str(cnpj) + '|' + str(enderecoEmissor) + '|' + meta['txid'])
 
             else:
                 store.sql("""
@@ -3239,9 +3240,9 @@ store._ddl['txout_approx'],
 
                 print('nota nova: %s', txId)
                 if isReplacement is True:
-                    store.redis.publish('invoice:update:' + str(enderecoEmissor), meta['txid'])
+                    store.redis.publish('invoice:update', str(cnpj) + '|' + str(enderecoEmissor) + '|' + meta['txid'])
                 else:
-                    store.redis.publish('invoice:new:' + str(enderecoEmissor), meta['txid'])
+                    store.redis.publish('invoice:new', str(cnpj) + '|' + str(enderecoEmissor) + '|' + meta['txid'])
 
         def bd_insert_company(company_data, meta):
             paisEndereco        = company_data.get('paisEnd', None)
@@ -3278,7 +3279,7 @@ store._ddl['txout_approx'],
 
             store.commit()
 
-            store.redis.publish('company:new:' + str(_cnpj), meta['txid'])
+            store.redis.publish('company:new', str(_cnpj) + '|' + str(enderecoBlockchain) + '|' + meta['txid'])
             print('empresa nova: %s', str(enderecoBlockchain))
 
         def bd_update_and_insert_invoice(data, meta):
@@ -3293,7 +3294,7 @@ store._ddl['txout_approx'],
             numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, identificacaoIntermed, \
             nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado, identificacaoTomador, nif, \
             nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, estadoEnd, paisEnd, cepEnd, email, \
-            tel = sdec_invoice_fields(data)
+            tel, cnpj = sdec_invoice_fields(data)
 
             store.sql("""
                 UPDATE invoice
