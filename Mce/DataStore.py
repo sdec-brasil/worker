@@ -969,16 +969,6 @@ store._ddl['txout_approx'],
     PRIMARY KEY (address)
 )""",
 
-# Emissor <> Empresa Table
-"""CREATE TABLE emissorEmpresa (
-    emissorAddress VARCHAR(255) NOT NULL,
-    empresaCnpj VARCHAR(14) NOT NULL,
-    PRIMARY KEY (emissorAddress, empresaCnpj),
-    KEY empresaCnpj (empresaCnpj),
-    CONSTRAINT emissoresEmpresa_ibfk_1 FOREIGN KEY (emissorAddress) REFERENCES emissor (address) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT emissoresEmpresa_ibfk_2 FOREIGN KEY (empresaCnpj) REFERENCES empresa (cnpj) ON DELETE CASCADE ON UPDATE CASCADE
-)""",
-
 # Empresa Table
 """CREATE TABLE empresa (
     cnpj VARCHAR(14) NOT NULL,
@@ -1000,6 +990,16 @@ store._ddl['txout_approx'],
     UNIQUE KEY razaoSocial (razaoSocial),
     KEY name (name),
     CONSTRAINT empresa_ibfk_1 FOREIGN KEY (name) REFERENCES emissor (address) ON DELETE NO ACTION ON UPDATE CASCADE
+)""",
+
+# Emissor <> Empresa Table
+"""CREATE TABLE emissorEmpresa (
+    emissorAddress VARCHAR(255) NOT NULL,
+    empresaCnpj VARCHAR(14) NOT NULL,
+    PRIMARY KEY (emissorAddress, empresaCnpj),
+    KEY empresaCnpj (empresaCnpj),
+    CONSTRAINT emissoresEmpresa_ibfk_1 FOREIGN KEY (emissorAddress) REFERENCES emissor (address) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT emissoresEmpresa_ibfk_2 FOREIGN KEY (empresaCnpj) REFERENCES empresa (cnpj) ON DELETE CASCADE ON UPDATE CASCADE
 )""",
 
 # Estado Table
@@ -1077,6 +1077,15 @@ store._ddl['txout_approx'],
     CONSTRAINT invoice_ibfk_3 FOREIGN KEY (blocoConfirmacaoId) REFERENCES block (block_id) ON DELETE SET NULL ON UPDATE CASCADE
 )""",
 
+# Regiao Table
+"""CREATE TABLE regiao (
+    nomeRegiao VARCHAR(65) NOT NULL,
+    uf VARCHAR(2) NOT NULL,
+    PRIMARY KEY (nomeRegiao,uf),
+    KEY uf (uf),
+    CONSTRAINT regiao_ibfk_1 FOREIGN KEY (uf) REFERENCES estado (sigla) ON DELETE NO ACTION ON UPDATE CASCADE
+)""",
+
 # Municipio Table
 """CREATE TABLE municipio (
     codigoIbge VARCHAR(7) NOT NULL,
@@ -1112,14 +1121,6 @@ store._ddl['txout_approx'],
     CONSTRAINT prefeitura_ibfk_1 FOREIGN KEY (codigoMunicipio) REFERENCES municipio (codigoIbge) ON DELETE NO ACTION ON UPDATE CASCADE
 )""",
 
-# Regiao Table
-"""CREATE TABLE regiao (
-    nomeRegiao VARCHAR(65) NOT NULL,
-    uf VARCHAR(2) NOT NULL,
-    PRIMARY KEY (nomeRegiao,uf),
-    KEY uf (uf),
-    CONSTRAINT regiao_ibfk_1 FOREIGN KEY (uf) REFERENCES estado (sigla) ON DELETE NO ACTION ON UPDATE CASCADE
-)""",
 
 
 ##########################################
