@@ -959,6 +959,204 @@ store._ddl['txout_approx'],
     FOREIGN KEY (pubkey_id) REFERENCES pubkey (pubkey_id)
 )""",
 
+##########################################
+######## SDEC Business Tables ############
+##########################################
+
+# Emissor Table
+"""CREATE TABLE emissor (
+    address       VARCHAR(50) NOT NULL,
+    PRIMARY KEY (address)
+)""",
+
+# Emissor <> Empresa Table
+"""CREATE TABLE emissorEmpresa (
+    emissorAddress VARCHAR(255) NOT NULL,
+    empresaCnpj VARCHAR(14) NOT NULL,
+    PRIMARY KEY (emissorAddress, empresaCnpj),
+    KEY empresaCnpj (empresaCnpj),
+    CONSTRAINT emissoresEmpresa_ibfk_1 FOREIGN KEY (emissorAddress) REFERENCES emissor (address) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT emissoresEmpresa_ibfk_2 FOREIGN KEY (empresaCnpj) REFERENCES empresa (cnpj) ON DELETE CASCADE ON UPDATE CASCADE
+)""",
+
+# Empresa Table
+"""CREATE TABLE empresa (
+    cnpj VARCHAR(14) NOT NULL,
+    razaoSocial VARCHAR(150) NOT NULL,
+    nomeFantasia VARCHAR(60) NOT NULL,
+    enderecoEmpresa VARCHAR(125) NOT NULL,
+    numeroEndereco int(11) NOT NULL,
+    complementoEndereco VARCHAR(60) DEFAULT NULL,
+    bairroEndereco VARCHAR(60) NOT NULL,
+    cidadeEndereco VARCHAR(60) NOT NULL,
+    unidadeFederacao VARCHAR(2) NOT NULL,
+    paisEndereco VARCHAR(4) DEFAULT NULL,
+    cep VARCHAR(8) NOT NULL,
+    email VARCHAR(80) DEFAULT NULL,
+    telefone VARCHAR(20) DEFAULT NULL,
+    name VARCHAR(255) NOT NULL,
+    PRIMARY KEY (cnpj),
+    UNIQUE KEY cnpj (cnpj),
+    UNIQUE KEY razaoSocial (razaoSocial),
+    KEY name (name),
+    CONSTRAINT empresa_ibfk_1 FOREIGN KEY (name) REFERENCES emissor (address) ON DELETE NO ACTION ON UPDATE CASCADE
+)""",
+
+# Estado Table
+"""CREATE TABLE estado (
+    sigla VARCHAR(2) NOT NULL,
+    nome VARCHAR(30) NOT NULL,
+    PRIMARY KEY (sigla),
+    UNIQUE KEY sigla (sigla),
+    UNIQUE KEY nome (nome)
+)""",
+
+# Invoice Table
+"""CREATE TABLE invoice (
+    txId VARCHAR(64) NOT NULL,
+    substitutes VARCHAR(64) DEFAULT NULL,
+    substitutedBy VARCHAR(64) DEFAULT NULL,
+    baseCalculo bigint(20) unsigned NOT NULL,
+    aliqServicos decimal(10,1) DEFAULT NULL,
+    valLiquiNfse bigint(20) unsigned DEFAULT NULL,
+    dataIncidencia date NOT NULL,
+    valServicos bigint(20) unsigned NOT NULL,
+    valDeducoes bigint(20) unsigned DEFAULT NULL,
+    valPis bigint(20) unsigned DEFAULT NULL,
+    valCofins bigint(20) unsigned DEFAULT NULL,
+    valInss bigint(20) unsigned DEFAULT NULL,
+    valIr bigint(20) unsigned DEFAULT NULL,
+    valCsll bigint(20) unsigned DEFAULT NULL,
+    outrasRetencoes bigint(20) unsigned DEFAULT NULL,
+    valTotalTributos bigint(20) unsigned DEFAULT NULL,
+    valIss bigint(20) unsigned NOT NULL,
+    descontoIncond bigint(20) unsigned DEFAULT NULL,
+    descontoCond bigint(20) unsigned DEFAULT NULL,
+    issRetido tinyint(1) NOT NULL,
+    respRetencao tinyint(3) unsigned DEFAULT NULL,
+    itemLista VARCHAR(5) NOT NULL,
+    codCnae VARCHAR(20) DEFAULT NULL,
+    codServico VARCHAR(20) DEFAULT NULL,
+    codNBS VARCHAR(9) DEFAULT NULL,
+    discriminacao VARCHAR(2000) NOT NULL,
+    exigibilidadeISS tinyint(3) unsigned NOT NULL,
+    numProcesso VARCHAR(30) DEFAULT NULL,
+    regimeEspTribut tinyint(3) unsigned DEFAULT NULL,
+    optanteSimplesNacional tinyint(1) NOT NULL DEFAULT '0',
+    incentivoFiscal tinyint(1) NOT NULL,
+    identificacaoTomador VARCHAR(14) DEFAULT NULL,
+    nif VARCHAR(40) DEFAULT NULL,
+    nomeRazaoTomador VARCHAR(150) DEFAULT NULL,
+    logEnd VARCHAR(125) DEFAULT NULL,
+    numEnd VARCHAR(10) DEFAULT NULL,
+    compEnd VARCHAR(60) DEFAULT NULL,
+    bairroEnd VARCHAR(60) DEFAULT NULL,
+    cidadeEnd int(10) unsigned DEFAULT NULL,
+    estadoEnd VARCHAR(2) DEFAULT NULL,
+    paisEnd int(10) unsigned DEFAULT NULL,
+    cepEnd VARCHAR(8) DEFAULT NULL,
+    email VARCHAR(80) DEFAULT NULL,
+    tel VARCHAR(20) DEFAULT NULL,
+    identificacaoIntermed VARCHAR(14) DEFAULT NULL,
+    nomeRazaoIntermed VARCHAR(150) DEFAULT NULL,
+    cidadeIntermed int(11) DEFAULT NULL,
+    codObra VARCHAR(30) DEFAULT NULL,
+    art VARCHAR(30) DEFAULT NULL,
+    estado tinyint(3) unsigned NOT NULL DEFAULT '0',
+    tomadorEncriptado text,
+    enderecoEmissor VARCHAR(255) NOT NULL,
+    cnpj VARCHAR(14) NOT NULL,
+    prefeituraIncidencia VARCHAR(7) NOT NULL,
+    blocoConfirmacaoId decimal(14,0) DEFAULT NULL,
+    PRIMARY KEY (txId),
+    KEY enderecoEmissor (enderecoEmissor),
+    KEY cnpj (cnpj),
+    KEY blocoConfirmacaoId (blocoConfirmacaoId),
+    CONSTRAINT invoice_ibfk_1 FOREIGN KEY (enderecoEmissor) REFERENCES emissor (address) ON DELETE NO ACTION ON UPDATE CASCADE,
+    CONSTRAINT invoice_ibfk_2 FOREIGN KEY (cnpj) REFERENCES empresa (cnpj) ON DELETE NO ACTION ON UPDATE CASCADE,
+    CONSTRAINT invoice_ibfk_3 FOREIGN KEY (blocoConfirmacaoId) REFERENCES block (block_id) ON DELETE SET NULL ON UPDATE CASCADE
+)""",
+
+# Municipio Table
+"""CREATE TABLE municipio (
+    codigoIbge VARCHAR(7) NOT NULL,
+    nome VARCHAR(60) NOT NULL,
+    uf VARCHAR(2) NOT NULL,
+    nomeRegiao VARCHAR(65) NOT NULL,
+    PRIMARY KEY (codigoIbge),
+    UNIQUE KEY codigoIbge (codigoIbge),
+    KEY uf (uf),
+    KEY nomeRegiao (nomeRegiao),
+    CONSTRAINT municipio_ibfk_1 FOREIGN KEY (uf) REFERENCES estado (sigla) ON DELETE NO ACTION ON UPDATE CASCADE,
+    CONSTRAINT municipio_ibfk_2 FOREIGN KEY (nomeRegiao) REFERENCES regiao (nomeRegiao) ON DELETE NO ACTION ON UPDATE CASCADE
+)""",
+
+# Nota de Pagamento Table
+"""CREATE TABLE nota_pagamento (
+    guid char(36) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+    data_emisaso date NOT NULL,
+    valor_total double NOT NULL,
+    status enum('pendente','pago','vencido','cancelado') NOT NULL DEFAULT 'pendente',
+    created_at datetime NOT NULL,
+    updated_at datetime NOT NULL,
+    PRIMARY KEY (guid)
+)""",
+
+# Prefeitura Table
+"""CREATE TABLE prefeitura (
+    codigoMunicipio VARCHAR(7) NOT NULL,
+    cnpj VARCHAR(14) NOT NULL,
+    PRIMARY KEY (codigoMunicipio,cnpj),
+    UNIQUE KEY codigoMunicipio (codigoMunicipio),
+    UNIQUE KEY cnpj (cnpj),
+    CONSTRAINT prefeitura_ibfk_1 FOREIGN KEY (codigoMunicipio) REFERENCES municipio (codigoIbge) ON DELETE NO ACTION ON UPDATE CASCADE
+)""",
+
+# Regiao Table
+"""CREATE TABLE regiao (
+    nomeRegiao VARCHAR(65) NOT NULL,
+    uf VARCHAR(2) NOT NULL,
+    PRIMARY KEY (nomeRegiao,uf),
+    KEY uf (uf),
+    CONSTRAINT regiao_ibfk_1 FOREIGN KEY (uf) REFERENCES estado (sigla) ON DELETE NO ACTION ON UPDATE CASCADE
+)""",
+
+
+##########################################
+######## SDEC SEED DATA   ################
+##########################################
+
+# Regiao Table
+"""INSERT INTO `estado` (`sigla`, `nome`)
+    VALUES
+	    ('AC','Acre'),
+	    ('AL','Alagoas'),
+	    ('AP','Amapá'),
+	    ('AM','Amazonas'),
+	    ('BA','Bahia'),
+	    ('CE','Ceará'),
+	    ('DF','Distrito Federal'),
+	    ('ES','Espírito Santo'),
+	    ('GO','Goiás'),
+	    ('MA','Maranhão'),
+	    ('MT','Mato Grosso'),
+	    ('MS','Mato Grosso do Sul'),
+	    ('MG','Minas Gerais'),
+	    ('PA','Pará'),
+	    ('PB','Paraíba'),
+	    ('PR','Paraná'),
+	    ('PE','Pernambuco'),
+	    ('PI','Piauí'),
+	    ('RJ','Rio de Janeiro'),
+	    ('RN','Rio Grande do Norte'),
+	    ('RS','Rio Grande do Sul'),
+	    ('RO','Rondônia'),
+	    ('RR','Roraima'),
+	    ('SC','Santa Catarina'),
+	    ('SP','São Paulo'),
+	    ('SE','Sergipe'),
+	    ('TO','Tocantins');
+""",
 
 # MULTICHAIN END
 ):
