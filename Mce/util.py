@@ -619,26 +619,30 @@ def parse_create_stream_10007(data):
             continue
 
         searchdata = data[pos:]
-        fname = searchdata[:searchdata.index("\0")]
-        pos = pos + len(fname) + 1
+        try:
+            fname = searchdata[:searchdata.index("\0")]
+            pos = pos + len(fname) + 1
 
-        flen = ord(data[pos:pos + 1])
-        pos += 1
-        # print "pos of payload: ", pos
-        if flen == 253:
-            (size,) = struct.unpack('<H', data[pos:pos + 2])
-            flen = size
-            pos += 2
-        elif flen == 254:
-            (size,) = struct.unpack('<I', data[pos:pos + 4])
-            flen = size
-            pos += 4
-        elif flen == 255:
-            (size,) = struct.unpack('<Q', data[pos:pos + 8])
-            flen = size
-            pos += 8
-        fields[fname] = data[pos:pos + flen]
-        pos += flen
+            flen = ord(data[pos:pos + 1])
+            pos += 1
+            # print "pos of payload: ", pos
+            if flen == 253:
+                (size,) = struct.unpack('<H', data[pos:pos + 2])
+                flen = size
+                pos += 2
+            elif flen == 254:
+                (size,) = struct.unpack('<I', data[pos:pos + 4])
+                flen = size
+                pos += 4
+            elif flen == 255:
+                (size,) = struct.unpack('<Q', data[pos:pos + 8])
+                flen = size
+                pos += 8
+            fields[fname] = data[pos:pos + flen]
+            pos += flen
+        except:
+            print('Ignorando erro...')
+            break;
     return fields
 
 
