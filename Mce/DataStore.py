@@ -3665,13 +3665,15 @@ DO
                 print('note:update:ERROR ', e.message)
                 store.redis.publish('error', e.message)
 
+        def process_smart_filter(jsCode):
+            
         def check_smart_filters(hex_):
-            hex_ = hex_[54:-4]
             hexArray = [hex_[i:i+2] for i in range(0, len(hex_), 2)]
             hexArray = map(lambda arg: int(arg, 16), hexArray)
             jsCode = "".join(map(chr, hexArray))
+            jsCode[jsCode.find('{'):jsCode.rfind('}')]
             if (jsCode.find('function filtertransaction()') > 0):
-                print(jsCode)
+                process_smart_filter(jsCode)
 
         ### END SDEC HANDLERS ###
 
