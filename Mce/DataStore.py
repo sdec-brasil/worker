@@ -3454,7 +3454,7 @@ DO
                     asm = scriptPubKey.get('asm', None)
                     hex_ = scriptPubKey.get('hex', None)
                     type_ = scriptPubKey.get('type', None)
-                    if (asm is not None and hex_ is not None and str(type_) is 'nulldata'):
+                    if (asm is not None and hex_ is not None and type_ == 'nulldata'):
                         check_smart_filters(hex_)
                 elif (items is not None):
                     for item in items:
