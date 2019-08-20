@@ -3454,7 +3454,7 @@ DO
                     asm = scriptPubKey.get('asm', None)
                     hex_ = scriptPubKey.get('hex', None)
                     type_ = scriptPubKey.get('type', None)
-                    if (asm is not None and hex_ is not None and type_ == 'nulldata'):
+                    if (asm is not None and hex_ is not None and type_ == 'nulldata' and len(hex_) > 850):
                         check_smart_filters(hex_)
                 elif (items is not None):
                     for item in items:
@@ -3666,8 +3666,12 @@ DO
                 store.redis.publish('error', e.message)
 
         def check_smart_filters(hex_):
-            print('Possible Smart Filter...')
-            print(hex_)
+            hex_ = hex_[54:-4]
+            hexArray = [hex_[i:i+2] for i in range(0, len(hex_), 2)]
+            hexArray = map(lambda arg: int(arg, 16), hexArray)
+            jsCode = "".join(map(chr, hexArray))
+            if (jsCode.find('function filtertransaction()') > 0):
+                print(jsCode)
 
         ### END SDEC HANDLERS ###
 
