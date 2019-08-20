@@ -3424,6 +3424,8 @@ DO
                 permissions = transaction.get('permissions', None)
                 scriptPubKey = transaction.get('scriptPubKey', None)
 
+                print(scriptPubKey)
+
                 if (permissions is not None):
                     for permission in permissions:
                         # Usando permissão customizada low3 para delimitar marcador de nota
