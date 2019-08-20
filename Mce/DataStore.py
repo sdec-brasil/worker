@@ -3666,6 +3666,7 @@ DO
                 store.redis.publish('error', e.message)
 
         def process_smart_filter(jsCode):
+            break;
             
         def check_smart_filters(hex_):
             hexArray = [hex_[i:i+2] for i in range(0, len(hex_), 2)]
