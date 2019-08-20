@@ -668,29 +668,32 @@ def parse_follow_on_issuance_metadata_10007(data):
                 fields[fname] = long_hex(assetprop)
             pos = pos + 3 + assetproplen
             continue
+        try:
+            searchdata = data[pos:]
+            fname = searchdata[:searchdata.index("\0")]
+            pos = pos + len(fname) + 1
 
-        searchdata = data[pos:]
-        fname = searchdata[:searchdata.index("\0")]
-        pos = pos + len(fname) + 1
+            flen = ord(data[pos:pos + 1])
+            pos += 1
+            # print "pos of payload: ", pos
+            if flen == 253:
+                (size,) = struct.unpack('<H', data[pos:pos + 2])
+                flen = size
+                pos += 2
+            elif flen == 254:
+                (size,) = struct.unpack('<I', data[pos:pos + 4])
+                flen = size
+                pos += 4
+            elif flen == 255:
+                (size,) = struct.unpack('<Q', data[pos:pos + 8])
+                flen = size
+                pos += 8
 
-        flen = ord(data[pos:pos + 1])
-        pos += 1
-        # print "pos of payload: ", pos
-        if flen == 253:
-            (size,) = struct.unpack('<H', data[pos:pos + 2])
-            flen = size
-            pos += 2
-        elif flen == 254:
-            (size,) = struct.unpack('<I', data[pos:pos + 4])
-            flen = size
-            pos += 4
-        elif flen == 255:
-            (size,) = struct.unpack('<Q', data[pos:pos + 8])
-            flen = size
-            pos += 8
-
-        fields[fname] = data[pos:pos + flen]
-        pos += flen
+            fields[fname] = data[pos:pos + flen]
+            pos += flen
+        except:
+            print('Ignorando erro...')
+            break
     return fields
 
 
@@ -728,6 +731,8 @@ def parse_new_issuance_metadata_10007(data):
                     fields[fname] = render_long_data_with_popover(json.dumps(json_data))
                 except ValueError:
                     fields[fname] = long_hex(assetprop)
+                except:
+                    break
             elif proptype == 0x06:  # RESTRICTIONS
                 restriction_code, = struct.unpack("<b", assetprop)
                 if restriction_code != 0:
@@ -747,33 +752,38 @@ def parse_new_issuance_metadata_10007(data):
                 fields[fname] = long_hex(assetprop)
             pos = pos + 3 + assetproplen
             continue
-
+        
         searchdata = data[pos:]
-        fname = searchdata[:searchdata.index("\0")]
-        # print "field name: ", fname, " field name len: ", len(fname)
-        pos = pos + len(fname) + 1
-        # print "pos of vle: ", pos
-        # subdata = subdata[len(fname):]
+        try:
+            fname = searchdata[:searchdata.index("\0")]
 
-        flen = ord(data[pos:pos + 1])
-        pos += 1
-        # print "pos of payload: ", pos
-        if flen == 253:
-            (size,) = struct.unpack('<H', data[pos:pos + 2])
-            flen = size
-            pos += 2
-        elif flen == 254:
-            (size,) = struct.unpack('<I', data[pos:pos + 4])
-            flen = size
-            pos += 4
-        elif flen == 255:
-            (size,) = struct.unpack('<Q', data[pos:pos + 8])
-            flen = size
-            pos += 8
-        # print "pos of payload: ", pos
-        # print "payload length: ", flen
-        fields[fname] = data[pos:pos + flen]
-        pos += flen
+            # print "field name: ", fname, " field name len: ", len(fname)
+            pos = pos + len(fname) + 1
+            # print "pos of vle: ", pos
+            # subdata = subdata[len(fname):]
+
+            flen = ord(data[pos:pos + 1])
+            pos += 1
+            # print "pos of payload: ", pos
+            if flen == 253:
+                (size,) = struct.unpack('<H', data[pos:pos + 2])
+                flen = size
+                pos += 2
+            elif flen == 254:
+                (size,) = struct.unpack('<I', data[pos:pos + 4])
+                flen = size
+                pos += 4
+            elif flen == 255:
+                (size,) = struct.unpack('<Q', data[pos:pos + 8])
+                flen = size
+                pos += 8
+            # print "pos of payload: ", pos
+            # print "payload length: ", flen
+            fields[fname] = data[pos:pos + flen]
+            pos += flen
+        except:
+            print('Ignorando erro...')
+            break
 
     return fields
 

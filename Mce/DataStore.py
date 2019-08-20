@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright(C) 2011,2012,2013,2014 by Abe developers.
 
 # DataStore.py: back end database access for Abe.
@@ -27,6 +28,7 @@ import time
 import errno
 import logging
 import redis
+import traceback
 
 import SqlAbstraction
 
@@ -972,34 +974,47 @@ store._ddl['txout_approx'],
 # Empresa Table
 """CREATE TABLE empresa (
     cnpj VARCHAR(14) NOT NULL,
-    razaoSocial VARCHAR(150) NOT NULL,
-    nomeFantasia VARCHAR(60) NOT NULL,
-    enderecoEmpresa VARCHAR(125) NOT NULL,
-    numeroEndereco int(11) NOT NULL,
-    complementoEndereco VARCHAR(60) DEFAULT NULL,
-    bairroEndereco VARCHAR(60) NOT NULL,
-    cidadeEndereco VARCHAR(60) NOT NULL,
-    unidadeFederacao VARCHAR(2) NOT NULL,
-    paisEndereco VARCHAR(4) DEFAULT NULL,
-    cep VARCHAR(8) NOT NULL,
+    razao VARCHAR(150) NOT NULL,
+    fantasia VARCHAR(60) DEFAULT NULL,
+    cepEnd VARCHAR(8) NOT NULL,
+    logEnd VARCHAR(125) NOT NULL,
+    numEnd VARCHAR(10) NOT NULL,
+    compEnd VARCHAR(60) DEFAULT NULL,
+    bairroEnd VARCHAR(60) NOT NULL,
+    cidadeEnd VARCHAR(7) NOT NULL,
+    estadoEnd VARCHAR(2) NOT NULL,
+    regTrib INTEGER NOT NULL,
     email VARCHAR(80) DEFAULT NULL,
     telefone VARCHAR(20) DEFAULT NULL,
-    name VARCHAR(255) NOT NULL,
+    endBlock VARCHAR(50) NOT NULL,
     PRIMARY KEY (cnpj),
     UNIQUE KEY cnpj (cnpj),
-    UNIQUE KEY razaoSocial (razaoSocial),
-    KEY name (name),
-    CONSTRAINT empresa_ibfk_1 FOREIGN KEY (name) REFERENCES emissor (address) ON DELETE NO ACTION ON UPDATE CASCADE
+    FOREIGN KEY (endBlock) REFERENCES emissor (address)
 )""",
+
+"""CREATE TABLE codigosCnae (
+    cnae VARCHAR(10) NOT NULL,
+    descricao VARCHAR(255) NOT NULL,
+    PRIMARY KEY (cnae)
+)
+""",
+
+"""CREATE TABLE cnaeEmpresa (
+    cnae VARCHAR(10) NOT NULL,
+    cnpj VARCHAR(14) NOT NULL,
+    PRIMARY KEY (cnae, cnpj),
+    FOREIGN KEY (cnpj) REFERENCES empresa (cnpj)
+)
+""", #FOREIGN KEY (cnae) REFERENCES codigosCnae (cnae),
 
 # Emissor <> Empresa Table
 """CREATE TABLE emissorEmpresa (
-    emissorAddress VARCHAR(255) NOT NULL,
+    emissorAddress VARCHAR(50) NOT NULL,
     empresaCnpj VARCHAR(14) NOT NULL,
     PRIMARY KEY (emissorAddress, empresaCnpj),
     KEY empresaCnpj (empresaCnpj),
-    CONSTRAINT emissoresEmpresa_ibfk_1 FOREIGN KEY (emissorAddress) REFERENCES emissor (address) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT emissoresEmpresa_ibfk_2 FOREIGN KEY (empresaCnpj) REFERENCES empresa (cnpj) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (emissorAddress) REFERENCES emissor (address),
+    FOREIGN KEY (empresaCnpj) REFERENCES empresa (cnpj)
 )""",
 
 # Estado Table
@@ -1009,72 +1024,6 @@ store._ddl['txout_approx'],
     PRIMARY KEY (sigla),
     UNIQUE KEY sigla (sigla),
     UNIQUE KEY nome (nome)
-)""",
-
-# Invoice Table
-"""CREATE TABLE invoice (
-    txId VARCHAR(64) NOT NULL,
-    substitutes VARCHAR(64) DEFAULT NULL,
-    substitutedBy VARCHAR(64) DEFAULT NULL,
-    baseCalculo bigint(20) unsigned NOT NULL,
-    aliqServicos decimal(10,1) DEFAULT NULL,
-    valLiquiNfse bigint(20) unsigned DEFAULT NULL,
-    dataIncidencia date NOT NULL,
-    valServicos bigint(20) unsigned NOT NULL,
-    valDeducoes bigint(20) unsigned DEFAULT NULL,
-    valPis bigint(20) unsigned DEFAULT NULL,
-    valCofins bigint(20) unsigned DEFAULT NULL,
-    valInss bigint(20) unsigned DEFAULT NULL,
-    valIr bigint(20) unsigned DEFAULT NULL,
-    valCsll bigint(20) unsigned DEFAULT NULL,
-    outrasRetencoes bigint(20) unsigned DEFAULT NULL,
-    valTotalTributos bigint(20) unsigned DEFAULT NULL,
-    valIss bigint(20) unsigned NOT NULL,
-    descontoIncond bigint(20) unsigned DEFAULT NULL,
-    descontoCond bigint(20) unsigned DEFAULT NULL,
-    issRetido tinyint(1) NOT NULL,
-    respRetencao tinyint(3) unsigned DEFAULT NULL,
-    itemLista VARCHAR(5) NOT NULL,
-    codCnae VARCHAR(20) DEFAULT NULL,
-    codServico VARCHAR(20) DEFAULT NULL,
-    codNBS VARCHAR(9) DEFAULT NULL,
-    discriminacao VARCHAR(2000) NOT NULL,
-    exigibilidadeISS tinyint(3) unsigned NOT NULL,
-    numProcesso VARCHAR(30) DEFAULT NULL,
-    regimeEspTribut tinyint(3) unsigned DEFAULT NULL,
-    optanteSimplesNacional tinyint(1) NOT NULL DEFAULT '0',
-    incentivoFiscal tinyint(1) NOT NULL,
-    identificacaoTomador VARCHAR(14) DEFAULT NULL,
-    nif VARCHAR(40) DEFAULT NULL,
-    nomeRazaoTomador VARCHAR(150) DEFAULT NULL,
-    logEnd VARCHAR(125) DEFAULT NULL,
-    numEnd VARCHAR(10) DEFAULT NULL,
-    compEnd VARCHAR(60) DEFAULT NULL,
-    bairroEnd VARCHAR(60) DEFAULT NULL,
-    cidadeEnd int(10) unsigned DEFAULT NULL,
-    estadoEnd VARCHAR(2) DEFAULT NULL,
-    paisEnd int(10) unsigned DEFAULT NULL,
-    cepEnd VARCHAR(8) DEFAULT NULL,
-    email VARCHAR(80) DEFAULT NULL,
-    tel VARCHAR(20) DEFAULT NULL,
-    identificacaoIntermed VARCHAR(14) DEFAULT NULL,
-    nomeRazaoIntermed VARCHAR(150) DEFAULT NULL,
-    cidadeIntermed int(11) DEFAULT NULL,
-    codObra VARCHAR(30) DEFAULT NULL,
-    art VARCHAR(30) DEFAULT NULL,
-    estado tinyint(3) unsigned NOT NULL DEFAULT '0',
-    tomadorEncriptado text,
-    enderecoEmissor VARCHAR(255) NOT NULL,
-    cnpj VARCHAR(14) NOT NULL,
-    prefeituraIncidencia VARCHAR(7) NOT NULL,
-    blocoConfirmacaoId decimal(14,0) DEFAULT NULL,
-    PRIMARY KEY (txId),
-    KEY enderecoEmissor (enderecoEmissor),
-    KEY cnpj (cnpj),
-    KEY blocoConfirmacaoId (blocoConfirmacaoId),
-    CONSTRAINT invoice_ibfk_1 FOREIGN KEY (enderecoEmissor) REFERENCES emissor (address) ON DELETE NO ACTION ON UPDATE CASCADE,
-    CONSTRAINT invoice_ibfk_2 FOREIGN KEY (cnpj) REFERENCES empresa (cnpj) ON DELETE NO ACTION ON UPDATE CASCADE,
-    CONSTRAINT invoice_ibfk_3 FOREIGN KEY (blocoConfirmacaoId) REFERENCES block (block_id) ON DELETE SET NULL ON UPDATE CASCADE
 )""",
 
 # Regiao Table
@@ -1091,43 +1040,125 @@ store._ddl['txout_approx'],
     codigoIbge VARCHAR(7) NOT NULL,
     nome VARCHAR(60) NOT NULL,
     uf VARCHAR(2) NOT NULL,
-    nomeRegiao VARCHAR(65) NOT NULL,
+    cnpj VARCHAR(14) DEFAULT NULL,
     PRIMARY KEY (codigoIbge),
     UNIQUE KEY codigoIbge (codigoIbge),
     KEY uf (uf),
-    KEY nomeRegiao (nomeRegiao),
-    CONSTRAINT municipio_ibfk_1 FOREIGN KEY (uf) REFERENCES estado (sigla) ON DELETE NO ACTION ON UPDATE CASCADE,
-    CONSTRAINT municipio_ibfk_2 FOREIGN KEY (nomeRegiao) REFERENCES regiao (nomeRegiao) ON DELETE NO ACTION ON UPDATE CASCADE
+    CONSTRAINT municipio_ibfk_1 FOREIGN KEY (uf) REFERENCES estado (sigla) ON DELETE NO ACTION ON UPDATE CASCADE
 )""",
 
 # Nota de Pagamento Table
 """CREATE TABLE nota_pagamento (
+    nonce int(11) NOT NULL AUTO_INCREMENT,
     guid char(36) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
-    data_emisaso date NOT NULL,
-    valor_total double NOT NULL,
-    status enum('pendente','pago','vencido','cancelado') NOT NULL DEFAULT 'pendente',
-    created_at datetime NOT NULL,
-    updated_at datetime NOT NULL,
-    PRIMARY KEY (guid)
-)""",
-
-# Prefeitura Table
-"""CREATE TABLE prefeitura (
-    codigoMunicipio VARCHAR(7) NOT NULL,
+    emissorId VARCHAR(50) NOT NULL,
     cnpj VARCHAR(14) NOT NULL,
-    PRIMARY KEY (codigoMunicipio,cnpj),
-    UNIQUE KEY codigoMunicipio (codigoMunicipio),
-    UNIQUE KEY cnpj (cnpj),
-    CONSTRAINT prefeitura_ibfk_1 FOREIGN KEY (codigoMunicipio) REFERENCES municipio (codigoIbge) ON DELETE NO ACTION ON UPDATE CASCADE
+    dataEmissao date NOT NULL,
+    valorTotal double NOT NULL,
+    status enum('pendente','pago','vencido','cancelado') NOT NULL DEFAULT 'pendente',
+    createdAt datetime NOT NULL,
+    updatedAt datetime NOT NULL,
+    PRIMARY KEY (nonce),
+    KEY guid (guid),
+    FOREIGN KEY (cnpj) REFERENCES empresa (cnpj),
+    FOREIGN KEY (emissorId) REFERENCES emissor (address)
 )""",
 
+# Item de Pagamento
+"""CREATE TABLE item_pagamento (
+    codigoIbge VARCHAR(7) NOT NULL,
+    notaPagamentoId char(36) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+    valor bigint(20) unsigned DEFAULT NULL,
+    PRIMARY KEY (codigoIbge,notaPagamentoId),
+    FOREIGN KEY (codigoIbge) REFERENCES municipio (codigoIbge),
+    FOREIGN KEY (notaPagamentoId) REFERENCES nota_pagamento (guid)
+)""",
+
+
+# Invoice Table
+"""CREATE TABLE invoice (
+    nonce int(11) NOT NULL AUTO_INCREMENT,
+    txId VARCHAR(64) NOT NULL,
+    substitui VARCHAR(64) DEFAULT NULL,
+    substituidaPor VARCHAR(64) DEFAULT NULL,
+    assetName VARCHAR(64) DEFAULT NULL,
+    emissor VARCHAR(50) NOT NULL,
+    dataPrestacao date NOT NULL,
+    prefeituraPrestacao VARCHAR(7) NOT NULL,
+    codTributMunicipio VARCHAR(7) NOT NULL,
+    itemLista VARCHAR(5) NOT NULL,
+    codCnae VARCHAR(10) DEFAULT NULL,
+    codServico VARCHAR(14) DEFAULT NULL,
+    codNBS VARCHAR(9) DEFAULT NULL,
+    discriminacao VARCHAR(2000) NOT NULL,
+    valServicos bigint(20) unsigned NOT NULL,
+    descontoIncond bigint(20) unsigned DEFAULT NULL,
+    descontoCond bigint(20) unsigned DEFAULT NULL,
+    exigibilidadeISS INTEGER NOT NULL,
+    numProcesso VARCHAR(30) DEFAULT NULL,
+    valDeducoes bigint(20) unsigned DEFAULT NULL,
+    baseCalculo bigint(20) unsigned NOT NULL,
+    issRetido INTEGER NOT NULL,
+    respRetencao INTEGER DEFAULT NULL,
+    regimeEspTribut INTEGER DEFAULT NULL,
+    incentivoFiscal INTEGER NOT NULL,
+    aliqServicos decimal(10,1) DEFAULT NULL,
+    valIss bigint(20) unsigned NOT NULL,
+    valPis bigint(20) unsigned DEFAULT NULL,
+    valCofins bigint(20) unsigned DEFAULT NULL,
+    valInss bigint(20) unsigned DEFAULT NULL,
+    valIr bigint(20) unsigned DEFAULT NULL,
+    valCsll bigint(20) unsigned DEFAULT NULL,
+    outrasRetencoes bigint(20) unsigned DEFAULT NULL,
+    valTotalTributos bigint(20) unsigned DEFAULT NULL,
+    valLiquiNfse bigint(20) unsigned DEFAULT NULL,
+    identificacaoTomador VARCHAR(14) DEFAULT NULL,
+    nif VARCHAR(40) DEFAULT NULL,
+    nomeRazaoTomador VARCHAR(150) DEFAULT NULL,
+    logEnd VARCHAR(125) DEFAULT NULL,
+    numEnd VARCHAR(10) DEFAULT NULL,
+    compEnd VARCHAR(60) DEFAULT NULL,
+    bairroEnd VARCHAR(60) DEFAULT NULL,
+    cidadeEnd VARCHAR(10) DEFAULT NULL,
+    estadoEnd VARCHAR(2) DEFAULT NULL,
+    paisEnd VARCHAR(10) DEFAULT NULL,
+    cepEnd VARCHAR(8) DEFAULT NULL,
+    email VARCHAR(80) DEFAULT NULL,
+    tel VARCHAR(20) DEFAULT NULL,
+    identificacaoIntermed VARCHAR(14) DEFAULT NULL,
+    nomeRazaoIntermed VARCHAR(150) DEFAULT NULL,
+    cidadeIntermed int(11) DEFAULT NULL,
+    codObra VARCHAR(30) DEFAULT NULL,
+    art VARCHAR(30) DEFAULT NULL,
+    estado INTEGER NOT NULL DEFAULT '0',
+    tomadorEncriptado text,
+    blocoConfirmacao decimal(14,0) DEFAULT NULL,
+    cnpj VARCHAR(14) NOT NULL,
+    notaPagamento char(36) CHARACTER SET latin1 COLLATE latin1_bin DEFAULT NULL,
+
+    PRIMARY KEY (nonce),
+    KEY txId (txId),
+    KEY emissor (emissor),
+    KEY cnpj (cnpj),
+    KEY blocoConfirmacao (blocoConfirmacao),
+    KEY prefeituraPrestacao (prefeituraPrestacao),
+    KEY codTributMunicipio (codTributMunicipio),
+    KEY notaPagamento (notaPagamento),
+    FOREIGN KEY (emissor) REFERENCES emissor (address),
+    FOREIGN KEY (cnpj) REFERENCES empresa (cnpj),
+    FOREIGN KEY (blocoConfirmacao) REFERENCES block (block_id),
+    FOREIGN KEY (prefeituraPrestacao) REFERENCES municipio (codigoIbge),
+    FOREIGN KEY (codTributMunicipio) REFERENCES municipio (codigoIbge),
+    FOREIGN KEY (notaPagamento) REFERENCES nota_pagamento (guid)
+)""",
+
+# ADD ABOVE FOREIGN KEY (codCnae) REFERENCES codigosCnae (cnae),
 
 
 ##########################################
 ######## SDEC SEED DATA   ################
 ##########################################
 
-# Regiao Table
 """INSERT INTO `estado` (`sigla`, `nome`)
     VALUES
 	    ('AC','Acre'),
@@ -1157,6 +1188,58 @@ store._ddl['txout_approx'],
 	    ('SP','São Paulo'),
 	    ('SE','Sergipe'),
 	    ('TO','Tocantins');
+""",
+
+"""INSERT INTO `municipio` (`codigoIbge`, `nome`, `uf`, `cnpj`)
+    VALUES
+        ('1100015','Alta Floresta D''Oeste', 'RO', '18511471000120'),
+        ('1100379','Alto Alegre dos Parecis', 'RO', '18511471000121'),
+        ('1100403','Alto Paraíso', 'RO', '18511471000122'),
+        ('1100346','Alvorada D''Oeste', 'RO', '18511471000123'),
+        ('1100023','Ariquemes', 'RO', '18511471000124');
+""",
+
+"""
+CREATE EVENT IF NOT EXISTS `expirador_notas_mensais`
+ON SCHEDULE EVERY 24 DAY_HOUR
+COMMENT 'Marcando notas como expiradas se for o terceiro dia do mês'
+DO
+	BEGIN
+        DECLARE FirstDayOfMonth int;
+        DECLARE CurrentDay int;
+        DECLARE doProcedure bool;
+        DECLARE dayOfMonth int;
+        
+        SELECT DATE_FORMAT(CURDATE(),'%Y-%m-01') INTO FirstDayOfMonth;
+
+        SET FirstDayOfMonth = DAYOFWEEK(FirstDayOfMonth);
+        SET CurrentDay = DAYOFWEEK(NOW());
+        SET dayOfMonth = DAYOFMONTH(NOW());
+                                    
+        IF (dayOfMonth = 4 AND FirstDayOfMonth = 1 AND CurrentDay = 4)
+            THEN SET doProcedure = true;
+        ELSEIF (dayOfMonth = 3 AND FirstDayOfMonth = 2 AND CurrentDay = 4)
+            THEN SET doProcedure = true;
+        ELSEIF (dayOfMonth = 3 AND FirstDayOfMonth = 3 AND CurrentDay = 5)
+            THEN SET doProcedure = true;
+        ELSEIF (dayOfMonth = 3 AND FirstDayOfMonth = 4 AND CurrentDay = 6)
+            THEN SET doProcedure = true;
+        ELSEIF (dayOfMonth = 5 AND FirstDayOfMonth = 5 AND CurrentDay = 2)
+            THEN SET doProcedure = true;
+        ELSEIF (dayOfMonth = 5 AND FirstDayOfMonth = 6 AND CurrentDay = 3)
+            THEN SET doProcedure = true;
+        ELSEIF (dayOfMonth = 5 AND FirstDayOfMonth = 7 AND CurrentDay = 3)
+            THEN SET doProcedure = true;
+        ELSE 
+            SET doProcedure = false;
+        END IF;
+
+        IF doProcedure = true THEN
+            UPDATE invoice
+            SET estado = 1
+            WHERE estado = 0 AND MONTH(dataPrestacao) = (MONTH(NOW()) - 1);
+        END IF;
+	END
 """,
 
 # MULTICHAIN END
@@ -3238,98 +3321,96 @@ store._ddl['txout_approx'],
         ### SDEC HANDLERS ###    
         
         def sdec_invoice_fields(data):
-            cnpj                    = data['cnpj']
-            p                       = data['prestacao']
-            substitutes             = p.get('substitutes', None)
-            prefeituraIncidencia    = p.get('prefeituraIncidencia', None)
-            baseCalculo             = p.get('baseCalculo', None)
-            aliqServicos            = p.get('aliqServicos', None)
-            valLiquiNfse            = p.get('valLiquiNfse', None)
-            dataIncidencia          = p.get('dataIncidencia', None)
-            valServicos             = p.get('valServicos', None)
-            valDeducoes             = p.get('valDeducoes', None)
-            valPis                  = p.get('valPis', None)
-            valCofins               = p.get('valCofins', None)
-            valInss                 = p.get('valInss', None)
-            valIr                   = p.get('valIr', None)
-            valCsll                 = p.get('valCsll', None)
-            outrasRetencoes         = p.get('outrasRetencoes', None)
-            valTotalTributos        = p.get('valTotalTributos', None)
-            valIss                  = p.get('valIss', None)
-            descontoIncond          = p.get('descontoIncond', None)
-            descontoCond            = p.get('descontoCond', None)
-            issRetido               = p.get('issRetido', None)
-            respRetencao            = p.get('respRetencao', None)
-            itemLista               = p.get('itemLista', None)
-            codCnae                 = p.get('codCnae', None)
-            codServico              = p.get('codServico', None)
-            codNBS                  = p.get('codNBS', None)
-            discriminacao           = p.get('discriminacao', None)
-            exigibilidadeISS        = p.get('exigibilidadeISS', None)
-            numProcesso             = p.get('numProcesso', None)
-            regimeEspTribut         = p.get('regimeEspTribut', None)
-            optanteSimplesNacional  = p.get('optanteSimplesNacional', None)
-            incentivoFiscal         = p.get('incentivoFiscal', None)
-            # Nested Optional Fields
-            identificacaoIntermed   = None
-            nomeRazaoIntermed       = None
-            cidadeIntermed          = None
-            codObra                 = None
-            art                     = None
-            tomadorEncriptado       = None
-            identificacaoTomador    = None
-            nif                     = None
-            nomeRazaoTomador        = None
-            logEnd                  = None
-            numEnd                  = None
-            compEnd                 = None
-            bairroEnd               = None
-            cidadeEnd               = None
-            estadoEnd               = None
-            paisEnd                 = None
-            cepEnd                  = None
-            email                   = None
-            tel                     = None
+            emissor                                 = data.get('emissor')
+            tomadorEncriptado                       = data.get('tomadorEncriptado')
+            cnpj                                    = data.get('cnpj')
+            substitui                             = data.get('substitui')
 
-            # Not returned, object
-            tomador                 = data.get('tomador', None)
+            prestacao                               = data.get('prestacao', {})
+            dataPrestacao                           = prestacao.get('dataPrestacao')
+            prefeituraPrestacao                     = prestacao.get('prefeituraPrestacao')
+            codTributMunicipio                      = prestacao.get('codTributMunicipio')
+            itemLista                               = prestacao.get('itemLista')
+            codCnae                                 = prestacao.get('codCnae')
 
-            if (data.get('intermediario', None) is not None):
-                identificacaoIntermed   = data['intermediario'].get('identificacaoIntermed', None)
-                nomeRazaoIntermed       = data['intermediario'].get('nomeRazaoIntermed', None)
-                cidadeIntermed          = data['intermediario'].get('cidadeIntermed', None)
-            if (data.get('constCivil', None) is not None):
-                codObra                 = data['constCivil'].get('codObra', None)
-                art                     = data['constCivil'].get('art', None)
+            if (codCnae is not None):
+                codCnae = codCnae.replace('-', '').replace('/', '').replace('.', '')
 
-            if (data.get('tomador', None) is not None):
-                identificacaoTomador    = tomador.get('identificacaoTomador', None)
-                nif                     = tomador.get('nif', None)
-                nomeRazaoTomador        = tomador.get('nomeRazaoTomador', None)
-                logEnd                  = tomador.get('logEnd', None)
-                numEnd                  = tomador.get('numEnd', None)
-                compEnd                 = tomador.get('compEnd', None)
-                bairroEnd               = tomador.get('bairroEnd', None)
-                cidadeEnd               = tomador.get('cidadeEnd', None)
-                estadoEnd               = tomador.get('estadoEnd', None)
-                paisEnd                 = tomador.get('paisEnd', None)
-                cepEnd                  = tomador.get('cepEnd', None)
-                email                   = tomador.get('email', None)
-                tel                     = tomador.get('tel', None)
-                if (identificacaoTomador is not None):
-                    identificacaoTomador.replace('.','').replace('/','').replace('-','')
-            else:
-                tomadorEncriptado = data.get('tomadorEncriptado', None)
+            codServico                              = prestacao.get('codServico')
+            codNBS                                  = prestacao.get('codNBS')
+            discriminacao                           = prestacao.get('discriminacao')
+            numProcesso                             = prestacao.get('numProcesso')
             
-            return substitutes, prefeituraIncidencia, baseCalculo, aliqServicos, valLiquiNfse, \
-                dataIncidencia, valServicos, valDeducoes, valPis, valCofins, valInss, valIr, valCsll, \
-                outrasRetencoes, valTotalTributos, valIss, descontoIncond, descontoCond, issRetido, \
-                respRetencao, itemLista, codCnae, codServico, codNBS, discriminacao, exigibilidadeISS, \
-                numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, identificacaoIntermed, \
-                nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado, identificacaoTomador, nif, \
-                nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, estadoEnd, paisEnd, cepEnd, email, tel, cnpj
+
+            tributos                                = data.get('tributos', {})
+            valDeducoes                             = int(tributos.get('valDeducoes')) if tributos.get('valDeducoes') else None
+            baseCalculo                             = int(tributos.get('baseCalculo')) if tributos.get('baseCalculo') else None
+            valServicos                             = int(tributos.get('valServicos')) if tributos.get('valServicos') else None
+            descontoIncond                          = int(tributos.get('descontoIncond')) if tributos.get('descontoIncond') else None
+            descontoCond                            = int(tributos.get('descontoCond')) if tributos.get('descontoCond') else None
+            exigibilidadeISS                        = int(tributos.get('exigibilidadeISS')) if tributos.get('exigibilidadeISS') else None
+            issRetido                               = int(tributos.get('issRetido')) if tributos.get('issRetido') else None
+            respRetencao                            = int(tributos.get('respRetencao')) if tributos.get('respRetencao') else None
+            regimeEspTribut                         = int(tributos.get('regimeEspTribut')) if tributos.get('regimeEspTribut') else None
+            incentivoFiscal                         = int(tributos.get('incentivoFiscal')) if tributos.get('incentivoFiscal') else None
+            aliqServicos                            = int(tributos.get('aliqServicos')) if tributos.get('aliqServicos') else None
+            valIss                                  = int(tributos.get('valIss')) if tributos.get('valIss') else None
+            valPis                                  = int(tributos.get('valPis')) if tributos.get('valPis') else None
+            valCofins                               = int(tributos.get('valCofins')) if tributos.get('valCofins') else None
+            valInss                                 = int(tributos.get('valInss')) if tributos.get('valInss') else None
+            valIr                                   = int(tributos.get('valIr')) if tributos.get('valIr') else None
+            valCsll                                 = int(tributos.get('valCsll')) if tributos.get('valCsll') else None
+            outrasRetencoes                         = int(tributos.get('outrasRetencoes')) if tributos.get('outrasRetencoes') else None
+            valTotalTributos                        = int(tributos.get('valTotalTributos')) if tributos.get('valTotalTributos') else None
+            valLiquiNfse                            = int(tributos.get('valLiquiNfse')) if tributos.get('valLiquiNfse') else None
+
+            tomador                                 = data.get('tomador', {})
+            identificacaoTomador                    = tomador.get('identificacaoTomador')
+            nif                                     = tomador.get('nif')
+            nomeRazaoTomador                        = tomador.get('nomeRazaoTomador')
+            logEnd                                  = tomador.get('logEnd')
+            numEnd                                  = tomador.get('numEnd')
+            compEnd                                 = tomador.get('compEnd')
+            bairroEnd                               = tomador.get('bairroEnd')
+            cidadeEnd                               = tomador.get('cidadeEnd')
+            estadoEnd                               = tomador.get('estadoEnd')
+            paisEnd                                 = tomador.get('paisEnd')
+            cepEnd                                  = tomador.get('cepEnd')
+            email                                   = tomador.get('email')
+            tel                                     = tomador.get('tel')
+
+            intermediario                           = data.get('intermediario', {})
+            identificacaoIntermed                   = intermediario.get('identificacaoIntermed')
+            nomeRazaoIntermed                       = intermediario.get('nomeRazaoIntermed')
+            cidadeIntermed                          = intermediario.get('cidadeIntermed')
+
+            construcaoCivil                         = data.get('construcaoCivil', {})
+            codObra                                 = construcaoCivil.get('codObra')
+            art                                     = construcaoCivil.get('art')
+
+            if identificacaoIntermed:
+                identificacaoIntermed = identificacaoIntermed.replace('.','').replace('/','').replace('-','')
+            
+            if identificacaoTomador:
+                identificacaoTomador = identificacaoTomador.replace('.','').replace('/','').replace('-','')
+            
+            cnpj = cnpj.replace('.','').replace('/','').replace('-','')
+            
+            return emissor, tomadorEncriptado, cnpj, substitui, \
+                dataPrestacao, prefeituraPrestacao, codTributMunicipio, itemLista, codCnae, \
+                codServico, codNBS, discriminacao, valServicos, descontoIncond, descontoCond, \
+                exigibilidadeISS, numProcesso, valDeducoes, baseCalculo, issRetido, \
+                respRetencao, regimeEspTribut, incentivoFiscal, aliqServicos, valIss, \
+                valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, \
+                valTotalTributos, valLiquiNfse, identificacaoTomador, nif, nomeRazaoTomador, \
+                logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, estadoEnd, paisEnd, cepEnd, \
+                email, tel, identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, \
+                codObra, art           
 
         def sdec_transaction_handler(decoded_tx, height):
+
+            #print(decoded_tx)
+            
             meta = {
                 'txid': decoded_tx['txid'],
                 'blockhash': decoded_tx.get('blockhash', None),
@@ -3337,23 +3418,43 @@ store._ddl['txout_approx'],
                 'height': height,
             }
             for transaction in decoded_tx['vout']:
-                permissions = transaction.get('permissions', None)
-                if (permissions is not None):
-                    return
+
+                assets = transaction.get('assets', None)
                 items = transaction.get('items', None)
-                if (items is not None):
+                permissions = transaction.get('permissions', None)
+
+                if (permissions is not None):
+                    for permission in permissions:
+                        # Usando permissão customizada low3 para delimitar marcador de nota
+                        if (permission['for'] and permission['for']['type'] == 'asset' and permission['custom'] and permission['custom'][0] == 'low3'):
+                            info = {
+                                'cnpj': permission['for']['name'],
+                                'address': transaction['scriptPubKey']['addresses'][0] # Algum caso extremo onde > 1 ?
+                            }
+                            bd_insert_new_emitter(info['cnpj'], info['address'], meta['txid'])
+                elif (assets is not None):
+                    for asset in assets:
+                        # old comment?
+                        # Não estamos parseando a transação que dá permissão
+                        # ao dono da empresa permitir nota e emitir certificados, assumindo
+                        # que a Junta Comercial a fará junto com o registro da Empresa
+                        # A Blockchain vai manter a integridade disso, mas o Banco de Dados
+                        # pode entrar num estado conflitante onde para o DB o endereço X
+                        # pode emitir nota da empresa M mas não para a Blockchain
+                        data = decoded_tx['issue']['details']
+                        if (asset['type'] == 'issuefirst'):
+                            if (re.match(r"[0-9]{2}\.[0-9]{3}\.[0-9]{3}\/[0-9]{4}\-[0-9]{2}", asset['name']) is not None):
+                                bd_insert_company(data, meta)
+                            # asset['name'] = CNPJ/NF-TIMESTAMP
+                            elif (asset['name'].split('/')[1][1] == 'F'):
+                                bd_insert_invoice(data, meta)
+                elif (items is not None):
                     for item in items:
                         if item['type'] == 'stream':
                             action = item['keys'][0].split('_')
                             data = item['data']['json']
                             meta['publishers'] = item['publishers']
-
-                            if (action[0] == 'COMPANY'):
-                                if (action[1] == 'REGISTRY'):
-                                    bd_insert_company(data, meta)
-                                elif (action[1] == 'UPDATE'):
-                                    print('COMPANY_UPDATE: Ainda não implementado')
-                            elif (action[0] == 'INVOICE'):
+                            if (action[0] == 'INVOICE'):
                                 if (action[1] == 'REGISTRY'):
                                     bd_insert_invoice(data, meta)
                                 elif (action[1] == 'UPDATE'):
@@ -3363,151 +3464,198 @@ store._ddl['txout_approx'],
                                     print('SETTLEMENT: Ainda não implementado')
                                 elif (action[1] == 'UPDATE'):
                                     print('SETTLEMENT: Ainda não implementado')
+                            # TODO: some of those returns should be break's or continue's
                             return
                         return
                     return
                 return
 
-        def is_equal(x, y, epsilon=1*10**(-2) ):
-            return abs(x - y) <= epsilon
+        def bd_insert_new_emitter(_cnpj, address, txid):
+            cnpj = _cnpj.replace('.','').replace('/','').replace('-','')
+
+            # Temos que monitorar erros de maneira melhor
+            try:
+                store.sql("""
+                    INSERT INTO emissor (address) VALUES (?) """, 
+                    [address])
+
+                store.sql("""
+                    INSERT INTO emissorEmpresa(
+                        empresaCnpj, emissorAddress
+                    ) VALUES (?, ?) """, 
+                    (cnpj, address))
+                
+                store.commit()
+
+                message = str(cnpj) + '|' + str(address) + '|' + str(txid)
+                store.redis.publish('emitter:new', message)
+
+                print('emitter:new ' + message)
+            except Exception as e:
+                print(traceback.print_exc())
+                print('emitter:ERROR ', e.message)
+                store.redis.publish('error', e.message)
         
         def bd_insert_invoice(data, meta, isReplacement = False):
             txId                    = meta['txid']	
-            enderecoEmissor         = meta['publishers'][0]	
-            blocoConfirmacaoId      = meta['height']
+            blocoConfirmacao        = int(meta['height'])
+            try:
 
-            substitutes, prefeituraIncidencia, baseCalculo, aliqServicos, valLiquiNfse, \
-            dataIncidencia, valServicos, valDeducoes, valPis, valCofins, valInss, valIr, valCsll, \
-            outrasRetencoes, valTotalTributos, valIss, descontoIncond, descontoCond, issRetido, \
-            respRetencao, itemLista, codCnae, codServico, codNBS, discriminacao, exigibilidadeISS, \
-            numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, identificacaoIntermed, \
-            nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado, identificacaoTomador, nif, \
-            nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, estadoEnd, paisEnd, cepEnd, email, \
-            tel, cnpj = sdec_invoice_fields(data)
+                emissor, tomadorEncriptado, cnpj, substitui, \
+                dataPrestacao, prefeituraPrestacao, codTributMunicipio, itemLista, codCnae, \
+                codServico, codNBS, discriminacao, valServicos, descontoIncond, descontoCond, \
+                exigibilidadeISS, numProcesso, valDeducoes, baseCalculo, issRetido, \
+                respRetencao, regimeEspTribut, incentivoFiscal, aliqServicos, valIss, \
+                valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, \
+                valTotalTributos, valLiquiNfse, identificacaoTomador, nif, nomeRazaoTomador, \
+                logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, estadoEnd, paisEnd, cepEnd, \
+                email, tel, identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, \
+                codObra, art = sdec_invoice_fields(data)
 
-            if (tomadorEncriptado is None):
                 store.sql("""
                 INSERT INTO invoice (
-                    txId, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
-                    aliqServicos, valLiquiNfse, dataIncidencia, valServicos, valDeducoes,
-                    valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, valTotalTributos,
-                    valIss, descontoIncond, descontoCond, issRetido, respRetencao, itemLista,
-                    codCnae, codServico, codNBS, discriminacao, exigibilidadeISS,
-                    numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, 
-                    identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, codObra, art,
-                    identificacaoTomador, nif, nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, 
-                    estadoEnd, paisEnd, cepEnd, email, tel, substitutes
+                    tomadorEncriptado, cnpj, substitui, txId, emissor, blocoConfirmacao, 
+                    dataPrestacao, prefeituraPrestacao, codTributMunicipio, itemLista, codCnae, 
+                    codServico, codNBS, discriminacao, valServicos, descontoIncond, descontoCond, 
+                    exigibilidadeISS, numProcesso, valDeducoes, baseCalculo, issRetido, 
+                    respRetencao, regimeEspTribut, incentivoFiscal, aliqServicos, valIss, 
+                    valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, 
+                    valTotalTributos, valLiquiNfse, identificacaoTomador, nif, nomeRazaoTomador, 
+                    logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, estadoEnd, paisEnd, cepEnd, 
+                    email, tel, identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, 
+                    codObra, art
                 ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
-                """, (txId, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
-                    aliqServicos, valLiquiNfse, dataIncidencia, valServicos, valDeducoes,
-                    valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, valTotalTributos,
-                    valIss, descontoIncond, descontoCond, issRetido, respRetencao, itemLista,
-                    codCnae, codServico, codNBS, discriminacao, exigibilidadeISS,
-                    numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, 
-                    identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, codObra, art, 
-                    identificacaoTomador, nif, nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, 
-                    estadoEnd, paisEnd, cepEnd, email, tel, substitutes
-                    )
+                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                """, [
+                        tomadorEncriptado, cnpj, substitui, txId, emissor, blocoConfirmacao,
+                        dataPrestacao, prefeituraPrestacao, codTributMunicipio, itemLista, codCnae, 
+                        codServico, codNBS, discriminacao, valServicos, descontoIncond, descontoCond, 
+                        exigibilidadeISS, numProcesso, valDeducoes, baseCalculo, issRetido, 
+                        respRetencao, regimeEspTribut, incentivoFiscal, aliqServicos, valIss, 
+                        valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, 
+                        valTotalTributos, valLiquiNfse, identificacaoTomador, nif, nomeRazaoTomador, 
+                        logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, estadoEnd, paisEnd, cepEnd, 
+                        email, tel, identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, 
+                        codObra, art
+                    ]
                 )
+
                 store.commit()
+                
+                message = str(cnpj) + '|' + str(emissor) + '|' + meta['txid']
+                channel = 'invoice:update' if isReplacement else 'invoice:new'
+                store.redis.publish(channel, message)
 
-                print('nota nova: %s', txId)
-                if isReplacement is True:
-                    store.redis.publish('invoice:update', str(cnpj) + '|' + str(enderecoEmissor) + '|' + meta['txid'])
-                else:
-                    store.redis.publish('invoice:new', str(cnpj) + '|' + str(enderecoEmissor) + '|' + meta['txid'])
+                print(channel + ' ' + message)
 
-            else:
-                store.sql("""
-                INSERT INTO invoice (
-                    txId, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
-                    aliqServicos, valLiquiNfse, dataIncidencia, valServicos, valDeducoes,
-                    valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, valTotalTributos,
-                    valIss, descontoIncond, descontoCond, issRetido, respRetencao, itemLista,
-                    codCnae, codServico, codNBS, discriminacao, exigibilidadeISS,
-                    numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, 
-                    identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado, substitutes
-                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                         ?, ?, ?, ?, ?, ?, ?, ?) 
-                """, (txId, enderecoEmissor, blocoConfirmacaoId, prefeituraIncidencia, baseCalculo,
-                    aliqServicos, valLiquiNfse, dataIncidencia, valServicos, valDeducoes,
-                    valPis, valCofins, valInss, valIr, valCsll, outrasRetencoes, valTotalTributos,
-                    valIss, descontoIncond, descontoCond, issRetido, respRetencao, itemLista,
-                    codCnae, codServico, codNBS, discriminacao, exigibilidadeISS,
-                    numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, 
-                    identificacaoIntermed, nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado, substitutes)
-                )
-                store.commit()
-
-                print('nota nova: %s', txId)
-                if isReplacement is True:
-                    store.redis.publish('invoice:update', str(cnpj) + '|' + str(enderecoEmissor) + '|' + meta['txid'])
-                else:
-                    store.redis.publish('invoice:new', str(cnpj) + '|' + str(enderecoEmissor) + '|' + meta['txid'])
+            except Exception as e:
+                print(data)
+                print(traceback.print_exc())
+                print('invoice:ERROR ', e.message)
+                store.redis.publish('error', e.message)
 
         def bd_insert_company(company_data, meta):
-            paisEndereco        = company_data.get('paisEnd', None)
-            razaoSocial         = company_data.get('razao', None)
-            cidadeEndereco      = company_data.get('cidadeEnd', None)
-            nomeFantasia        = company_data.get('fantasia', None)
-            enderecoBlockchain  = company_data.get('endBlock', None)
-            bairroEndereco      = company_data.get('bairroEnd', None)
-            unidadeFederacao    = company_data.get('estadoEnd', None)
-            email               = company_data.get('email', None)
-            complementoEndereco = company_data.get('compEnd', None)
-            _cnpj                = company_data.get('cnpj', None)
-            numeroEndereco      = company_data.get('numEnd', None)
-            telefone            = company_data.get('tel', None)
-            enderecoEmpresa     = company_data.get('logEnd', None)
-            cep                 = company_data.get('cepEnd', None)
+            # Nova Empresa se Registrando
+            # Precisamos inserir primeiro o endereço como emissor de nota
+            # E a relação de entre eles depois
+            try:
+                _cnpj = company_data.get('cnpj')
+                codCnaes = company_data.get('cnaes')
+                razao = company_data.get('razao')
+                fantasia = company_data.get('fantasia')
+                cepEnd = company_data.get('cepEnd')
+                logEnd = company_data.get('logEnd')
+                numEnd = company_data.get('numEnd')
+                compEnd = company_data.get('compEnd')
+                bairroEnd = company_data.get('bairroEnd')
+                cidadeEnd = company_data.get('cidadeEnd')
+                estadoEnd = company_data.get('estadoEnd')
+                regTrib = company_data.get('regTrib')
+                email = company_data.get('email')
+                telefone = company_data.get('telefone')
+                endBlock = company_data.get('endBlock')
 
-            cnpj = _cnpj.replace('.','').replace('/','').replace('-','')
+                cnpj = _cnpj.replace('.','').replace('/','').replace('-','')
 
-            # Inserting new company on our database
-            store.sql("""
-                INSERT INTO empresa (
-                paisEndereco, razaoSocial, cidadeEndereco, nomeFantasia, 
-                enderecoBlockchain, bairroEndereco, unidadeFederacao, email, 
-                complementoEndereco, cnpj, numeroEndereco, telefone, 
-                enderecoEmpresa, cep
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, 
-                (paisEndereco, razaoSocial, cidadeEndereco, nomeFantasia, 
-                enderecoBlockchain, bairroEndereco, unidadeFederacao, email, 
-                complementoEndereco, cnpj, numeroEndereco, telefone, 
-                enderecoEmpresa, cep)
-            )
+                #  Inserindo endereço como emissor
+                store.sql("""
+                    INSERT INTO emissor (
+                        address
+                    ) VALUES (?)
+                    """, 
+                    [endBlock])
 
-            store.commit()
+                store.commit()
 
-            store.redis.publish('company:new', str(_cnpj) + '|' + str(enderecoBlockchain) + '|' + meta['txid'])
-            print('empresa nova: %s', str(enderecoBlockchain))
+                # Inserindo empresa
+                store.sql("""
+                    INSERT INTO empresa (
+                        cnpj, razao, fantasia, cepEnd,
+                        logEnd, numEnd, compEnd, bairroEnd,
+                        cidadeEnd, estadoEnd, regTrib,
+                        email, telefone, endBlock 
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, 
+                    [
+                        cnpj, razao, fantasia, cepEnd,
+                        logEnd, numEnd, compEnd, bairroEnd,
+                        cidadeEnd, estadoEnd, regTrib,
+                        email, telefone, endBlock
+                    ]
+                )
+
+                store.commit()
+
+                # Inserindo a relação de CNAEs:
+                for _cnae in codCnaes:
+                    cnae = _cnae.replace('.', '').replace('/', '').replace('-', '')
+                    store.sql("""
+                        INSERT INTO cnaeEmpresa (
+                            cnae, cnpj
+                        )  VALUES (?, ?)
+                        """,
+                        [cnae, cnpj] 
+                    )
+
+                    store.commit()
+
+                # Inserindo o endereço dono como emissor daquela empresa
+                store.sql("""
+                    INSERT INTO emissorEmpresa(
+                        empresaCnpj, emissorAddress
+                    ) VALUES (?, ?) """, 
+                    [cnpj, endBlock])
+
+                store.commit()
+
+                message =  str(_cnpj) + '|' + str(endBlock) + '|' + str(meta['txid'])
+                store.redis.publish('company:new', message)
+                print('company:new ' + message)
+            except Exception as e:
+                print(traceback.print_exc())
+                print('company:ERROR ', e.message)
+                store.redis.publish('error', e.message)
 
         def bd_update_and_insert_invoice(data, meta):
-            txId                    = meta['txid']	
-            enderecoEmissor         = meta['publishers'][0]	
-            blocoConfirmacaoId      = meta['height']
-            
-            substitutes, prefeituraIncidencia, baseCalculo, aliqServicos, valLiquiNfse, \
-            dataIncidencia, valServicos, valDeducoes, valPis, valCofins, valInss, valIr, valCsll, \
-            outrasRetencoes, valTotalTributos, valIss, descontoIncond, descontoCond, issRetido, \
-            respRetencao, itemLista, codCnae, codServico, codNBS, discriminacao, exigibilidadeISS, \
-            numProcesso, regimeEspTribut, optanteSimplesNacional, incentivoFiscal, identificacaoIntermed, \
-            nomeRazaoIntermed, cidadeIntermed, codObra, art, tomadorEncriptado, identificacaoTomador, nif, \
-            nomeRazaoTomador, logEnd, numEnd, compEnd, bairroEnd, cidadeEnd, estadoEnd, paisEnd, cepEnd, email, \
-            tel, cnpj = sdec_invoice_fields(data)
+            txId                    = meta['txid']
 
-            store.sql("""
-                UPDATE invoice
-                SET
-                    substitutedBy = ?
-                WHERE
-                    txId = ?;
-                """, (txId, substitutes)
-                )
-            store.commit()
-            bd_insert_invoice(data, meta, True)
+            try:
+                substitui             = data['prestacao'].get('substitui', None)
+                store.sql("""
+                    UPDATE invoice
+                    SET
+                        substituidaPor = ?
+                    WHERE
+                        txId = ?;
+                    """, (txId, substitui)
+                    )
+                # We leave store.commit() for bd_insert_invoice
+                bd_insert_invoice(data, meta, True)
+            except Exception as e:
+                print(traceback.print_exc())
+                print('note:update:ERROR ', e.message)
+                store.redis.publish('error', e.message)
+
 
         ### END SDEC HANDLERS ###
 
