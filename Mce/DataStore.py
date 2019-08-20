@@ -3574,7 +3574,8 @@ DO
                 email = company_data.get('email')
                 telefone = company_data.get('telefone')
                 endBlock = company_data.get('endBlock')
-
+                
+                cepEnd = cepEnd.replace('-', '')
                 cnpj = _cnpj.replace('.','').replace('/','').replace('-','')
 
                 #  Inserindo endereço como emissor
