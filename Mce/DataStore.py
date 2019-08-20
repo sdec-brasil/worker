@@ -3424,8 +3424,6 @@ DO
                 permissions = transaction.get('permissions', None)
                 scriptPubKey = transaction.get('scriptPubKey', None)
 
-                print(scriptPubKey)
-
                 if (permissions is not None):
                     for permission in permissions:
                         # Usando permissão customizada low3 para delimitar marcador de nota
@@ -3456,6 +3454,9 @@ DO
                     asm = scriptPubKey.get('asm', None)
                     hex_ = scriptPubKey.get('hex', None)
                     type_ = scriptPubKey.get('type', None)
+                    print(asm)
+                    print(hex_)
+                    print(type_)
                     if (asm is not None and hex_ is not None and type_ is 'nulldata'):
                         check_smart_filters(hex_)
                 elif (items is not None):
