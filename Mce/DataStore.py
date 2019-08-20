@@ -3422,6 +3422,7 @@ DO
                 assets = transaction.get('assets', None)
                 items = transaction.get('items', None)
                 permissions = transaction.get('permissions', None)
+                scriptPubKey = transaction.get('scriptPubKey', None)
 
                 if (permissions is not None):
                     for permission in permissions:
@@ -3443,11 +3444,18 @@ DO
                         # pode emitir nota da empresa M mas não para a Blockchain
                         data = decoded_tx['issue']['details']
                         if (asset['type'] == 'issuefirst'):
+                            # asset['name'] = CNPJ
                             if (re.match(r"[0-9]{2}\.[0-9]{3}\.[0-9]{3}\/[0-9]{4}\-[0-9]{2}", asset['name']) is not None):
                                 bd_insert_company(data, meta)
                             # asset['name'] = CNPJ/NF-TIMESTAMP
                             elif (asset['name'].split('/')[1][1] == 'F'):
                                 bd_insert_invoice(data, meta)
+                elif (scriptPubKey is not None):
+                    asm = scriptPubKey.get('asm', None)
+                    hex_ = scriptPubKey.get('hex', None)
+                    type_ = scriptPubKey.get('type', None)
+                    if (asm is not None and hex_ is not None and type_ is 'nulldata'):
+                        check_smart_filters(hex_)
                 elif (items is not None):
                     for item in items:
                         if item['type'] == 'stream':
@@ -3657,6 +3665,9 @@ DO
                 print('note:update:ERROR ', e.message)
                 store.redis.publish('error', e.message)
 
+        def check_smart_filters(hex_):
+            print('Possible Smart Filter...')
+            print(hex_)
 
         ### END SDEC HANDLERS ###
 
