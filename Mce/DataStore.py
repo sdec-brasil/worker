@@ -969,7 +969,7 @@ store._ddl['txout_approx'],
 """CREATE TABLE emissor (
     address       VARCHAR(50) NOT NULL,
     PRIMARY KEY (address)
-)""",
+) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8;""",
 
 # Empresa Table
 """CREATE TABLE empresa (
@@ -990,13 +990,13 @@ store._ddl['txout_approx'],
     PRIMARY KEY (cnpj),
     UNIQUE KEY cnpj (cnpj),
     FOREIGN KEY (endBlock) REFERENCES emissor (address)
-)""",
+) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8;""",
 
 """CREATE TABLE codigosCnae (
     cnae VARCHAR(10) NOT NULL,
     descricao VARCHAR(255) NOT NULL,
     PRIMARY KEY (cnae)
-)
+) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8;
 """,
 
 """CREATE TABLE cnaeEmpresa (
@@ -1004,7 +1004,7 @@ store._ddl['txout_approx'],
     cnpj VARCHAR(14) NOT NULL,
     PRIMARY KEY (cnae, cnpj),
     FOREIGN KEY (cnpj) REFERENCES empresa (cnpj)
-)
+) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8;
 """, #FOREIGN KEY (cnae) REFERENCES codigosCnae (cnae),
 
 # Emissor <> Empresa Table
@@ -1015,7 +1015,7 @@ store._ddl['txout_approx'],
     KEY empresaCnpj (empresaCnpj),
     FOREIGN KEY (emissorAddress) REFERENCES emissor (address),
     FOREIGN KEY (empresaCnpj) REFERENCES empresa (cnpj)
-)""",
+) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8;""",
 
 # Estado Table
 """CREATE TABLE estado (
@@ -1024,7 +1024,7 @@ store._ddl['txout_approx'],
     PRIMARY KEY (sigla),
     UNIQUE KEY sigla (sigla),
     UNIQUE KEY nome (nome)
-)""",
+) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8;""",
 
 # Regiao Table
 """CREATE TABLE regiao (
@@ -1033,7 +1033,7 @@ store._ddl['txout_approx'],
     PRIMARY KEY (nomeRegiao,uf),
     KEY uf (uf),
     CONSTRAINT regiao_ibfk_1 FOREIGN KEY (uf) REFERENCES estado (sigla) ON DELETE NO ACTION ON UPDATE CASCADE
-)""",
+) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8;""",
 
 # Municipio Table
 """CREATE TABLE municipio (
@@ -1045,7 +1045,7 @@ store._ddl['txout_approx'],
     UNIQUE KEY codigoIbge (codigoIbge),
     KEY uf (uf),
     CONSTRAINT municipio_ibfk_1 FOREIGN KEY (uf) REFERENCES estado (sigla) ON DELETE NO ACTION ON UPDATE CASCADE
-)""",
+) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8;""",
 
 # Nota de Pagamento Table
 """CREATE TABLE nota_pagamento (
@@ -1062,7 +1062,7 @@ store._ddl['txout_approx'],
     KEY guid (guid),
     FOREIGN KEY (cnpj) REFERENCES empresa (cnpj),
     FOREIGN KEY (emissorId) REFERENCES emissor (address)
-)""",
+) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8;""",
 
 # Item de Pagamento
 """CREATE TABLE item_pagamento (
@@ -1072,7 +1072,7 @@ store._ddl['txout_approx'],
     PRIMARY KEY (codigoIbge,notaPagamentoId),
     FOREIGN KEY (codigoIbge) REFERENCES municipio (codigoIbge),
     FOREIGN KEY (notaPagamentoId) REFERENCES nota_pagamento (guid)
-)""",
+) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8;""",
 
 
 # Invoice Table
@@ -1150,7 +1150,7 @@ store._ddl['txout_approx'],
     FOREIGN KEY (prefeituraPrestacao) REFERENCES municipio (codigoIbge),
     FOREIGN KEY (codTributMunicipio) REFERENCES municipio (codigoIbge),
     FOREIGN KEY (notaPagamento) REFERENCES nota_pagamento (guid)
-)""",
+) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8;""",
 
 # ADD ABOVE FOREIGN KEY (codCnae) REFERENCES codigosCnae (cnae),
 
@@ -3699,8 +3699,7 @@ DO
                 else:
                     return
             return
-
-            
+      
         def check_smart_filters(hex_):
             hexArray = [hex_[i:i+2] for i in range(0, len(hex_), 2)]
             hexArray = map(lambda arg: int(arg, 16), hexArray)
