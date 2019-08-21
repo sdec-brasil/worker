@@ -234,7 +234,7 @@ class PostgresDB(ServerDB):
     def createdb(db):
         with db.root() as cur:
             cur.execute("COMMIT")  # XXX
-            cur.execute('CREATE DATABASE abe')
+            cur.execute('CREATE DATABASE abe CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;')
             cur.execute("GRANT ALL ON DATABASE abe TO abe")
             cur.execute("COMMIT")
         DB.createdb(db)
