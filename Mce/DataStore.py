@@ -3683,8 +3683,13 @@ DO
                         [line[0], line[1]])
 
                         store.commit()
-                    except:
+                    except Exception as e:
                         print('Não conseguiu inserir no DB!')
+                        print(line[0])
+                        print(len(line[0]))
+                        print(line[1])
+                        print(len(line[1]))
+                        print(e)
                 except:
                     if (i != len(strippedLines) - 1):
                         print('Erro na leitura do Smart Filter!')
