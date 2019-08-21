@@ -3671,8 +3671,8 @@ DO
             lines = jsCode[jsCode.find('{')+1:jsCode.rfind('};')].split(',\n')
             strippedLines = map(str.strip, lines)
             for line in strippedLines:
-                try:
-                    line = line.replace('\'', '').split(':')
+                line = line.replace('\'', '').split(':')
+                if (len(line[0]) > 0 and len(line[1]) > 0):
                     try:
                         store.sql("""
                         INSERT INTO codigosCnae (
@@ -3689,9 +3689,6 @@ DO
                         print(line[1])
                         print(len(line[1]))
                         print(e)
-                except:
-                    print('Erro na leitura do Smart Filter!')
-                    print(line)
             
         def process_smart_filter(jsCode):
             flags = re.search(r'\/\* ?worker:flag:\S*: ?\*\/', jsCode)
