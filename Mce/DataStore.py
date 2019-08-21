@@ -3679,7 +3679,7 @@ DO
                             cnae, descricao
                         ) VALUES (?, ?)
                         """, 
-                        [line[0], line[1]])
+                        [line[0], unicode(line[1], "utf-8")])
 
                         store.commit()
                     except Exception as e:
