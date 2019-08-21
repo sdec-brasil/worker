@@ -3687,7 +3687,7 @@ DO
                         print('Não conseguiu inserir no DB!')
                 except:
                     if (i != len(strippedLines) - 1):
-                    print('Erro na leitura do Smart Filter!')
+                        print('Erro na leitura do Smart Filter!')
             
         def process_smart_filter(jsCode):
             flags = re.search(r'\/\* ?worker:flag:\S*: ?\*\/', jsCode)
