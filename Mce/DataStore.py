@@ -3665,8 +3665,40 @@ DO
                 print('note:update:ERROR ', e.message)
                 store.redis.publish('error', e.message)
 
+        def process_and_insert_cnaes(jsCode):
+            declaration = 'const cnaes = {'
+            jsCode = jsCode[jsCode.find(declaration)+len(declaration):jsCode.find('};', jsCode.find(declaration))]
+            lines = jsCode[jsCode.find('{')+1:jsCode.rfind('};')].split(',\n')
+            strippedLines = map(str.strip, lines)
+            for i, line in enumerate(strippedLines):
+                try:
+                    line = line.replace('\'', '').split(':')
+
+                    try:
+                        store.sql("""
+                        INSERT INTO codigosCnae (
+                            cnae, descricao
+                        ) VALUES (?, ?)
+                        """, 
+                        [line[0], line[1]])
+
+                        store.commit()
+                    except:
+                        print('Não conseguiu inserir no DB!')
+                except:
+                    if (i != len(strippedLines) - 1):
+                    print('Erro na leitura do Smart Filter!')
+            
         def process_smart_filter(jsCode):
-            break;
+            flags = re.search(r'\/\* ?worker:flag:\S*: ?\*\/', jsCode)
+            if flags is not None:
+                flag = flags.group(0).replace('/*', '').replace('*/', '').split(':')[2]
+                if (flag == 'CNAE'):
+                    process_and_insert_cnaes(jsCode)
+                else:
+                    return
+            return
+
             
         def check_smart_filters(hex_):
             hexArray = [hex_[i:i+2] for i in range(0, len(hex_), 2)]
