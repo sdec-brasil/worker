@@ -1041,7 +1041,7 @@ store._ddl['txout_approx'],
 # Nota de Pagamento Table
 """CREATE TABLE nota_pagamento (
     nonce int(11) NOT NULL AUTO_INCREMENT,
-    guid char(36) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+    guid char(36) NOT NULL,
     emissorId VARCHAR(50) NOT NULL,
     taxNumber VARCHAR(14) NOT NULL,
     dataEmissao date NOT NULL,
@@ -1058,7 +1058,7 @@ store._ddl['txout_approx'],
 # Item de Pagamento
 """CREATE TABLE item_pagamento (
     code VARCHAR(7) NOT NULL,
-    notaPagamentoId char(36) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+    notaPagamentoId char(36) NOT NULL,
     valor bigint(20) unsigned DEFAULT NULL,
     PRIMARY KEY (code,notaPagamentoId),
     FOREIGN KEY (code) REFERENCES municipio (code),
