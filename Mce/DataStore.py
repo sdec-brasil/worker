@@ -1020,10 +1020,10 @@ store._ddl['txout_approx'],
 # Estado Table
 """CREATE TABLE estado (
     sigla VARCHAR(2) NOT NULL,
-    nome VARCHAR(30) NOT NULL,
+    name VARCHAR(30) NOT NULL,
     PRIMARY KEY (sigla),
     UNIQUE KEY sigla (sigla),
-    UNIQUE KEY nome (nome)
+    UNIQUE KEY name (name)
 )""",
 
 # Municipio Table
@@ -1044,8 +1044,8 @@ store._ddl['txout_approx'],
     guid char(36) NOT NULL,
     emissorId VARCHAR(50) NOT NULL,
     taxNumber VARCHAR(14) NOT NULL,
-    dataEmissao date NOT NULL,
-    valorTotal double NOT NULL,
+    dateEmission date NOT NULL,
+    totalValue bigint(20) unsigned NOT NULL,
     status enum('pendente','pago','vencido','cancelado') NOT NULL DEFAULT 'pendente',
     createdAt datetime NOT NULL,
     updatedAt datetime NOT NULL,
@@ -1146,7 +1146,7 @@ store._ddl['txout_approx'],
 ######## SDEC SEED DATA   ################
 ##########################################
 
-"""INSERT INTO `estado` (`sigla`, `nome`)
+"""INSERT INTO `estado` (`sigla`, `name`)
     VALUES
 	    ('AC','Acre'),
 	    ('AL','Alagoas'),
