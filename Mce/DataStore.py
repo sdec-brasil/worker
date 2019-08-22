@@ -1001,9 +1001,9 @@ store._ddl['txout_approx'],
 
 """CREATE TABLE cnaeEmpresa (
     cnae VARCHAR(10) NOT NULL,
-    cnpj VARCHAR(14) NOT NULL,
-    PRIMARY KEY (cnae, cnpj),
-    FOREIGN KEY (cnpj) REFERENCES empresa (cnpj)
+    taxNumber VARCHAR(14) NOT NULL,
+    PRIMARY KEY (cnae, taxNumber),
+    FOREIGN KEY (taxNumber) REFERENCES empresa (taxNumber)
 )
 """, #FOREIGN KEY (cnae) REFERENCES codigosCnae (cnae),
 
@@ -1012,7 +1012,7 @@ store._ddl['txout_approx'],
     emitterAddress VARCHAR(50) NOT NULL,
     taxNumber VARCHAR(14) NOT NULL,
     PRIMARY KEY (emitterAddress, taxNumber),
-    KEY empresaCnpj (taxNumber),
+    KEY taxNumber (taxNumber),
     FOREIGN KEY (emitterAddress) REFERENCES emissor (address),
     FOREIGN KEY (taxNumber) REFERENCES empresa (taxNumber)
 )""",
