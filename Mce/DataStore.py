@@ -1032,8 +1032,8 @@ store._ddl['txout_approx'],
     name VARCHAR(60) NOT NULL,
     uf VARCHAR(2) NOT NULL,
     taxNumber VARCHAR(14) DEFAULT NULL,
-    PRIMARY KEY (codigoIbge),
-    UNIQUE KEY codigoIbge (codigoIbge),
+    PRIMARY KEY (code),
+    UNIQUE KEY code (code),
     KEY uf (uf),
     CONSTRAINT municipio_ibfk_1 FOREIGN KEY (uf) REFERENCES estado (sigla) ON DELETE NO ACTION ON UPDATE CASCADE
 )""",
@@ -1057,11 +1057,11 @@ store._ddl['txout_approx'],
 
 # Item de Pagamento
 """CREATE TABLE item_pagamento (
-    codigoIbge VARCHAR(7) NOT NULL,
+    code VARCHAR(7) NOT NULL,
     notaPagamentoId char(36) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
     valor bigint(20) unsigned DEFAULT NULL,
-    PRIMARY KEY (codigoIbge,notaPagamentoId),
-    FOREIGN KEY (codigoIbge) REFERENCES municipio (codigoIbge),
+    PRIMARY KEY (code,notaPagamentoId),
+    FOREIGN KEY (code) REFERENCES municipio (code),
     FOREIGN KEY (notaPagamentoId) REFERENCES nota_pagamento (guid)
 )""",
 
@@ -1224,7 +1224,7 @@ DO
         IF doProcedure = true THEN
             UPDATE invoice
             SET status = 1
-            WHERE status = 0 AND MONTH(dataPrestacao) = (MONTH(NOW()) - 1);
+            WHERE status = 0 AND MONTH(provisionIssuedOn) = (MONTH(NOW()) - 1);
         END IF;
 	END
 """,
