@@ -1043,7 +1043,7 @@ store._ddl['txout_approx'],
     nonce int(11) NOT NULL AUTO_INCREMENT,
     guid char(36) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
     emissorId VARCHAR(50) NOT NULL,
-    cnpj VARCHAR(14) NOT NULL,
+    taxNumber VARCHAR(14) NOT NULL,
     dataEmissao date NOT NULL,
     valorTotal double NOT NULL,
     status enum('pendente','pago','vencido','cancelado') NOT NULL DEFAULT 'pendente',
@@ -1051,7 +1051,7 @@ store._ddl['txout_approx'],
     updatedAt datetime NOT NULL,
     PRIMARY KEY (nonce),
     KEY guid (guid),
-    FOREIGN KEY (cnpj) REFERENCES empresa (cnpj),
+    FOREIGN KEY (taxNumber) REFERENCES empresa (taxNumber),
     FOREIGN KEY (emissorId) REFERENCES emissor (address)
 )""",
 
@@ -3413,10 +3413,10 @@ DO
                         # Usando permissão customizada low3 para delimitar marcador de nota
                         if (permission['for'] and permission['for']['type'] == 'asset' and permission['custom'] and permission['custom'][0] == 'low3'):
                             info = {
-                                'cnpj': permission['for']['name'],
+                                'taxNumber': permission['for']['name'],
                                 'address': transaction['scriptPubKey']['addresses'][0] # Algum caso extremo onde > 1 ?
                             }
-                            bd_insert_new_emitter(info['cnpj'], info['address'], meta['txid'])
+                            bd_insert_new_emitter(info['taxNumber'], info['address'], meta['txid'])
                 elif (assets is not None):
                     for asset in assets:
                         # old comment?
@@ -3457,7 +3457,7 @@ DO
                 return
 
         def bd_insert_new_emitter(_cnpj, address, txid):
-            cnpj = _cnpj.replace('.','').replace('/','').replace('-','')
+            taxNumber = _cnpj.replace('.','').replace('/','').replace('-','')
 
             # Temos que monitorar erros de maneira melhor
             try:
@@ -3469,11 +3469,11 @@ DO
                     INSERT INTO emissorEmpresa(
                         taxNumber, emitterAddress
                     ) VALUES (?, ?) """, 
-                    (cnpj, address))
+                    (taxNumber, address))
                 
                 store.commit()
 
-                message = str(cnpj) + '|' + str(address) + '|' + str(txid)
+                message = str(taxNumber) + '|' + str(address) + '|' + str(txid)
                 store.redis.publish('emitter:new', message)
 
                 print('emitter:new ' + message)
