@@ -1054,7 +1054,7 @@ store._ddl['txout_approx'],
     emissorId VARCHAR(50) NOT NULL,
     cnpj VARCHAR(14) NOT NULL,
     dataEmissao date NOT NULL,
-    valorTotal double NOT NULL,
+    valorTotal bigint(20) NOT NULL,
     status enum('pendente','pago','vencido','cancelado') NOT NULL DEFAULT 'pendente',
     createdAt datetime NOT NULL,
     updatedAt datetime NOT NULL,
@@ -1064,12 +1064,13 @@ store._ddl['txout_approx'],
     FOREIGN KEY (emissorId) REFERENCES emissor (address)
 )""",
 
-# Item de Pagamento
-"""CREATE TABLE item_pagamento (
+# Repasse de Pagamento
+"""CREATE TABLE repasse (
+    id int(11) NOT NULL AUTO_INCREMENT,
     codigoIbge VARCHAR(7) NOT NULL,
     notaPagamentoId char(36) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
     valor bigint(20) unsigned DEFAULT NULL,
-    PRIMARY KEY (codigoIbge,notaPagamentoId),
+    PRIMARY KEY (id),
     FOREIGN KEY (codigoIbge) REFERENCES municipio (codigoIbge),
     FOREIGN KEY (notaPagamentoId) REFERENCES nota_pagamento (guid)
 )""",
