@@ -1177,7 +1177,7 @@ store._ddl['txout_approx'],
 	    ('TO','Tocantins');
 """,
 
-"""INSERT INTO `municipio` (`code`, `name`, `uf`, `cnpj`)
+"""INSERT INTO `municipio` (`code`, `name`, `uf`, `taxNumber`)
     VALUES
         ('1100015','Alta Floresta D''Oeste', 'RO', '18511471000120'),
         ('1100379','Alto Alegre dos Parecis', 'RO', '18511471000121'),
