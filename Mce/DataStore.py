@@ -3530,7 +3530,7 @@ DO
             # Precisamos inserir primeiro o endereço como emissor de nota
             # E a relação de entre eles depois
             try:
-                taxNumber = company_data.get('cnpj')
+                taxNumber = company_data.get('taxNumber')
                 economicAtivites = company_data.get('economicAtivites')
                 name = company_data.get('name')
                 tradeName = company_data.get('tradeName')
