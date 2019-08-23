@@ -1035,7 +1035,7 @@ store._ddl['txout_approx'],
     PRIMARY KEY (code),
     UNIQUE KEY code (code),
     KEY uf (uf),
-    CONSTRAINT municipio_ibfk_1 FOREIGN KEY (uf) REFERENCES estado (sigla) ON DELETE NO ACTION ON UPDATE CASCADE
+    FOREIGN KEY (uf) REFERENCES estado (sigla)
 )""",
 
 # Nota de Pagamento Table
@@ -1058,7 +1058,7 @@ store._ddl['txout_approx'],
     codeIbge VARCHAR(7) NOT NULL,
     notaPagamentoId VARCHAR(32) NOT NULL,
     value bigint(20) unsigned DEFAULT NULL,
-    PRIMARY KEY (notaPagamentoId, code),
+    PRIMARY KEY (notaPagamentoId, codeIbge),
     FOREIGN KEY (codeIbge) REFERENCES municipio (code),
     FOREIGN KEY (notaPagamentoId) REFERENCES nota_pagamento (txId)
 )""",
