@@ -3493,7 +3493,6 @@ DO
                 invoice_data.append(invoiceCode)
                 invoice_data.append(blockHeight)
                 invoice_data.append(invoiceName)
-
                 store.sql("""
                 INSERT INTO invoice (
                     emitter, encryptedBorrower, taxNumber, substitutes,
@@ -3538,7 +3537,7 @@ DO
                 street = company_data.get('street')
                 number = company_data.get('number')
                 additionalInformation = company_data.get('additionalInformation')
-                district = company_data.get('bairrdistrictoEnd')
+                district = company_data.get('district')
                 city = company_data.get('city')
                 state = company_data.get('state')
                 taxRegime = company_data.get('taxRegime')
