@@ -3324,11 +3324,11 @@ DO
 
             provisionNbsCode                                  = provision.get('nbsCode')
             provisionDescription                           = provision.get('description')
-            provisionProcessNumber                             = provision.get('processNumber')
             provisionServicesAmount                            = int(provision.get('servicesAmount')) if provision.get('servicesAmount') else None
             
 
             tributes                                = data.get('tributes', {})
+            tributesProcessNumber                             = tributes.get('processNumber')
             tributesDeductionsAmount                             = int(tributes.get('deductionsAmount')) if tributes.get('deductionsAmount') else None
             tributesCalculationBasis                             = int(tributes.get('calculationBasis')) if tributes.get('calculationBasis') else None
             tributesUnconditionedDiscountAmount                          = int(tributes.get('unconditionedDiscountAmount')) if tributes.get('unconditionedDiscountAmount') else None
@@ -3384,7 +3384,7 @@ DO
             return [emitter, encryptedBorrower, taxNumber, substitutes,
                 provisionIssuedOn, provisionCityServiceLocation, provisionServiceCode, provisionCnaeCode,
                 provisionNbsCode, provisionDescription, provisionServicesAmount, tributesUnconditionedDiscountAmount, tributesConditionedDiscountAmount,
-                tributesIssExigibility, provisionProcessNumber, tributesDeductionsAmount, tributesCalculationBasis, tributesIssWithheld,
+                tributesIssExigibility, tributesProcessNumber, tributesDeductionsAmount, tributesCalculationBasis, tributesIssWithheld,
                 tributesRetentionResponsible, tributesSpecialTaxRegime, tributesTaxBenefit, tributesIssRate, tributesIssAmount,
                 tributesPisAmount, tributesCofinsAmount, tributesInssAmount, tributesIrAmount, tributesCsllAmount, tributesOthersAmountsWithheld,
                 tributesApproximateTax, tributesNetValueNfse, borrowerTaxNumber, borrowerNif, borrowerName,
@@ -3499,7 +3499,7 @@ DO
                     emitter, encryptedBorrower, taxNumber, substitutes,
                     provisionIssuedOn, provisionCityServiceLocation, provisionServiceCode, provisionCnaeCode,
                     provisionNbsCode, provisionDescription, provisionServicesAmount, tributesUnconditionedDiscountAmount, tributesConditionedDiscountAmount,
-                    tributesIssExigibility, provisionProcessNumber, tributesDeductionsAmount, tributesCalculationBasis, tributesIssWithheld,
+                    tributesIssExigibility, tributesProcessNumber, tributesDeductionsAmount, tributesCalculationBasis, tributesIssWithheld,
                     tributesRetentionResponsible, tributesSpecialTaxRegime, tributesTaxBenefit, tributesIssRate, tributesIssAmount,
                     tributesPisAmount, tributesCofinsAmount, tributesInssAmount, tributesIrAmount, tributesCsllAmount, tributesOthersAmountsWithheld,
                     tributesApproximateTax, tributesNetValueNfse, borrowerTaxNumber, borrowerNif, borrowerName,
