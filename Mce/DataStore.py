@@ -3353,7 +3353,7 @@ DO
             borrowerTaxNumber                    = borrower.get('taxNumber')
             borrowerNif                                     = borrower.get('nif')
             borrowerName                        = borrower.get('name')
-            borrowerSteet                                  = borrower.get('street')
+            borrowerStreet                                  = borrower.get('street')
             borrowerNumber                                  = borrower.get('number')
             borrowerAdditionalInformation                                 = borrower.get('additionalInformation')
             borrowerDistrict                               = borrower.get('district')
@@ -3388,7 +3388,7 @@ DO
                 tributesRetentionResponsible, tributesSpecialTaxRegime, tributesTaxBenefit, tributesIssRate, tributesIssAmount,
                 tributesPisAmount, tributesCofinsAmount, tributesInssAmount, tributesIrAmount, tributesCsllAmount, tributesOthersAmountsWithheld,
                 tributesApproximateTax, tributesNetValueNfse, borrowerTaxNumber, borrowerNif, borrowerName,
-                borrowerSteet, borrowerNumber, borrowerAdditionalInformation, borrowerDistrict, borrowerCity, borrowerState, borrowerCountry, borrowerPostalCode,
+                borrowerStreet, borrowerNumber, borrowerAdditionalInformation, borrowerDistrict, borrowerCity, borrowerState, borrowerCountry, borrowerPostalCode,
                 borrowerEmail, borrowerPhoneNumber, intermediaryTaxNumber, intermediaryName, intermediaryCity,
                 constructionWorkCode, constructionArt]  
 
@@ -3503,7 +3503,7 @@ DO
                     tributesRetentionResponsible, tributesSpecialTaxRegime, tributesTaxBenefit, tributesIssRate, tributesIssAmount,
                     tributesPisAmount, tributesCofinsAmount, tributesInssAmount, tributesIrAmount, tributesCsllAmount, tributesOthersAmountsWithheld,
                     tributesApproximateTax, tributesNetValueNfse, borrowerTaxNumber, borrowerNif, borrowerName,
-                    borrowerSteet, borrowerNumber, borrowerAdditionalInformation, borrowerDistrict, borrowerCity, borrowerState, borrowerCountry, borrowerPostalCode,
+                    borrowerStreet, borrowerNumber, borrowerAdditionalInformation, borrowerDistrict, borrowerCity, borrowerState, borrowerCountry, borrowerPostalCode,
                     borrowerEmail, borrowerPhoneNumber, intermediaryTaxNumber, intermediaryName, intermediaryCity,
                     constructionWorkCode, constructionArt, invoiceCode, blockHeight, invoiceName
                 ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
