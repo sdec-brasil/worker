@@ -1041,29 +1041,26 @@ store._ddl['txout_approx'],
 # Nota de Pagamento Table
 """CREATE TABLE nota_pagamento (
     nonce int(11) NOT NULL AUTO_INCREMENT,
-    guid char(36) NOT NULL,
+    txId VARCHAR(32) NOT NULL,
     emissorId VARCHAR(50) NOT NULL,
     taxNumber VARCHAR(14) NOT NULL,
     dateEmission date NOT NULL,
     totalValue bigint(20) unsigned NOT NULL,
     status enum('pendente','pago','vencido','cancelado') NOT NULL DEFAULT 'pendente',
-    createdAt datetime NOT NULL,
-    updatedAt datetime NOT NULL,
     PRIMARY KEY (nonce),
-    KEY guid (guid),
+    KEY txId (txId),
     FOREIGN KEY (taxNumber) REFERENCES empresa (taxNumber),
     FOREIGN KEY (emissorId) REFERENCES emissor (address)
 )""",
 
 # Repasse de Pagamento
 """CREATE TABLE repasse (
-    code VARCHAR(7) NOT NULL,
-    notaPagamentoId int(11) NOT NULL,
+    codeIbge VARCHAR(7) NOT NULL,
+    notaPagamentoId VARCHAR(32) NOT NULL,
     value bigint(20) unsigned DEFAULT NULL,
-    PRIMARY KEY (notaPagamentoId,code),
-    KEY code (code),
-    FOREIGN KEY (code) REFERENCES municipio (code),
-    FOREIGN KEY (notaPagamentoId) REFERENCES nota_pagamento (nonce)
+    PRIMARY KEY (notaPagamentoId, code),
+    FOREIGN KEY (codeIbge) REFERENCES municipio (code),
+    FOREIGN KEY (notaPagamentoId) REFERENCES nota_pagamento (txId)
 )""",
 
 
@@ -1079,7 +1076,7 @@ store._ddl['txout_approx'],
     encryptedBorrower text,
     blockHeight decimal(14,0) DEFAULT NULL,
     taxNumber VARCHAR(14) NOT NULL,
-    paymentInstructionsCode char(36) DEFAULT NULL,
+    paymentInstructionsCode VARCHAR(32) DEFAULT NULL,
     provisionIssuedOn date NOT NULL,
     provisionCityServiceLocation VARCHAR(7) NOT NULL,
     provisionCnaeCode VARCHAR(10) DEFAULT NULL,
@@ -1137,7 +1134,7 @@ store._ddl['txout_approx'],
     FOREIGN KEY (taxNumber) REFERENCES empresa (taxNumber),
     FOREIGN KEY (blockHeight) REFERENCES block (block_id),
     FOREIGN KEY (provisionCityServiceLocation) REFERENCES municipio (code),
-    FOREIGN KEY (paymentInstructionsCode) REFERENCES nota_pagamento (guid)
+    FOREIGN KEY (paymentInstructionsCode) REFERENCES nota_pagamento (txId)
 )""",
 
 # ADD ABOVE FOREIGN KEY (codCnae) REFERENCES codigosCnae (cnae),
