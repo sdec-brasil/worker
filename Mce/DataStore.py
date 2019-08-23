@@ -1055,11 +1055,11 @@ store._ddl['txout_approx'],
 
 # Repasse de Pagamento
 """CREATE TABLE repasse (
-    codeIbge VARCHAR(7) NOT NULL,
+    ibgeCode VARCHAR(7) NOT NULL,
     notaPagamentoId VARCHAR(32) NOT NULL,
     value bigint(20) unsigned DEFAULT NULL,
-    PRIMARY KEY (notaPagamentoId, codeIbge),
-    FOREIGN KEY (codeIbge) REFERENCES municipio (code),
+    PRIMARY KEY (notaPagamentoId, ibgeCode),
+    FOREIGN KEY (ibgeCode) REFERENCES municipio (code),
     FOREIGN KEY (notaPagamentoId) REFERENCES nota_pagamento (txId)
 )""",
 
