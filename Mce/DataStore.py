@@ -3528,7 +3528,7 @@ DO
             # E a relação de entre eles depois
             try:
                 taxNumber = company_data.get('taxNumber')
-                economicAtivites = company_data.get('economicAtivites')
+                economicActivities = company_data.get('economicActivities')
                 name = company_data.get('name')
                 tradeName = company_data.get('tradeName')
                 postalCode = company_data.get('postalCode')
@@ -3576,7 +3576,7 @@ DO
                 store.commit()
 
                 # Inserindo a relação de CNAEs:
-                for _cnae in economicAtivites:
+                for _cnae in economicActivities:
                     cnae = _cnae.replace('.', '').replace('/', '').replace('-', '')
                     store.sql("""
                         INSERT INTO cnaeEmpresa (
