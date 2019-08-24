@@ -1035,34 +1035,32 @@ store._ddl['txout_approx'],
     PRIMARY KEY (code),
     UNIQUE KEY code (code),
     KEY uf (uf),
-    CONSTRAINT municipio_ibfk_1 FOREIGN KEY (uf) REFERENCES estado (sigla) ON DELETE NO ACTION ON UPDATE CASCADE
+    FOREIGN KEY (uf) REFERENCES estado (sigla)
 )""",
 
 # Nota de Pagamento Table
 """CREATE TABLE nota_pagamento (
     nonce int(11) NOT NULL AUTO_INCREMENT,
-    guid char(36) NOT NULL,
+    txId VARCHAR(32) NOT NULL,
     emissorId VARCHAR(50) NOT NULL,
     taxNumber VARCHAR(14) NOT NULL,
     dateEmission date NOT NULL,
-    totalValue bigint(20) unsigned NOT NULL,
+    totalAmount bigint(20) unsigned NOT NULL,
     status enum('pendente','pago','vencido','cancelado') NOT NULL DEFAULT 'pendente',
-    createdAt datetime NOT NULL,
-    updatedAt datetime NOT NULL,
     PRIMARY KEY (nonce),
-    KEY guid (guid),
+    KEY txId (txId),
     FOREIGN KEY (taxNumber) REFERENCES empresa (taxNumber),
     FOREIGN KEY (emissorId) REFERENCES emissor (address)
 )""",
 
-# Item de Pagamento
-"""CREATE TABLE item_pagamento (
-    code VARCHAR(7) NOT NULL,
-    notaPagamentoId char(36) NOT NULL,
-    valor bigint(20) unsigned DEFAULT NULL,
-    PRIMARY KEY (code,notaPagamentoId),
-    FOREIGN KEY (code) REFERENCES municipio (code),
-    FOREIGN KEY (notaPagamentoId) REFERENCES nota_pagamento (guid)
+# Repasse de Pagamento
+"""CREATE TABLE repasse (
+    ibgeCode VARCHAR(7) NOT NULL,
+    notaPagamentoId VARCHAR(32) NOT NULL,
+    amount bigint(20) unsigned DEFAULT NULL,
+    PRIMARY KEY (notaPagamentoId, ibgeCode),
+    FOREIGN KEY (ibgeCode) REFERENCES municipio (code),
+    FOREIGN KEY (notaPagamentoId) REFERENCES nota_pagamento (txId)
 )""",
 
 
@@ -1078,7 +1076,7 @@ store._ddl['txout_approx'],
     encryptedBorrower text,
     blockHeight decimal(14,0) DEFAULT NULL,
     taxNumber VARCHAR(14) NOT NULL,
-    paymentInstructionsCode char(36) DEFAULT NULL,
+    paymentInstructionsCode VARCHAR(32) DEFAULT NULL,
     provisionIssuedOn date NOT NULL,
     provisionCityServiceLocation VARCHAR(7) NOT NULL,
     provisionCnaeCode VARCHAR(10) DEFAULT NULL,
@@ -1136,7 +1134,7 @@ store._ddl['txout_approx'],
     FOREIGN KEY (taxNumber) REFERENCES empresa (taxNumber),
     FOREIGN KEY (blockHeight) REFERENCES block (block_id),
     FOREIGN KEY (provisionCityServiceLocation) REFERENCES municipio (code),
-    FOREIGN KEY (paymentInstructionsCode) REFERENCES nota_pagamento (guid)
+    FOREIGN KEY (paymentInstructionsCode) REFERENCES nota_pagamento (txId)
 )""",
 
 # ADD ABOVE FOREIGN KEY (codCnae) REFERENCES codigosCnae (cnae),
@@ -3530,7 +3528,7 @@ DO
             # E a relação de entre eles depois
             try:
                 taxNumber = company_data.get('taxNumber')
-                economicAtivites = company_data.get('economicAtivites')
+                economicActivities = company_data.get('economicActivities')
                 name = company_data.get('name')
                 tradeName = company_data.get('tradeName')
                 postalCode = company_data.get('postalCode')
@@ -3578,7 +3576,7 @@ DO
                 store.commit()
 
                 # Inserindo a relação de CNAEs:
-                for _cnae in economicAtivites:
+                for _cnae in economicActivities:
                     cnae = _cnae.replace('.', '').replace('/', '').replace('-', '')
                     store.sql("""
                         INSERT INTO cnaeEmpresa (
