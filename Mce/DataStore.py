@@ -3390,10 +3390,13 @@ DO
                 borrowerEmail, borrowerPhoneNumber, intermediaryTaxNumber, intermediaryName, intermediaryCity,
                 constructionWorkCode, constructionArt]  
 
-        def sdec_transaction_handler(decoded_tx, height):
+        def sdec_cpf_or_cnpj(string):
+            if (re.match(r"[0-9]{2}\.[0-9]{3}\.[0-9]{3}\/[0-9]{4}\-[0-9]{2}", string) is not None or
+                re.match(r"^\d{3}\x2E\d{3}\x2E\d{3}\x2D\d{2}$", string) is not None):
+                return True
+            return False
 
-            #print(decoded_tx)
-            
+        def sdec_transaction_handler(decoded_tx, height):
             meta = {
                 'txid': decoded_tx['txid'],
                 'blockhash': decoded_tx.get('blockhash', None),
@@ -3427,11 +3430,14 @@ DO
                         data = decoded_tx['issue']['details']
                         if (asset['type'] == 'issuefirst'):
                             meta['name'] = asset['name']
-                            if (re.match(r"[0-9]{2}\.[0-9]{3}\.[0-9]{3}\/[0-9]{4}\-[0-9]{2}", asset['name']) is not None):
+                            # asset['name'] = taxNumber
+                            if (sdec_cpf_or_cnpj(asset['name'])):
                                 bd_insert_company(data, meta)
-                            # asset['name'] = CNPJ/NF-TIMESTAMP
-                            elif (asset['name'].split('/')[1][1] == 'F'):
+                            # asset['name'] = taxNumber|NF-TIMESTAMP
+                            elif (sdec_cpf_or_cnpj(asset['name'].split('|')[0]) and asset['name'].split('|')[1].split('-')[0] == 'NF'):
                                 bd_insert_invoice(data, meta)
+                            elif (sdec_cpf_or_cnpj(asset['name'].split('|')[0]) and asset['name'].split('|')[1].split('-')[0] == 'NP'):
+                                bd_insert_settlement_request(data, meta)
                 elif (items is not None):
                     for item in items:
                         if item['type'] == 'stream':
@@ -3597,7 +3603,7 @@ DO
 
                 store.commit()
 
-                message =  str(taxNumber) + '|' + str(endBlock) + '|' + str(meta['txid'])
+                message = str(taxNumber) + '|' + str(endBlock) + '|' + str(meta['txid'])
                 store.redis.publish('company:new', message)
                 print('company:new ' + message)
             except Exception as e:
@@ -3625,6 +3631,49 @@ DO
                 print('note:update:ERROR ', e.message)
                 store.redis.publish('error', e.message)
 
+        def bd_insert_settlement_request(data, meta):
+            txId = meta['txid']
+            emissorId = data.get('emissor')
+            taxNumber = data.get('taxNumber').replace('-', '').replace('/', '').replace('.', '')
+            dateEmission = meta['blocktime']
+            totalAmount = data.get('dueAmount')
+            proceeds = data.get('proceeds')
+            invoices = data.get('invoices')
+
+            try:
+                store.sql("""
+                    INSERT INTO nota_pagamento(
+                        txId, emissorId,
+                        taxNumber, dateEmission, totalAmount,
+                    ) VALUES (?, ?, ?, ?, ?)
+                """, (txId, emissorId, taxNumber, dateEmission, totalAmount))
+
+                for proceed in proceeds:
+                    store.sql("""
+                        INSERT INTO repasse (
+                            notaPagamentoId, ibgeCode, amount
+                        ) VALUES (?, ?, ?)
+                    """, [txId, proceed[0], proceed[1]])
+
+                for invoiceCode in invoices:
+                    store.sql("""
+                        UPDATE invoice
+                        SET
+                            paymentInstructionsCode = ?
+                        WHERE
+                            invoiceCode = ?;
+                    """, (txId, invoiceCode))
+
+                store.commit()
+
+                message = str(taxNumber) + '|' + str(emissorId) + '|' + str(txId)
+                store.redis.publish('settlement:request', message)
+                print('settlement:request ' + message)
+
+            except Exception as e:
+                print(traceback.print_exc())
+                print('settlement:new:ERROR ', e.message)
+                store.redis.publish('error', e.message)
 
         ### END SDEC HANDLERS ###
 
