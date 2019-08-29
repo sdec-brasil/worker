@@ -3391,8 +3391,8 @@ DO
                 constructionWorkCode, constructionArt]  
 
         def sdec_cpf_or_cnpj(string):
-            if (re.match(r"[0-9]{2}\.[0-9]{3}\.[0-9]{3}\/[0-9]{4}\-[0-9]{2}", string) is not None or
-                re.match(r"^\d{3}\x2E\d{3}\x2E\d{3}\x2D\d{2}$", string) is not None):
+            if (re.match(r"[0-9]{2}[0-9]{3}[0-9]{3}[0-9]{4}[0-9]{2}", string) is not None or
+                re.match(r"^\d{3}\d{3}\d{3}\d{2}$", string) is not None):
                 return True
             return False
 
