@@ -3430,11 +3430,13 @@ DO
                         data = decoded_tx['issue']['details']
                         if (asset['type'] == 'issuefirst'):
                             meta['name'] = asset['name']
+                            print('Avaliando: ' + asset['name'])
                             # asset['name'] = taxNumber
                             if (sdec_cpf_or_cnpj(asset['name'])):
                                 bd_insert_company(data, meta)
                             # asset['name'] = taxNumber|NF-TIMESTAMP
                             elif (sdec_cpf_or_cnpj(asset['name'].split('|')[0]) and asset['name'].split('|')[1].split('-')[0] == 'NF'):
+                                print('Inserindo nota...')
                                 bd_insert_invoice(data, meta)
                             elif (sdec_cpf_or_cnpj(asset['name'].split('|')[0]) and asset['name'].split('|')[1].split('-')[0] == 'NP'):
                                 bd_insert_settlement_request(data, meta)
