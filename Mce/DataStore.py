@@ -3418,7 +3418,7 @@ DO
                                 'address': transaction['scriptPubKey']['addresses'][0] # Algum caso extremo onde > 1 ?
                             }
                             bd_insert_new_emitter(info['taxNumber'], info['address'], meta['txid'])
-                elif (assets is not None):
+                if (assets is not None):
                     for asset in assets:
                         # old comment?
                         # Não estamos parseando a transação que dá permissão
