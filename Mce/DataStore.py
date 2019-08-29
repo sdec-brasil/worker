@@ -3551,7 +3551,9 @@ DO
                 phoneNumber = company_data.get('phoneNumber')
                 endBlock = company_data.get('endBlock')
                 
-                postalCode = postalCode.replace('-', '')
+                if (postalCode is not None):
+                    postalCode = postalCode.replace('-', '')
+                
                 taxNumber = taxNumber.replace('.','').replace('/','').replace('-','')
 
                 #  Inserindo endereço como emissor
