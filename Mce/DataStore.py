@@ -3390,11 +3390,18 @@ DO
                 borrowerEmail, borrowerPhoneNumber, intermediaryTaxNumber, intermediaryName, intermediaryCity,
                 constructionWorkCode, constructionArt]  
 
-        def sdec_cpf_or_cnpj(string):
+        def sdec_cpf_or_cnpj_invoice(string):
             if (re.match(r"[0-9]{2}[0-9]{3}[0-9]{3}[0-9]{4}[0-9]{2}", string) is not None or
                 re.match(r"^\d{3}\d{3}\d{3}\d{2}$", string) is not None):
                 return True
             return False
+        
+        def sdec_cpf_or_cnpj_company(string):
+            if (re.match(r"[0-9]{2}\.[0-9]{3}\.[0-9]{3}\/[0-9]{4}\-[0-9]{2}", string) is not None or
+                re.match(r"^\d{3}\x2E\d{3}\x2E\d{3}\x2D\d{2}$", string) is not None):
+                return True
+            return False
+
 
         def sdec_transaction_handler(decoded_tx, height):
             meta = {
@@ -3432,13 +3439,13 @@ DO
                             meta['name'] = asset['name']
                             print('Avaliando: ' + asset['name'])
                             # asset['name'] = taxNumber
-                            if (sdec_cpf_or_cnpj(asset['name'])):
+                            if (sdec_cpf_or_cnpj_company(asset['name'])):
                                 bd_insert_company(data, meta)
                             # asset['name'] = taxNumber|NF-TIMESTAMP
-                            elif (sdec_cpf_or_cnpj(asset['name'].split('|')[0]) and asset['name'].split('|')[1].split('-')[0] == 'NF'):
+                            elif (sdec_cpf_or_cnpj_invoice(asset['name'].split('|')[0]) and asset['name'].split('|')[1].split('-')[0] == 'NF'):
                                 print('Inserindo nota...')
                                 bd_insert_invoice(data, meta)
-                            elif (sdec_cpf_or_cnpj(asset['name'].split('|')[0]) and asset['name'].split('|')[1].split('-')[0] == 'NP'):
+                            elif (sdec_cpf_or_cnpj_invoice(asset['name'].split('|')[0]) and asset['name'].split('|')[1].split('-')[0] == 'NP'):
                                 bd_insert_settlement_request(data, meta)
                 elif (items is not None):
                     for item in items:
