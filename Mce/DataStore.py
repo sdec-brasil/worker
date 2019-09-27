@@ -3335,7 +3335,7 @@ DO
             tributesIssWithheld                               = int(tributes.get('issWithheld')) if tributes.get('issWithheld') else None
             tributesRetentionResponsible                            = int(tributes.get('retentionResponsible')) if tributes.get('retentionResponsible') else None
             tributesSpecialTaxRegime                         = int(tributes.get('specialTaxRegime')) if tributes.get('specialTaxRegime') else None
-            tributesTaxBenefit                         = int(tributes.get('taxBenefit')) if tributes.get('taxBenefit') else None
+            tributesTaxBenefit                         = int(tributes.get('taxBenefit')) if isinstance(tributes.get('taxBenefit'), bool) else None
             tributesIssRate                            = int(tributes.get('issRate')) if tributes.get('issRate') else None
             tributesIssAmount                                  = int(tributes.get('issAmount')) if tributes.get('issAmount') else None
             tributesPisAmount                                  = int(tributes.get('pisAmount')) if tributes.get('pisAmount') else None
